@@ -1,0 +1,352 @@
+/**
+ * The guidebook data model — the single source of truth for the whole document.
+ *
+ * Ported from design_handoff_guidebook_editor/README.md ("The data model").
+ * The editor mutates a `Book`; the renderer consumes it; `public/book.js`
+ * persists it in a hand-editable form (`window.BOOK = { ... }`).
+ *
+ * Deviations from the prototype (intentional, per the README NOTE on `layout`):
+ *  - `layout` is an explicit field, preferred over filename-suffix inference.
+ *  - `image2` stores the second slot of a `double` row explicitly, instead of
+ *    relying on the `-2`-before-extension filename convention.
+ *
+ * Image references stay as BARE filenames; the renderer composes the full path
+ * as `public/<chapter.id>/<image>` (and the cover as `public/<book.cover>`).
+ */
+
+/**
+ * Callout types. `warn` is a deprecated alias for `warning` (kept so existing
+ * configs render unchanged) — normalize via normalizeCalloutType().
+ */
+export type CalloutType =
+  | "info"
+  | "note"
+  | "success"
+  | "warning"
+  | "danger"
+  | "warn";
+
+/** The canonical types (excludes the `warn` alias) — used by editor controls. */
+export const CALLOUT_TYPE_OPTIONS = [
+  "info",
+  "note",
+  "success",
+  "warning",
+  "danger",
+] as const;
+
+export type RowLayout = "single" | "double" | "single-wide";
+
+/** Per-slot image frame. `boolean` keeps back-compat; the object adds overrides. */
+export interface BorderStyle {
+  color?: string;
+  width?: string;
+  radius?: string;
+  /** Drop shadow under the framed image. */
+  shadow?: boolean;
+}
+export type Border = boolean | BorderStyle;
+
+export type CalloutLayout = "side" | "below";
+
+export type CalloutCols = 1 | 2 | 3;
+
+export interface Callout {
+  /** Default 'info'. */
+  type: CalloutType;
+  title?: string;
+  /** Body text — may contain the markdown subset (bold/italic, lists). */
+  body?: string;
+  /** Overrides the row's calloutLayout for this one callout (mixed placement). */
+  placement?: CalloutLayout;
+  /** below-mode only: how many grid columns this callout spans (clamped to calloutCols). */
+  span?: CalloutCols;
+  /** side-mode only: width as a percentage of the side column (1–100). */
+  widthPct?: number;
+}
+
+/** CSS lengths, e.g. "360px", "70mm". */
+export interface SizeOverride {
+  width?: string;
+  height?: string;
+}
+
+/**
+ * A ROW = one horizontal band on a step page: one image (single / single-wide)
+ * or two (double).
+ */
+// --- Annotation canvas (ADR-004) ---
+
+export type Anchor =
+  | "top"
+  | "right"
+  | "bottom"
+  | "left"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "center"
+  | "start"
+  | "end"
+  | "mid";
+
+export type EndpointStyle = "none" | "arrow" | "circle" | "point" | "bar";
+
+export type EndpointSize = "small" | "medium" | "large";
+
+/** A connector endpoint: a free point (normalized 0–1) or bound to a surface. */
+export interface Endpoint {
+  x?: number;
+  y?: number;
+  /** id of a Surface this endpoint snaps to. */
+  ref?: string;
+  anchor?: Anchor;
+  style: EndpointStyle;
+  /** Marker size (default "medium"). */
+  size?: EndpointSize;
+}
+
+/** A snap-target shape that is also drawn: box, line, or square bracket. */
+export interface Surface {
+  id: string;
+  kind: "box" | "line" | "bracket";
+  /** Normalized 0–1 bounds relative to the image slot. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  orientation?: "horizontal" | "vertical";
+  /** bracket only: invert tick direction (spine swaps side). */
+  flip?: boolean;
+  stroke: string;
+  width: number;
+  fill?: string;
+}
+
+/** An arrow/line drawn between two endpoints (each free or surface-bound). */
+export interface Connector {
+  id: string;
+  kind: "connector";
+  from: Endpoint;
+  to: Endpoint;
+  stroke: string;
+  width: number;
+  /** Path style: a straight line or a rectangular (elbow) route. */
+  routing?: "straight" | "elbow";
+  /** Intermediate points the path passes through (normalized 0–1). Editor-only
+   *  handles shape these; they print as the resulting bent path. */
+  waypoints?: { x: number; y: number }[];
+}
+
+export type Annotation = Surface | Connector;
+
+export interface ImageRow {
+  /** Bare filename, e.g. "01-double.jpg" (slot A). */
+  image: string;
+  /** Second slot for `double` rows (preferred over the `-2` filename convention). */
+  image2?: string;
+  /**
+   * Resolution order: use `layout` if set, else infer from the filename suffix,
+   * else default 'single'.
+   */
+  layout?: RowLayout;
+  /** Double only: draw a connecting arrow between the two images. */
+  arrow?: boolean;
+  /** Default true (6px frame); false = no frame; object = framed with overrides. */
+  border?: Border;
+  /** Small row sub-heading. */
+  title?: string;
+  /** Row body copy. */
+  instruction?: string;
+  callouts?: Callout[];
+  /** Default 'side'. */
+  calloutLayout?: CalloutLayout;
+  /** Grid columns when layout = 'below' (default 2). */
+  calloutCols?: CalloutCols;
+  /** Override slot width for all slots in the row. */
+  imageWidth?: string;
+  /** Override slot height (e.g. a long scrolling capture). */
+  imageHeight?: string;
+  /** Gap between the two images of a `double` row (CSS length, default 8mm). */
+  imageGap?: string;
+  /** Per-slot override, indexed by slot position. */
+  imageSizes?: SizeOverride[];
+  /** Canvas annotations drawn over the row's primary image (ADR-004). */
+  annotations?: Annotation[];
+}
+
+/**
+ * A STEP = one page. Two authoring forms are supported (the renderer handles
+ * BOTH):
+ *  (A) legacy single image: `image` + step-level layout fields, or
+ *  (B) multi-row: an `images: ImageRow[]` array (overrides the single-image
+ *      fields when present).
+ */
+export interface Step {
+  /** Page heading. */
+  title?: string;
+  /** Numbered intro under the heading. */
+  instruction?: string;
+
+  // form (A) single — same fields as ImageRow, directly on the step:
+  image?: string;
+  image2?: string;
+  layout?: RowLayout;
+  arrow?: boolean;
+  border?: Border;
+  callouts?: Callout[];
+  calloutLayout?: CalloutLayout;
+  calloutCols?: CalloutCols;
+  imageWidth?: string;
+  imageHeight?: string;
+  imageGap?: string;
+  imageSizes?: SizeOverride[];
+  annotations?: Annotation[];
+
+  // form (B) multi-row — when present, overrides the single-image fields:
+  images?: ImageRow[];
+}
+
+export interface Chapter {
+  /** Folder slug — images load from public/<id>/. */
+  id: string;
+  title: string;
+  /** Shown on the chapter-intro page and in the TOC. */
+  description: string;
+  steps: Step[];
+}
+
+export type WatermarkPosition =
+  | "center"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-right"
+  | "top-left";
+
+/** New feature (not in the prototype) — see README "Watermark". */
+export interface Watermark {
+  enabled: boolean;
+  /** e.g. "CONFIDENTIAL — DRAFT". */
+  text?: string;
+  /** Path/filename of a small mark, optional. */
+  icon?: string;
+  position?: WatermarkPosition;
+  /** 0–1, default 0.06. */
+  opacity?: number;
+}
+
+/** Per-section font override. */
+export interface SectionFont {
+  /**
+   * CSS font-family value. For next/font-loaded families use the CSS variable
+   * (e.g. "var(--font-roboto)"); for system fonts use a literal stack
+   * (e.g. "Arial, sans-serif"). The editor offers presets; hand-editing any
+   * valid CSS font-family value is supported.
+   */
+  family?: string;
+  /** CSS length, e.g. "16pt" / "1.2em". */
+  size?: string;
+  /** CSS color. */
+  color?: string;
+}
+
+export type ThemeSection = "cover" | "chapter" | "step" | "row" | "callout";
+
+export type Theme = Partial<Record<ThemeSection, SectionFont>>;
+
+/** Full-page background image rendered behind content (above the page color). */
+export interface Background {
+  /** Path/URL of the image. */
+  image?: string;
+  /** 0–1, default 1. */
+  opacity?: number;
+}
+
+/** The closing (back-cover) page content. All optional with sensible defaults. */
+export interface Ending {
+  /** Small eyebrow label (default "End"). */
+  eyebrow?: string;
+  /** Heading (default "Thank you for reading."). */
+  title?: string;
+  /** Body text — may contain the markdown subset. */
+  body?: string;
+}
+
+export interface Book {
+  title: string;
+  subtitle: string;
+  author: string;
+  edition: string;
+  /** public/<cover> — optional hero (the TOC carries the cover today). */
+  cover: string;
+  watermark?: Watermark;
+  /** Per-section font overrides (size/color/family). */
+  theme?: Theme;
+  /** Full-page background image. */
+  background?: Background;
+  /** Closing-page content (title, ending text). */
+  ending?: Ending;
+  chapters: Chapter[];
+}
+
+// --- Defaults (centralize the README's documented fallbacks) ---
+
+export const DEFAULT_CALLOUT_TYPE: CalloutType = "info";
+export const DEFAULT_ROW_LAYOUT: RowLayout = "single";
+export const DEFAULT_CALLOUT_LAYOUT: CalloutLayout = "side";
+export const DEFAULT_CALLOUT_COLS: CalloutCols = 2;
+export const DEFAULT_BORDER = true;
+export const DEFAULT_WATERMARK_OPACITY = 0.06;
+
+/**
+ * Resolve a row/step layout per the README's resolution order:
+ * explicit `layout` → filename suffix → default 'single'.
+ */
+export function resolveLayout(
+  layout: RowLayout | undefined,
+  image: string | undefined,
+): RowLayout {
+  if (layout) return layout;
+  if (image) {
+    if (/-single-wide(\.|$)/.test(image)) return "single-wide";
+    if (/-double(-\d+)?(\.|$)/.test(image)) return "double";
+    if (/-single(\.|$)/.test(image)) return "single";
+  }
+  return DEFAULT_ROW_LAYOUT;
+}
+
+/** Map the deprecated `warn` alias to `warning`; pass other types through. */
+export function normalizeCalloutType(
+  type: CalloutType | undefined,
+): "info" | "note" | "success" | "warning" | "danger" {
+  if (type === "warn") return "warning";
+  return type ?? "info";
+}
+
+export interface ResolvedBorder {
+  show: boolean;
+  color: string;
+  width: string;
+  radius: string;
+  shadow: boolean;
+}
+
+/** Resolve a Border value into concrete frame styles (defaults match the prototype). */
+export function resolveBorder(border: Border | undefined): ResolvedBorder {
+  const defaults = {
+    color: "var(--img-border)",
+    width: "6px",
+    radius: "6px",
+    shadow: false,
+  };
+  if (border === false) return { show: false, ...defaults };
+  if (border === true || border === undefined) return { show: true, ...defaults };
+  return {
+    show: true,
+    color: border.color ?? defaults.color,
+    width: border.width ?? defaults.width,
+    radius: border.radius ?? defaults.radius,
+    shadow: border.shadow ?? false,
+  };
+}

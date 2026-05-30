@@ -1,0 +1,173 @@
+/* Landing + static doc pages (Guided). Minimalist, on-brand teal/cream. */
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--color-app-bg);
+}
+.landing-card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  padding: 40px;
+  text-align: center;
+}
+.landing-kicker {
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  color: var(--color-muted);
+  margin: 0 0 14px;
+}
+.landing-kicker .hi {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.landing-wordmark {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  margin: 0 0 12px;
+}
+.landing-wordmark .wm-ed {
+  font-style: italic;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.landing-title {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 0 0 28px;
+}
+.landing-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.landing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-rule-strong);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+.landing-btn:hover {
+  background: #f0f5f6;
+}
+.landing-btn.primary {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: #fff;
+}
+.landing-btn.primary:hover {
+  background: #013640;
+}
+.landing-newform {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.landing-newform input {
+  flex: 1 1 auto;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 10px;
+  outline: none;
+}
+.landing-newform input:focus {
+  border-color: var(--color-ink);
+}
+.landing-error {
+  color: #a11;
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+.landing-foot {
+  margin-top: 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.landing-foot a {
+  color: var(--color-muted);
+  text-decoration: none;
+}
+.landing-foot a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* Static doc pages (quickstart / terms / privacy) */
+.prose {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  font-family: var(--font-body);
+  color: var(--color-ink-text);
+  line-height: 1.6;
+}
+.prose .back {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+.prose h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--color-ink);
+  margin: 16px 0 8px;
+}
+.prose h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--color-ink);
+  margin: 28px 0 8px;
+}
+.prose p,
+.prose li {
+  font-size: 15px;
+}
+.prose ul,
+.prose ol {
+  padding-left: 22px;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--color-cream);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.prose .muted {
+  color: var(--color-muted);
+  font-size: 13px;
+}

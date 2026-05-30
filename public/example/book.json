@@ -1,0 +1,375 @@
+{
+  "title": "The Guidebook",
+  "subtitle": "A field manual — replace this subtitle with one short, evocative line.",
+  "author": "Author name",
+  "edition": "First edition · 2026",
+  "cover": "cover.jpg",
+  "chapters": [
+    {
+      "id": "chapter1",
+      "title": "Layout reference",
+      "description": "This first chapter is a showcase of every supported step layout. Use it to choose the right combination of image type and callouts for your guide.",
+      "steps": [
+        {
+          "image": "01-single.jpg",
+          "title": "Single — plain",
+          "instruction": "One phone-shaped screen, centered, with the instruction beneath. Use this for the majority of mobile screenshots."
+        },
+        {
+          "image": "02-single.jpg",
+          "title": "Single — with callouts",
+          "instruction": "Same phone-shaped screen, with a column of callouts to the right pointing out elements on the screen.",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Header",
+              "body": "Describe the labelled area at the top of the screen."
+            },
+            {
+              "type": "info",
+              "title": "Action",
+              "body": "Explain the primary control the user interacts with here."
+            },
+            {
+              "type": "warn",
+              "title": "Required",
+              "body": "Flag a precondition or required field before the user can continue."
+            }
+          ]
+        },
+        {
+          "image": "03-double.jpg",
+          "title": "Double — plain",
+          "instruction": "Two phone screens side-by-side. Use for before/after, comparison of two options, or the result of an action on the previous screen."
+        },
+        {
+          "image": "04-double.jpg",
+          "title": "Double — with callouts",
+          "instruction": "Two screens side-by-side with a callouts column. Use when both screens need annotation but you don't want to imply a flow direction between them.",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Left screen",
+              "body": "Identify a key element on the first screen."
+            },
+            {
+              "type": "info",
+              "title": "Right screen",
+              "body": "Identify a key element on the second screen."
+            },
+            {
+              "type": "note",
+              "title": "Compare",
+              "body": "A softer side-remark on the difference between the two states."
+            }
+          ]
+        },
+        {
+          "image": "05-double.jpg",
+          "arrow": true,
+          "title": "Double — arrow + callouts",
+          "instruction": "Two screens with an arrow tracking the user's path, plus callouts on the right pointing out specific elements.",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Inventory",
+              "body": "Inventory is auto-populated from your last session."
+            },
+            {
+              "type": "info",
+              "title": "Quantity",
+              "body": "Tap to increase or decrease the amount."
+            },
+            {
+              "type": "warn",
+              "title": "Required",
+              "body": "Take a photo before tapping Continue, otherwise the form will not submit."
+            }
+          ]
+        },
+        {
+          "image": "06-single-wide.jpg",
+          "title": "Single-wide — plain",
+          "instruction": "One wide screen spanning the full double-layout width — use for landscape captures, tablet UI, or wider composite screens."
+        },
+        {
+          "image": "07-single-wide.jpg",
+          "title": "Single-wide — with callouts",
+          "instruction": "Single-wide image with a callouts column to the right. The wide slot shrinks to make room for the callouts while keeping the same aspect ratio.",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Toolbar",
+              "body": "Identify the controls along the top of the wide layout."
+            },
+            {
+              "type": "note",
+              "title": "Detail",
+              "body": "A softer side-remark for less critical info."
+            }
+          ]
+        },
+        {
+          "image": "08-single.jpg",
+          "title": "Single — callouts below",
+          "instruction": "Same single screen, but with callouts laid out below in a 2-column grid. Use when you have several short annotations and want to give the screen its full width on the page.",
+          "calloutLayout": "below",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Header",
+              "body": "The labelled area at the top of the screen."
+            },
+            {
+              "type": "info",
+              "title": "Action",
+              "body": "The primary control the user taps to continue."
+            },
+            {
+              "type": "info",
+              "title": "Status",
+              "body": "Persistent status indicator — usually visible across screens."
+            },
+            {
+              "type": "note",
+              "title": "Empty state",
+              "body": "Shown until the user has at least one saved item."
+            },
+            {
+              "type": "warn",
+              "title": "Required",
+              "body": "Must be filled before the user can submit."
+            },
+            {
+              "type": "info",
+              "title": "Footer",
+              "body": "Secondary navigation lives at the bottom."
+            }
+          ]
+        },
+        {
+          "image": "09-double.jpg",
+          "arrow": true,
+          "title": "Double — callouts below",
+          "instruction": "Two screens stacked side-by-side with an arrow, callouts below in a grid. Best when each numbered callout corresponds to a labelled spot across both screens.",
+          "calloutLayout": "below",
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Tap the menu",
+              "body": "Opens the navigation drawer."
+            },
+            {
+              "type": "info",
+              "title": "Pick a list",
+              "body": "Choose any list to view its contents."
+            },
+            {
+              "type": "info",
+              "title": "Sort order",
+              "body": "Defaults to most-recent first."
+            },
+            {
+              "type": "warn",
+              "title": "Required",
+              "body": "A list must contain at least one item before sharing."
+            }
+          ]
+        },
+        {
+          "image": "10-single-wide.jpg",
+          "title": "Single-wide — callouts below (3 cols)",
+          "instruction": "Wide layout with a 3-column grid of callouts beneath. Set `calloutCols: 3` for denser annotation when callout bodies are short.",
+          "calloutLayout": "below",
+          "calloutCols": 3,
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Search",
+              "body": "Searches across all open documents."
+            },
+            {
+              "type": "info",
+              "title": "Filters",
+              "body": "Stack filters to narrow results."
+            },
+            {
+              "type": "info",
+              "title": "Sort",
+              "body": "Sort by date, name or size."
+            },
+            {
+              "type": "note",
+              "title": "Tip",
+              "body": "Hold ⌥ to multi-select rows."
+            },
+            {
+              "type": "note",
+              "title": "Tip",
+              "body": "Double-click a header to auto-fit."
+            },
+            {
+              "type": "warn",
+              "title": "Heads up",
+              "body": "Selection is cleared on filter change."
+            }
+          ]
+        },
+        {
+          "image": "11-single.jpg",
+          "title": "Single — custom height",
+          "instruction": "Override `imageHeight` when a screenshot is longer than a standard phone screen (e.g. a scrolling capture). Width is unaffected; the slot just grows taller.",
+          "imageHeight": "660px"
+        },
+        {
+          "image": "12-double.jpg",
+          "title": "Double — per-slot sizing",
+          "instruction": "Use `imageSizes` to set width and/or height for each slot independently — for example, a phone screen next to a slightly taller wider screenshot.",
+          "imageSizes": [
+            {},
+            {
+              "width": "360px",
+              "height": "585px"
+            }
+          ]
+        },
+        {
+          "image": "13-single.jpg",
+          "title": "Single — full-width callouts below",
+          "instruction": "Set `calloutCols: 1` to give each callout the full page width below the screen. Best when callout bodies are long sentences or paragraphs.",
+          "calloutLayout": "below",
+          "calloutCols": 1,
+          "callouts": [
+            {
+              "type": "info",
+              "title": "Why this screen matters",
+              "body": "Walks the user through the most important decision they'll make in the whole flow. Give it the spotlight it deserves."
+            },
+            {
+              "type": "info",
+              "title": "Tap the primary action",
+              "body": "The CTA at the bottom advances to the next step. Notice that it stays disabled until every required field above it is filled in correctly."
+            },
+            {
+              "type": "warn",
+              "title": "Don't skip this",
+              "body": "If the user backs out at this point, the partial entry is discarded — there is no draft saved on the device or server."
+            }
+          ]
+        },
+        {
+          "title": "Multi-row — stack layouts on one page",
+          "instruction": "Use an `images` array instead of a single `image`. Each entry is its own row — any mix of single, double or single-wide — stacked down the page. If the combined stack would overflow, every image scales down (aspect preserved) until it fits.",
+          "images": [
+            {
+              "image": "14-single-wide.jpg",
+              "title": "Row one — a wide hero",
+              "instruction": "A single-wide screen leads the page."
+            },
+            {
+              "image": "14-double.jpg",
+              "arrow": true,
+              "title": "Row two — a before / after pair",
+              "instruction": "A double row sits beneath it, sharing the leftover vertical space."
+            }
+          ]
+        },
+        {
+          "title": "Multi-row — callouts per row",
+          "instruction": "Each row carries its own `callouts` and `calloutLayout`. Keep callout counts modest so the whole stack still fits the page.",
+          "images": [
+            {
+              "image": "15-single.jpg",
+              "title": "Top row — side callouts",
+              "callouts": [
+                {
+                  "type": "info",
+                  "title": "Field",
+                  "body": "Annotate an element on the top screen."
+                },
+                {
+                  "type": "warn",
+                  "title": "Required",
+                  "body": "Flag the must-do action here."
+                }
+              ]
+            },
+            {
+              "image": "15-double.jpg",
+              "arrow": true,
+              "title": "Bottom row — callouts below",
+              "calloutLayout": "below",
+              "calloutCols": 2,
+              "callouts": [
+                {
+                  "type": "info",
+                  "title": "Tap",
+                  "body": "Opens the next screen."
+                },
+                {
+                  "type": "info",
+                  "title": "Result",
+                  "body": "Shows the updated state."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Per-image border — framed vs. borderless",
+          "instruction": "Every image is framed with a 6px border by default. Set `border: false` to drop the frame — handy for screenshots that already include their own chrome or a full-bleed graphic.",
+          "images": [
+            {
+              "image": "16-single-wide.jpg",
+              "title": "Framed (default — border: true)",
+              "border": true
+            },
+            {
+              "image": "16b-single-wide.jpg",
+              "title": "Borderless (border: false)",
+              "border": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter2",
+      "title": "Working through the process",
+      "description": "The middle chapter. Use it to expand on the technique introduced in chapter one and to demonstrate variations.",
+      "steps": [
+        {
+          "image": "01-single.jpg",
+          "instruction": "Begin with a brief re-orientation — remind the reader where they left off."
+        },
+        {
+          "image": "02-double.jpg",
+          "instruction": "Introduce the core technique of this chapter. The pair of screens shows the tap and the resulting state."
+        },
+        {
+          "image": "03-single.jpg",
+          "instruction": "Show a common variation, with the image highlighting the difference."
+        },
+        {
+          "image": "04-double.jpg",
+          "instruction": "End with a checkpoint — the left screen is what the reader should see; the right is the next view they'll move into."
+        }
+      ]
+    },
+    {
+      "id": "chapter3",
+      "title": "Finishing well",
+      "description": "The closing chapter. Tie everything together and leave the reader with a clear sense of completion.",
+      "steps": [
+        {
+          "image": "01-double.jpg",
+          "instruction": "Inspect the work. The two screens compare the expected and the actual result."
+        },
+        {
+          "image": "02-single.jpg",
+          "instruction": "Make final adjustments — small changes only at this stage."
+        }
+      ]
+    }
+  ]
+}

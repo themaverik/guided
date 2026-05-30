@@ -1,0 +1,353 @@
+"use client";
+
+/*
+ * Editor store. Per-render-tree instance (created in a context provider) so it
+ * is SSR-safe — no module-level singleton shared across requests. The `book`
+ * object is the single source of truth; UI selection state is kept separate.
+ *
+ * Structural mutations are delegated to the pure helpers in book-mutations.ts;
+ * the actions here apply them and keep the selection coherent after removes.
+ */
+import { createContext, useContext, useRef } from "react";
+import { useStore } from "zustand";
+import { createStore, type StoreApi } from "zustand/vanilla";
+import type {
+  Annotation,
+  Background,
+  Book,
+  Callout,
+  Chapter,
+  Connector,
+  Ending,
+  ImageRow,
+  SectionFont,
+  Step,
+  Surface,
+  Theme,
+  ThemeSection,
+  Watermark,
+} from "./book-schema";
+import { DEFAULT_WATERMARK_OPACITY } from "./book-schema";
+import * as M from "./book-mutations";
+
+export interface Selection {
+  chapterIndex: number;
+  /** null = the chapter intro page is selected (no specific step). */
+  stepIndex: number | null;
+  rowIndex: number | null;
+  slotIndex: number | null;
+}
+
+export interface EditorState {
+  /** The project this editor is editing (its slug). */
+  projectSlug: string;
+  book: Book;
+  selection: Selection;
+  /** id of the focused annotation (shows its drag handles on the preview). */
+  selectedAnnotation: string | null;
+  /** data-screen-labels of pages that still overflow after the last fit pass. */
+  overflows: string[];
+
+  // selection
+  selectChapter: (chapterIndex: number) => void;
+  selectStep: (chapterIndex: number, stepIndex: number) => void;
+  selectRow: (chapterIndex: number, stepIndex: number, rowIndex: number) => void;
+
+  // book meta
+  updateBookMeta: (
+    patch: Partial<Pick<Book, "title" | "subtitle" | "author" | "edition">>,
+  ) => void;
+  updateWatermark: (patch: Partial<Watermark>) => void;
+  updateTheme: (section: ThemeSection, patch: Partial<SectionFont>) => void;
+  updateBackground: (patch: Partial<Background>) => void;
+  updateEnding: (patch: Partial<Ending>) => void;
+  setOverflows: (overflows: string[]) => void;
+
+  // chapters
+  addChapter: () => void;
+  removeChapter: (ci: number) => void;
+  moveChapter: (ci: number, dir: -1 | 1) => void;
+  updateChapter: (
+    ci: number,
+    patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+  ) => void;
+
+  // steps
+  addStep: (ci: number) => void;
+  removeStep: (ci: number, si: number) => void;
+  moveStep: (ci: number, si: number, dir: -1 | 1) => void;
+  updateStep: (
+    ci: number,
+    si: number,
+    patch: Partial<Pick<Step, "title" | "instruction">>,
+  ) => void;
+
+  // rows
+  addRow: (ci: number, si: number) => void;
+  removeRow: (ci: number, si: number, ri: number) => void;
+  moveRow: (ci: number, si: number, ri: number, dir: -1 | 1) => void;
+  updateRow: (
+    ci: number,
+    si: number,
+    ri: number,
+    patch: Partial<ImageRow>,
+  ) => void;
+
+  // callouts
+  setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
+  updateCallout: (
+    ci: number,
+    si: number,
+    ri: number,
+    k: number,
+    patch: Partial<Callout>,
+  ) => void;
+  removeCallout: (ci: number, si: number, ri: number, k: number) => void;
+  moveCallout: (
+    ci: number,
+    si: number,
+    ri: number,
+    k: number,
+    dir: -1 | 1,
+  ) => void;
+
+  // annotations (page-level)
+  addAnnotation: (ci: number, si: number, ann: Annotation) => void;
+  updateAnnotation: (
+    ci: number,
+    si: number,
+    id: string,
+    patch: Partial<Surface> & Partial<Connector>,
+  ) => void;
+  removeAnnotation: (ci: number, si: number, id: string) => void;
+  selectAnnotation: (id: string | null) => void;
+}
+
+export type EditorStore = StoreApi<EditorState>;
+
+const clamp = (n: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, n));
+
+export function createEditorStore(
+  initialBook: Book,
+  projectSlug: string,
+): EditorStore {
+  return createStore<EditorState>()((set) => ({
+    projectSlug,
+    book: initialBook,
+    selection: {
+      chapterIndex: 0,
+      stepIndex: null,
+      rowIndex: null,
+      slotIndex: null,
+    },
+    selectedAnnotation: null,
+    overflows: [],
+
+    // ── selection ──
+    selectChapter: (chapterIndex) =>
+      set({
+        selection: {
+          chapterIndex,
+          stepIndex: null,
+          rowIndex: null,
+          slotIndex: null,
+        },
+        selectedAnnotation: null,
+      }),
+    selectStep: (chapterIndex, stepIndex) =>
+      set({
+        selection: {
+          chapterIndex,
+          stepIndex,
+          rowIndex: 0,
+          slotIndex: null,
+        },
+        selectedAnnotation: null,
+      }),
+    selectRow: (chapterIndex, stepIndex, rowIndex) =>
+      set({
+        selection: {
+          chapterIndex,
+          stepIndex,
+          rowIndex,
+          slotIndex: null,
+        },
+      }),
+
+    // ── book meta ──
+    updateBookMeta: (patch) =>
+      set((s) => ({ book: { ...s.book, ...patch } })),
+    updateWatermark: (patch) =>
+      set((s) => {
+        const current: Watermark = s.book.watermark ?? {
+          enabled: false,
+          position: "center",
+          opacity: DEFAULT_WATERMARK_OPACITY,
+        };
+        return { book: { ...s.book, watermark: { ...current, ...patch } } };
+      }),
+    updateTheme: (section, patch) =>
+      set((s) => {
+        const theme: Theme = { ...(s.book.theme ?? {}) };
+        const merged: SectionFont = { ...(theme[section] ?? {}), ...patch };
+        // Drop empty values so unset sections fall back to defaults.
+        (Object.keys(merged) as (keyof SectionFont)[]).forEach((k) => {
+          if (!merged[k]) delete merged[k];
+        });
+        if (Object.keys(merged).length === 0) delete theme[section];
+        else theme[section] = merged;
+        return { book: { ...s.book, theme } };
+      }),
+    updateBackground: (patch) =>
+      set((s) => {
+        const current: Background = s.book.background ?? {};
+        const next: Background = { ...current, ...patch };
+        return { book: { ...s.book, background: next } };
+      }),
+    updateEnding: (patch) =>
+      set((s) => {
+        const current: Ending = s.book.ending ?? {};
+        return { book: { ...s.book, ending: { ...current, ...patch } } };
+      }),
+    setOverflows: (overflows) => set({ overflows }),
+
+    // ── chapters ──
+    addChapter: () =>
+      set((s) => {
+        const book = M.addChapter(s.book);
+        return {
+          book,
+          selection: {
+            chapterIndex: book.chapters.length - 1,
+            stepIndex: null,
+            rowIndex: null,
+            slotIndex: null,
+          },
+        };
+      }),
+    removeChapter: (ci) =>
+      set((s) => {
+        const book = M.removeChapter(s.book, ci);
+        const chapterIndex = clamp(
+          s.selection.chapterIndex,
+          0,
+          Math.max(0, book.chapters.length - 1),
+        );
+        return {
+          book,
+          selection: {
+            chapterIndex,
+            stepIndex: null,
+            rowIndex: null,
+            slotIndex: null,
+          },
+        };
+      }),
+    moveChapter: (ci, dir) =>
+      set((s) => ({ book: M.moveChapter(s.book, ci, dir) })),
+    updateChapter: (ci, patch) =>
+      set((s) => ({ book: M.updateChapter(s.book, ci, patch) })),
+
+    // ── steps ──
+    addStep: (ci) =>
+      set((s) => {
+        const book = M.addStep(s.book, ci);
+        return {
+          book,
+          selection: {
+            chapterIndex: ci,
+            stepIndex: book.chapters[ci].steps.length - 1,
+            rowIndex: 0,
+            slotIndex: null,
+          },
+        };
+      }),
+    removeStep: (ci, si) =>
+      set((s) => {
+        const book = M.removeStep(s.book, ci, si);
+        const count = book.chapters[ci]?.steps.length ?? 0;
+        return {
+          book,
+          selection: {
+            chapterIndex: ci,
+            stepIndex: count > 0 ? clamp(si, 0, count - 1) : null,
+            rowIndex: count > 0 ? 0 : null,
+            slotIndex: null,
+          },
+        };
+      }),
+    moveStep: (ci, si, dir) =>
+      set((s) => ({ book: M.moveStep(s.book, ci, si, dir) })),
+    updateStep: (ci, si, patch) =>
+      set((s) => ({ book: M.updateStep(s.book, ci, si, patch) })),
+
+    // ── rows ──
+    addRow: (ci, si) =>
+      set((s) => ({ book: M.addRow(s.book, ci, si) })),
+    removeRow: (ci, si, ri) =>
+      set((s) => {
+        const book = M.removeRow(s.book, ci, si, ri);
+        const rowIndex =
+          s.selection.rowIndex != null ? Math.max(0, s.selection.rowIndex - (s.selection.rowIndex >= ri ? 1 : 0)) : 0;
+        return { book, selection: { ...s.selection, rowIndex } };
+      }),
+    moveRow: (ci, si, ri, dir) =>
+      set((s) => ({ book: M.moveRow(s.book, ci, si, ri, dir) })),
+    updateRow: (ci, si, ri, patch) =>
+      set((s) => ({ book: M.updateRow(s.book, ci, si, ri, patch) })),
+
+    // ── callouts ──
+    setCalloutCount: (ci, si, ri, n) =>
+      set((s) => ({ book: M.setCalloutCount(s.book, ci, si, ri, n) })),
+    updateCallout: (ci, si, ri, k, patch) =>
+      set((s) => ({ book: M.updateCallout(s.book, ci, si, ri, k, patch) })),
+    removeCallout: (ci, si, ri, k) =>
+      set((s) => ({ book: M.removeCallout(s.book, ci, si, ri, k) })),
+    moveCallout: (ci, si, ri, k, dir) =>
+      set((s) => ({ book: M.moveCallout(s.book, ci, si, ri, k, dir) })),
+
+    addAnnotation: (ci, si, ann) =>
+      set((s) => ({ book: M.addAnnotation(s.book, ci, si, ann) })),
+    updateAnnotation: (ci, si, id, patch) =>
+      set((s) => ({ book: M.updateAnnotation(s.book, ci, si, id, patch) })),
+    removeAnnotation: (ci, si, id) =>
+      set((s) => ({
+        book: M.removeAnnotation(s.book, ci, si, id),
+        selectedAnnotation:
+          s.selectedAnnotation === id ? null : s.selectedAnnotation,
+      })),
+    selectAnnotation: (id) => set({ selectedAnnotation: id }),
+  }));
+}
+
+const EditorStoreContext = createContext<EditorStore | null>(null);
+
+export function EditorStoreProvider({
+  initialBook,
+  projectSlug,
+  children,
+}: {
+  initialBook: Book;
+  projectSlug: string;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<EditorStore | null>(null);
+  if (ref.current === null) {
+    ref.current = createEditorStore(initialBook, projectSlug);
+  }
+  return (
+    <EditorStoreContext.Provider value={ref.current}>
+      {children}
+    </EditorStoreContext.Provider>
+  );
+}
+
+/** Subscribe to a slice of the editor store. */
+export function useEditor<T>(selector: (state: EditorState) => T): T {
+  const store = useContext(EditorStoreContext);
+  if (!store) {
+    throw new Error("useEditor must be used within an EditorStoreProvider");
+  }
+  return useStore(store, selector);
+}

@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/*
+ * Tailwind v4 CSS-first theme. Tokens mirror the handoff design-token table
+ * (design_handoff_guidebook_editor/README.md → Design tokens). Font families
+ * bind to the next/font CSS variables set in app/layout.tsx.
+ */
+@theme {
+  --font-heading: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-body: var(--font-inter), "Inter", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+
+  /* Brand / surfaces */
+  --color-ink: #024450;
+  --color-ink-text: #1a2327;
+  --color-paper: #ffffff;
+  --color-cream: #f2f4f4;
+  --color-accent: #024450;
+  --color-muted: #1a232799;
+  --color-img-border: #d7dede;
+  --color-app-bg: #e9e6e0;
+
+  /* Rules / hairlines */
+  --color-rule: #02445026;
+  --color-rule-strong: #02445040;
+
+  /* Callout palettes */
+  --color-info-bg: #f0f5f6;
+  --color-info-border: #02445033;
+  --color-info-title: #024450;
+  --color-note-bg: #f7f9fa;
+  --color-note-border: #02445020;
+  --color-note-title: #1a232799;
+  --color-warn-bg: #fdf5dc;
+  --color-warn-border: #c89a1e55;
+  --color-warn-title: #7a5a08;
+  --color-warn-body: #4a3a0a;
+  --color-warn-marker: #b88812;
+  /* warning is the canonical name for the legacy `warn` palette */
+  --color-warning-bg: #fdf5dc;
+  --color-warning-border: #c89a1e55;
+  --color-warning-title: #7a5a08;
+  --color-warning-body: #4a3a0a;
+  --color-warning-marker: #b88812;
+  --color-success-bg: #eef7f0;
+  --color-success-border: #2e7d4d40;
+  --color-success-title: #1d6b3a;
+  --color-success-body: #173f25;
+  --color-success-marker: #2e7d4d;
+  --color-danger-bg: #fdeeee;
+  --color-danger-border: #c0392b40;
+  --color-danger-title: #a32b1e;
+  --color-danger-body: #5a1e16;
+  --color-danger-marker: #c0392b;
+}
+
+/*
+ * Print/render geometry constants (millimeters). Kept as plain custom properties
+ * — not @theme tokens — because the renderer consumes them directly in CSS
+ * lengths rather than as Tailwind utilities. Source of truth: the prototype
+ * (design-references/Guidebook A4.html). Phase 1 wires these into the renderer.
+ */
+:root {
+  --page-w: 210mm;
+  --page-h: 297mm;
+  --page-margin: 18mm;
+  --content-w: 170mm;
+  --gutter: 8mm;
+  --slot-single-w: 81mm;
+  --slot-wide-w: 170mm;
+  --img-frame: 6px;
+  --img-radius: 6px;
+  --callout-radius: 2mm;
+
+  --page-gap-screen: 12mm;
+  --page-shadow-screen: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+html,
+body {
+  background: var(--color-app-bg);
+  color: var(--color-ink-text);
+  font-family: var(--font-body);
+}

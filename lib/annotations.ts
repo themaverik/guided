@@ -1,0 +1,208 @@
+/*
+ * Annotation geometry (ADR-004). Pure helpers shared by the static renderer and
+ * the (future) interactive editor. All coordinates are normalized 0–1 relative
+ * to the image slot.
+ */
+import type {
+  Anchor,
+  Annotation,
+  Endpoint,
+  EndpointSize,
+  EndpointStyle,
+  Surface,
+} from "./book-schema";
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/** Marker pixel size per endpoint size keyword. */
+export const MARKER_PX: Record<EndpointSize, number> = {
+  small: 8,
+  medium: 12,
+  large: 18,
+};
+
+/** SVG marker reference for an endpoint style + size (none → no marker). */
+export function markerRef(
+  style: EndpointStyle,
+  size: EndpointSize = "medium",
+): string | undefined {
+  if (style === "none") return undefined;
+  return `url(#anno-${style}-${size})`;
+}
+
+/**
+ * The four line segments of a bracket as [x1,y1,x2,y2] in normalized coords:
+ * a spine plus two ticks. `flip` swaps the spine to the opposite side.
+ */
+export function bracketSegments(s: Surface): [number, number, number, number][] {
+  const { x, y, w, h } = s;
+  const horizontal = s.orientation !== "vertical";
+  if (horizontal) {
+    const spineY = s.flip ? y + h : y;
+    return [
+      [x, spineY, x + w, spineY], // spine
+      [x, y, x, y + h], // left tick
+      [x + w, y, x + w, y + h], // right tick
+    ];
+  }
+  const spineX = s.flip ? x + w : x;
+  return [
+    [spineX, y, spineX, y + h], // spine
+    [x, y, x + w, y], // top tick
+    [x, y + h, x + w, y + h], // bottom tick
+  ];
+}
+
+/** The point of a surface's named anchor, in normalized coords. */
+export function anchorPoint(surface: Surface, anchor: Anchor): Point {
+  const { x, y, w, h, kind } = surface;
+  if (kind === "box") {
+    switch (anchor) {
+      case "top":
+        return { x: x + w / 2, y };
+      case "bottom":
+        return { x: x + w / 2, y: y + h };
+      case "left":
+        return { x, y: y + h / 2 };
+      case "right":
+        return { x: x + w, y: y + h / 2 };
+      case "top-left":
+        return { x, y };
+      case "top-right":
+        return { x: x + w, y };
+      case "bottom-left":
+        return { x, y: y + h };
+      case "bottom-right":
+        return { x: x + w, y: y + h };
+      default:
+        return { x: x + w / 2, y: y + h / 2 };
+    }
+  }
+  // bracket: anchors live ON the spine (accounting for orientation + flip).
+  if (kind === "bracket") {
+    const horizontal = surface.orientation !== "vertical";
+    const start = horizontal
+      ? { x, y: surface.flip ? y + h : y }
+      : { x: surface.flip ? x + w : x, y };
+    const end = horizontal
+      ? { x: x + w, y: surface.flip ? y + h : y }
+      : { x: surface.flip ? x + w : x, y: y + h };
+    switch (anchor) {
+      case "start":
+        return start;
+      case "end":
+        return end;
+      default:
+        return { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+    }
+  }
+  // line: a segment from (x,y) to (x+w, y+h).
+  const end = { x: x + w, y: y + h };
+  switch (anchor) {
+    case "start":
+      return { x, y };
+    case "end":
+      return end;
+    default:
+      return { x: (x + end.x) / 2, y: (y + end.y) / 2 };
+  }
+}
+
+/**
+ * The polyline points of a connector in normalized coords. `straight` is two
+ * points; `elbow` inserts a right-angle corner (rectangular route). The corner
+ * goes horizontal-first when the run is wider than tall, else vertical-first.
+ */
+export function connectorPoints(
+  annotations: Annotation[],
+  c: import("./book-schema").Connector,
+): Point[] {
+  const a = resolveEndpoint(annotations, c.from);
+  const b = resolveEndpoint(annotations, c.to);
+  const wps = c.waypoints ?? [];
+  // Manual waypoints take over the path shape (straight segments through them).
+  if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
+  if (c.routing !== "elbow") return [a, b];
+  const corner =
+    Math.abs(b.x - a.x) >= Math.abs(b.y - a.y)
+      ? { x: b.x, y: a.y }
+      : { x: a.x, y: b.y };
+  return [a, corner, b];
+}
+
+/** Resolve a connector endpoint to a concrete normalized point. */
+export function resolveEndpoint(
+  annotations: Annotation[],
+  ep: Endpoint,
+): Point {
+  if (ep.ref) {
+    const surface = annotations.find(
+      (a): a is Surface => a.kind !== "connector" && a.id === ep.ref,
+    );
+    if (surface) return anchorPoint(surface, ep.anchor ?? "center");
+  }
+  return { x: ep.x ?? 0.5, y: ep.y ?? 0.5 };
+}
+
+/** Anchors offered as snap targets per surface kind. */
+function snapAnchors(kind: Surface["kind"]): Anchor[] {
+  if (kind === "box") {
+    return [
+      "center",
+      "top",
+      "bottom",
+      "left",
+      "right",
+      "top-left",
+      "top-right",
+      "bottom-left",
+      "bottom-right",
+    ];
+  }
+  return ["start", "mid", "end"];
+}
+
+export interface SnapResult {
+  x: number;
+  y: number;
+  ref?: string;
+  anchor?: Anchor;
+}
+
+/**
+ * Snap a dragged point to the nearest surface anchor within `threshold`
+ * (normalized distance). Returns a surface binding when snapped, else the free
+ * point. `excludeId` skips the surface being edited.
+ */
+export function snapPoint(
+  surfaces: Surface[],
+  p: Point,
+  threshold = 0.05,
+  excludeId?: string,
+): SnapResult {
+  let best: SnapResult | null = null;
+  let bestD = threshold;
+  for (const s of surfaces) {
+    if (s.id === excludeId) continue;
+    for (const a of snapAnchors(s.kind)) {
+      const ap = anchorPoint(s, a);
+      const d = Math.hypot(ap.x - p.x, ap.y - p.y);
+      if (d < bestD) {
+        bestD = d;
+        best = { x: ap.x, y: ap.y, ref: s.id, anchor: a };
+      }
+    }
+  }
+  return best ?? { x: p.x, y: p.y };
+}
+
+/** Normalized value → CSS/SVG percentage string. */
+export const pct = (n: number): string => `${n * 100}%`;
+
+/** Short unique id for a new annotation. */
+export function annotationId(): string {
+  return Math.random().toString(36).slice(2, 9);
+}

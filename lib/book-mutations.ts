@@ -1,0 +1,383 @@
+/*
+ * Pure, immutable mutations on the Book model. Every function returns a new
+ * Book (deep-cloned) — the store swaps the result in, the preview re-renders,
+ * auto-fit re-runs. Kept separate from the store so the logic is testable.
+ *
+ * Row normalization: a Step has two authoring forms — legacy single-image
+ * (row fields live directly on the step) and multi-row (`images: ImageRow[]`).
+ * The editor edits a "rows" view; `ensureMulti` migrates a legacy step into the
+ * multi-row form the first time a second row is needed, moving the row-level
+ * fields into `images[0]` while leaving the page-level `title`/`instruction`.
+ */
+import {
+  type Annotation,
+  type Book,
+  type Callout,
+  type CalloutType,
+  type Chapter,
+  type Connector,
+  type ImageRow,
+  type RowLayout,
+  type Step,
+  type Surface,
+} from "./book-schema";
+import { annotationId } from "./annotations";
+
+const clone = <T>(v: T): T => structuredClone(v);
+
+/*
+ * Fields that belong to a ROW (not the page), used to split a legacy step into
+ * the multi-row form. NOTE: `title`/`instruction` are intentionally excluded —
+ * on a legacy single-image step those are PAGE-level (the heading + numbered
+ * intro), so they must stay on the step, not migrate into images[0].
+ */
+const ROW_FIELDS: (keyof ImageRow)[] = [
+  "image",
+  "image2",
+  "layout",
+  "arrow",
+  "border",
+  "callouts",
+  "calloutLayout",
+  "calloutCols",
+  "imageWidth",
+  "imageHeight",
+  "imageGap",
+  "imageSizes",
+  "annotations",
+];
+
+export function blankRow(): ImageRow {
+  return { image: "", layout: "single", border: true };
+}
+
+export function blankCallout(): Callout {
+  return { type: "info", title: "", body: "" };
+}
+
+export function blankStep(): Step {
+  return { title: "New step", instruction: "", image: "", layout: "single" };
+}
+
+export function blankChapter(index: number): Chapter {
+  return {
+    id: `chapter${index + 1}`,
+    title: "New chapter",
+    description: "",
+    steps: [blankStep()],
+  };
+}
+
+/** Extract the row-level fields from a legacy single-image step into an ImageRow. */
+function extractRow(step: Step): ImageRow {
+  const row: Record<string, unknown> = {};
+  for (const f of ROW_FIELDS) {
+    if (step[f as keyof Step] !== undefined) row[f] = step[f as keyof Step];
+  }
+  if (row.image === undefined) row.image = "";
+  if (row.layout === undefined) row.layout = "single";
+  if (row.border === undefined) row.border = true;
+  return row as unknown as ImageRow;
+}
+
+/** Ensure a step is in multi-row form. Mutates the (already-cloned) step. */
+function ensureMulti(step: Step): void {
+  if (Array.isArray(step.images) && step.images.length > 0) return;
+  step.images = [extractRow(step)];
+  for (const f of ROW_FIELDS) delete step[f as keyof Step];
+}
+
+/** The object a row's fields should be written to (step itself for legacy ri 0). */
+function rowTarget(step: Step, ri: number): ImageRow | Step | null {
+  if (Array.isArray(step.images) && step.images.length > 0) {
+    return step.images[ri] ?? null;
+  }
+  return ri === 0 ? step : null;
+}
+
+/** Read the rows of a step as a list (without mutating). */
+export function rowsOf(step: Step): ImageRow[] {
+  if (Array.isArray(step.images) && step.images.length > 0) return step.images;
+  return [extractRow(step)];
+}
+
+const swap = <T>(arr: T[], a: number, b: number): void => {
+  [arr[a], arr[b]] = [arr[b], arr[a]];
+};
+
+// ── Chapters ───────────────────────────────────────────────
+export function addChapter(book: Book): Book {
+  const next = clone(book);
+  next.chapters.push(blankChapter(next.chapters.length));
+  return next;
+}
+
+export function removeChapter(book: Book, ci: number): Book {
+  const next = clone(book);
+  next.chapters.splice(ci, 1);
+  return next;
+}
+
+export function moveChapter(book: Book, ci: number, dir: -1 | 1): Book {
+  const next = clone(book);
+  const j = ci + dir;
+  if (j < 0 || j >= next.chapters.length) return book;
+  swap(next.chapters, ci, j);
+  return next;
+}
+
+export function updateChapter(
+  book: Book,
+  ci: number,
+  patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+): Book {
+  const next = clone(book);
+  Object.assign(next.chapters[ci], patch);
+  return next;
+}
+
+// ── Steps ──────────────────────────────────────────────────
+export function addStep(book: Book, ci: number): Book {
+  const next = clone(book);
+  next.chapters[ci].steps.push(blankStep());
+  return next;
+}
+
+export function removeStep(book: Book, ci: number, si: number): Book {
+  const next = clone(book);
+  next.chapters[ci].steps.splice(si, 1);
+  return next;
+}
+
+export function moveStep(
+  book: Book,
+  ci: number,
+  si: number,
+  dir: -1 | 1,
+): Book {
+  const next = clone(book);
+  const steps = next.chapters[ci].steps;
+  const j = si + dir;
+  if (j < 0 || j >= steps.length) return book;
+  swap(steps, si, j);
+  return next;
+}
+
+export function updateStep(
+  book: Book,
+  ci: number,
+  si: number,
+  patch: Partial<Pick<Step, "title" | "instruction">>,
+): Book {
+  const next = clone(book);
+  Object.assign(next.chapters[ci].steps[si], patch);
+  return next;
+}
+
+// ── Rows ───────────────────────────────────────────────────
+export function updateRow(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  patch: Partial<ImageRow>,
+): Book {
+  const next = clone(book);
+  const target = rowTarget(next.chapters[ci].steps[si], ri);
+  if (!target) return book;
+  Object.assign(target, patch);
+  return next;
+}
+
+export function addRow(book: Book, ci: number, si: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci].steps[si];
+  ensureMulti(step);
+  step.images!.push(blankRow());
+  return next;
+}
+
+export function removeRow(book: Book, ci: number, si: number, ri: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci].steps[si];
+  if (Array.isArray(step.images) && step.images.length > 1) {
+    step.images.splice(ri, 1);
+  }
+  // A single legacy/multi row is the minimum; removing the last is a no-op.
+  return next;
+}
+
+export function moveRow(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  dir: -1 | 1,
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci].steps[si];
+  ensureMulti(step);
+  const rows = step.images!;
+  const j = ri + dir;
+  if (j < 0 || j >= rows.length) return book;
+  swap(rows, ri, j);
+  return next;
+}
+
+// ── Callouts (within a row) ────────────────────────────────
+export function setCalloutCount(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  n: number,
+): Book {
+  const next = clone(book);
+  const target = rowTarget(next.chapters[ci].steps[si], ri);
+  if (!target) return book;
+  const cur = target.callouts ?? [];
+  const count = Math.max(0, Math.min(12, n));
+  if (count === 0) {
+    delete target.callouts;
+    return next;
+  }
+  const out = cur.slice(0, count);
+  while (out.length < count) out.push(blankCallout());
+  target.callouts = out;
+  if (!target.calloutLayout) target.calloutLayout = "side";
+  return next;
+}
+
+export function updateCallout(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  k: number,
+  patch: Partial<Callout>,
+): Book {
+  const next = clone(book);
+  const target = rowTarget(next.chapters[ci].steps[si], ri);
+  if (!target?.callouts?.[k]) return book;
+  Object.assign(target.callouts[k], patch);
+  return next;
+}
+
+export function removeCallout(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  k: number,
+): Book {
+  const next = clone(book);
+  const target = rowTarget(next.chapters[ci].steps[si], ri);
+  if (!target?.callouts) return book;
+  target.callouts.splice(k, 1);
+  if (target.callouts.length === 0) delete target.callouts;
+  return next;
+}
+
+export function moveCallout(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  k: number,
+  dir: -1 | 1,
+): Book {
+  const next = clone(book);
+  const target = rowTarget(next.chapters[ci].steps[si], ri);
+  const list = target?.callouts;
+  if (!list) return book;
+  const j = k + dir;
+  if (j < 0 || j >= list.length) return book;
+  swap(list, k, j);
+  return next;
+}
+
+// --- Annotations (ADR-004) ---
+
+const ANNO_STROKE = "#658995";
+
+export function newSurface(kind: Surface["kind"]): Surface {
+  const base = { id: annotationId(), stroke: ANNO_STROKE, width: 2 };
+  if (kind === "box") return { ...base, kind, x: 0.3, y: 0.3, w: 0.4, h: 0.3 };
+  if (kind === "line") return { ...base, kind, x: 0.2, y: 0.5, w: 0.6, h: 0 };
+  // bracket: vertical + inverted, centered on the page by default.
+  return {
+    ...base,
+    kind,
+    x: 0.5,
+    y: 0.3,
+    w: 0.05,
+    h: 0.4,
+    orientation: "vertical",
+    flip: true,
+  };
+}
+
+export function newConnector(): Connector {
+  return {
+    id: annotationId(),
+    kind: "connector",
+    from: { x: 0.3, y: 0.3, style: "none", size: "medium" },
+    to: { x: 0.6, y: 0.6, style: "arrow", size: "medium" },
+    stroke: ANNO_STROKE,
+    width: 2,
+    routing: "straight",
+  };
+}
+
+// Annotations are page-level: stored on the step, drawn over the whole page,
+// so connectors can span images and callouts.
+export function addAnnotation(
+  book: Book,
+  ci: number,
+  si: number,
+  ann: Annotation,
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci].steps[si];
+  step.annotations = [...(step.annotations ?? []), ann];
+  return next;
+}
+
+export function updateAnnotation(
+  book: Book,
+  ci: number,
+  si: number,
+  id: string,
+  patch: Partial<Surface> & Partial<Connector>,
+): Book {
+  const next = clone(book);
+  const list = next.chapters[ci].steps[si].annotations;
+  if (!list) return book;
+  const idx = list.findIndex((a) => a.id === id);
+  if (idx < 0) return book;
+  list[idx] = { ...list[idx], ...patch } as Annotation;
+  return next;
+}
+
+export function removeAnnotation(
+  book: Book,
+  ci: number,
+  si: number,
+  id: string,
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci].steps[si];
+  if (!step.annotations) return book;
+  step.annotations = step.annotations.filter((a) => a.id !== id);
+  if (step.annotations.length === 0) delete step.annotations;
+  return next;
+}
+
+export const CALLOUT_TYPES: CalloutType[] = [
+  "info",
+  "note",
+  "success",
+  "warning",
+  "danger",
+];
+export const ROW_LAYOUTS: RowLayout[] = ["single", "double", "single-wide"];

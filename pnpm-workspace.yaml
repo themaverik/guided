@@ -1,0 +1,5 @@
+# Supply-chain hardening: a release "cooldown" — refuse to install any package
+# version published less than this many MINUTES ago, so freshly-published
+# (possibly compromised) versions have time to be caught and pulled.
+# 10080 minutes = 7 days. (pnpm's own default is 1440 = 1 day.) Requires pnpm >= 10.16.
+minimumReleaseAge: 10080

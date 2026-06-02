@@ -38,7 +38,10 @@ export function fitSteps(container: HTMLElement): string[] {
     if (!inner || !body) return;
 
     // Reset any previous fit so re-runs measure from the natural layout.
+    // Skip slots with a manual size override (data-ov) — clearing them would
+    // wipe the React-managed inline width/height the user set.
     body.querySelectorAll<HTMLElement>(".img-slot").forEach((s) => {
+      if (s.dataset.ov) return;
       s.style.width = "";
       s.style.height = "";
       s.style.maxWidth = "";
@@ -70,7 +73,11 @@ export function fitSteps(container: HTMLElement): string[] {
     while (body.scrollHeight > budget + 1 && guard < 80) {
       const ratio = budget / body.scrollHeight; // < 1
       const step = 1 - (1 - ratio) * 0.5; // damped
-      const slots = [...body.querySelectorAll<HTMLElement>(".img-slot")];
+      // Don't scale manually-sized slots — the user fixed those dimensions.
+      const slots = [...body.querySelectorAll<HTMLElement>(".img-slot")].filter(
+        (s) => !s.dataset.ov,
+      );
+      if (slots.length === 0) break;
 
       // READ phase — snapshot every slot's current size BEFORE mutating any.
       const snap = slots.map((s) => s.getBoundingClientRect());

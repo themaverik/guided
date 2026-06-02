@@ -43,13 +43,17 @@ export default function ImageRow({
     const bFile = secondImageName(row.image, row.image2);
     slots = (
       <>
+        {/* key on the resolved filename so a changed image cleanly remounts the
+            leaf and re-probes its URL, instead of reusing stale probe state. */}
         <ImageSlot
+          key={`a-${aFile ?? ""}`}
           src={imageSrc(assetBase, chapter.id, aFile)}
           label="Screen A"
           path={displayPath(chapter.id, aFile)}
           {...sizeFor(0)}
         />
         <ImageSlot
+          key={`b-${bFile ?? ""}`}
           src={imageSrc(assetBase, chapter.id, bFile)}
           label="Screen B"
           path={displayPath(chapter.id, bFile)}
@@ -61,6 +65,7 @@ export default function ImageRow({
     const label = row.layout === "single-wide" ? "Wide screen" : "Screen";
     slots = (
       <ImageSlot
+        key={`s-${row.image ?? ""}`}
         src={imageSrc(assetBase, chapter.id, row.image)}
         label={label}
         path={displayPath(chapter.id, row.image)}

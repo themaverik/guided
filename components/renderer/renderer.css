@@ -453,13 +453,44 @@
 }
 
 .step-instruction {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 0;
+  max-width: 170mm;
+}
+.step-instruction-body {
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-body);
   font-size: 10.5pt;
   line-height: 1.6;
   color: var(--ink-text);
-  margin: 0;
-  max-width: 170mm;
   text-wrap: pretty;
+}
+.step-instruction-body p {
+  margin: 0 0 1.5mm;
+}
+.step-instruction-body p:last-child {
+  margin-bottom: 0;
+}
+.step-instruction-body ul,
+.step-instruction-body ol {
+  margin: 1mm 0;
+  padding-left: 5mm;
+}
+/* Restore list markers — Tailwind's preflight resets list-style to none. */
+.step-instruction-body ul,
+.row-instruction ul,
+.callout-body ul,
+.chap-desc ul {
+  list-style: disc outside;
+}
+.step-instruction-body ol,
+.row-instruction ol,
+.callout-body ol,
+.chap-desc ol {
+  list-style: decimal outside;
 }
 .step-instruction-num {
   display: inline-flex;
@@ -696,7 +727,8 @@
 .img-slot.has-img .img-slot-meta {
   display: none;
 }
-.img-slot::before {
+/* Faint "status bar" band only on empty placeholder slots (no image). */
+.img-slot[data-src=""]::before {
   content: "";
   position: absolute;
   top: 0;
@@ -705,9 +737,6 @@
   height: 8mm;
   background: var(--ink);
   opacity: 0.06;
-}
-.img-slot.has-img::before {
-  display: none;
 }
 
 /* Annotation overlay — above the image, non-interactive in the static render. */

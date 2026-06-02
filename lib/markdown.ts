@@ -53,7 +53,10 @@ export function renderMarkdownBlocks(src: string): string {
 
   const flushPara = () => {
     if (para.length) {
-      out.push(`<p>${inline(escapeHtml(para.join(" ")))}</p>`);
+      // Each source line becomes a visual line (single newline → <br>);
+      // a blank line still starts a new paragraph.
+      const html = para.map((l) => inline(escapeHtml(l))).join("<br>");
+      out.push(`<p>${html}</p>`);
       para = [];
     }
   };

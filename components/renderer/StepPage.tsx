@@ -53,10 +53,15 @@ export default function StepPage({
         </div>
         <h2 className="step-title">{step.title || `Step ${stepNum}`}</h2>
         {step.instruction ? (
-          <p className="step-instruction">
+          <div className="step-instruction">
             <span className="step-instruction-num">{stepNum}</span>
-            <RichText as="span" text={step.instruction} />
-          </p>
+            <RichText
+              className="step-instruction-body"
+              as="div"
+              block
+              text={step.instruction}
+            />
+          </div>
         ) : null}
         <div className="step-body">
           {rows.map((row, i) => (

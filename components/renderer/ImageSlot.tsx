@@ -74,11 +74,22 @@ export default function ImageSlot({
   if (frame.shadow) {
     style.boxShadow = "0 6px 18px rgba(0, 0, 0, 0.18)";
   }
+  // White (not cream) behind any real image, so the contain-letterbox is
+  // invisible against the white page — including in the exported PDF.
+  if (src) {
+    style.backgroundColor = "#ffffff";
+  }
 
   const cls = `img-slot${frame.show ? "" : " no-border"}${loaded ? " has-img" : ""}`;
+  const hasOverride = Boolean(width || height);
 
   return (
-    <div className={cls} style={style} data-src={src ?? ""}>
+    <div
+      className={cls}
+      style={style}
+      data-src={src ?? ""}
+      data-ov={hasOverride ? "1" : undefined}
+    >
       <div className="img-slot-meta">
         <div className="img-slot-icon">
           <PhotoIcon />

@@ -337,16 +337,18 @@ export function resolveBorder(border: Border | undefined): ResolvedBorder {
   const defaults = {
     color: "var(--img-border)",
     width: "6px",
-    radius: "6px",
-    shadow: false,
+    radius: "20px",
+    shadow: true,
   };
-  if (border === false) return { show: false, ...defaults };
+  // Border off means no frame AND no shadow — otherwise the drop shadow lingers
+  // as a grey halo that reads as a border in both Chrome and Preview.
+  if (border === false) return { ...defaults, show: false, shadow: false };
   if (border === true || border === undefined) return { show: true, ...defaults };
   return {
     show: true,
     color: border.color ?? defaults.color,
     width: border.width ?? defaults.width,
     radius: border.radius ?? defaults.radius,
-    shadow: border.shadow ?? false,
+    shadow: border.shadow ?? defaults.shadow,
   };
 }

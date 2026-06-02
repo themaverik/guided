@@ -52,13 +52,16 @@ export default function RowCard({
   const setLayout = (l: RowLayout) => updateRow(ci, si, ri, { layout: l });
 
   const commitBorder = (next: BorderStyle) => {
-    const empty = !next.color && !next.width && !next.radius && !next.shadow;
+    // Collapse to plain `true` only when nothing differs from the defaults.
+    // An explicit `shadow: false` must persist (defaults now have shadow on).
+    const empty =
+      !next.color && !next.width && !next.radius && next.shadow !== false;
     updateRow(ci, si, ri, { border: empty ? true : next });
   };
   const setBorderField = (field: keyof BorderStyle, value: string) =>
     commitBorder({ ...borderObj, [field]: value || undefined });
   const setBorderShadow = (on: boolean) =>
-    commitBorder({ ...borderObj, shadow: on || undefined });
+    commitBorder({ ...borderObj, shadow: on });
 
   return (
     <div className={`row-card${selected ? " selected" : ""}`}>
@@ -217,7 +220,7 @@ export default function RowCard({
               <div className="editor-field">
                 <label>Radius</label>
                 <input
-                  placeholder="6px"
+                  placeholder="20px"
                   value={borderObj.radius ?? ""}
                   onChange={(e) => setBorderField("radius", e.target.value)}
                 />
@@ -225,7 +228,7 @@ export default function RowCard({
               <label className="ctrl-check" style={{ gridColumn: "1 / -1" }}>
                 <input
                   type="checkbox"
-                  checked={borderObj.shadow ?? false}
+                  checked={borderObj.shadow ?? true}
                   onChange={(e) => setBorderShadow(e.target.checked)}
                 />
                 Drop shadow

@@ -4,9 +4,19 @@
  * Landing actions: Start a new project (prompts for a name → POST /api/projects
  * → navigate to /<slug>), View demo, View quickstart.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { Book } from "@/lib/book-schema";
+
+const LS_PREFIX = "guidebook:book:";
+
+interface Recoverable {
+  key: string;
+  slug: string;
+  title: string;
+  book: Book;
+}
 
 export default function LandingActions() {
   const router = useRouter();
@@ -14,6 +24,74 @@ export default function LandingActions() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [recoverable, setRecoverable] = useState<Recoverable[]>([]);
+
+  // Surface any locally-mirrored books (crash/expiry recovery).
+  useEffect(() => {
+    try {
+      const found: Recoverable[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key?.startsWith(LS_PREFIX)) continue;
+        try {
+          const book = JSON.parse(localStorage.getItem(key) ?? "") as Book;
+          if (Array.isArray(book?.chapters)) {
+            found.push({
+              key,
+              slug: key.slice(LS_PREFIX.length),
+              title: book.title || key.slice(LS_PREFIX.length),
+              book,
+            });
+          }
+        } catch {
+          /* skip unparseable */
+        }
+      }
+      setRecoverable(found);
+    } catch {
+      /* localStorage unavailable */
+    }
+  }, []);
+
+  const restore = async (item: Recoverable) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: item.title, book: item.book }),
+      });
+      const data = (await res.json()) as { slug?: string; error?: string };
+      if (res.ok && data.slug) router.push(`/${data.slug}`);
+      else setError(data.error ?? "Could not restore");
+    } catch {
+      setError("Could not restore");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/projects/import", { method: "POST", body: fd });
+      const data = (await res.json()) as { slug?: string; error?: string };
+      if (res.ok && data.slug) router.push(`/${data.slug}`);
+      else setError(data.error ?? "Could not import project");
+    } catch {
+      setError("Could not import project");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const create = async () => {
     const trimmed = name.trim();
@@ -76,6 +154,38 @@ export default function LandingActions() {
       <Link className="landing-btn" href="/quickstart">
         View quickstart guide
       </Link>
+      <button
+        className="landing-btn"
+        onClick={() => fileRef.current?.click()}
+        disabled={busy}
+      >
+        {busy ? "Importing…" : "Import a project (.zip)"}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".zip,application/zip"
+        hidden
+        onChange={onImport}
+      />
+
+      {recoverable.length > 0 ? (
+        <div className="landing-recover">
+          <p className="landing-recover-title">
+            Recover unsaved work (this browser)
+          </p>
+          {recoverable.map((r) => (
+            <button
+              key={r.key}
+              className="landing-btn"
+              onClick={() => restore(r)}
+              disabled={busy}
+            >
+              Restore “{r.title}”
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {error ? <p className="landing-error">{error}</p> : null}
     </div>

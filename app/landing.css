@@ -104,6 +104,22 @@
   font-size: 12px;
   margin: 8px 0 0;
 }
+.landing-recover {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.landing-recover-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0;
+}
 .landing-foot {
   margin-top: 28px;
   display: flex;

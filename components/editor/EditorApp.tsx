@@ -8,6 +8,7 @@
 import { useRef, useState } from "react";
 import type { Book } from "@/lib/book-schema";
 import { EditorStoreProvider } from "@/lib/store";
+import EphemeralNotice from "./EphemeralNotice";
 import LeftPane from "./LeftPane";
 import PreviewPane from "./PreviewPane";
 import "./editor.css";
@@ -40,20 +41,23 @@ export default function EditorApp({
 
   return (
     <EditorStoreProvider initialBook={initialBook} projectSlug={projectSlug}>
-      <div
-        className="editor"
-        style={{ ["--left-w" as string]: `${leftW}px` }}
-      >
-        <LeftPane />
+      <div className="editor-shell">
+        <EphemeralNotice />
         <div
-          className="editor-resizer"
-          onPointerDown={onDown}
-          onPointerMove={onMove}
-          onPointerUp={onUp}
-          role="separator"
-          aria-orientation="vertical"
-        />
-        <PreviewPane />
+          className="editor"
+          style={{ ["--left-w" as string]: `${leftW}px` }}
+        >
+          <LeftPane />
+          <div
+            className="editor-resizer"
+            onPointerDown={onDown}
+            onPointerMove={onMove}
+            onPointerUp={onUp}
+            role="separator"
+            aria-orientation="vertical"
+          />
+          <PreviewPane />
+        </div>
       </div>
     </EditorStoreProvider>
   );

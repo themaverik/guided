@@ -12,7 +12,10 @@ import path from "node:path";
 import type { Book } from "./book-schema";
 
 export const DATA_ROOT = path.join(process.cwd(), "data", "projects");
-export const PROJECT_TTL_MS = 60 * 60 * 1000; // 1 hour idle
+// Idle TTL before a project is swept. Default is 1 day (1440 min); override
+// with GUIDED_PROJECT_TTL_MIN if a deployment wants a different window.
+export const PROJECT_TTL_MS =
+  Number(process.env.GUIDED_PROJECT_TTL_MIN ?? 1440) * 60 * 1000;
 
 /** Slugs that must never be assigned to a user project. */
 export const RESERVED_SLUGS = new Set([
@@ -127,6 +130,40 @@ export async function seedProject(
 
 export const assetsRoot = (slug: string) =>
   path.join(projectDir(slug), "assets");
+
+/**
+ * Create a new project from imported files (project-relative paths, e.g.
+ * "book.json", "assets/chapter1/x.png"). Writes them under a fresh slug and a
+ * fresh meta. Path-traversal guarded. Requires a book.json among the files.
+ */
+export async function importProject(
+  name: string,
+  files: { name: string; data: Buffer }[],
+): Promise<ProjectMeta> {
+  const slug = await uniqueSlug(name);
+  const dir = projectDir(slug);
+  await mkdir(dir, { recursive: true });
+
+  let hasBook = false;
+  for (const f of files) {
+    const rel = f.name.replace(/\\/g, "/").replace(/^\/+/, "");
+    if (!rel || rel === "meta.json") continue; // meta is regenerated
+    const target = path.normalize(path.join(dir, rel));
+    if (target !== dir && !target.startsWith(dir + path.sep)) continue; // traversal
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, f.data);
+    if (rel === "book.json") hasBook = true;
+  }
+  if (!hasBook) {
+    await rm(dir, { recursive: true, force: true });
+    throw new Error("archive has no book.json");
+  }
+
+  const now = Date.now();
+  const meta: ProjectMeta = { slug, name, createdAt: now, updatedAt: now };
+  await writeFile(metaPath(slug), JSON.stringify(meta, null, 2), "utf8");
+  return meta;
+}
 
 /**
  * Resolve a relative asset path under a project's assets dir, guarding against

@@ -45,10 +45,6 @@ export default function Terms() {
         we are not liable for any damages arising from its use.
       </p>
 
-      <p className="muted">
-        This summary is provided for transparency and is not legal advice;
-        consider review by a qualified professional before relying on it.
-      </p>
     </main>
   );
 }

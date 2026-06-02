@@ -11,7 +11,7 @@ import Watermark from "./Watermark";
 const DEFAULT_ENDING = {
   eyebrow: "End",
   title: "Thank you for reading.",
-  body: "A closing note. Credit collaborators, link to further reading, or leave space for the reader's own notes.",
+  body: "",
 };
 
 export default function BackCover({

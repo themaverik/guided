@@ -29,7 +29,7 @@ export default function CoverPage({
       <div className="page-inner cover">
         <div>
           <div className="cover-meta">
-            A Guidebook · {book.chapters.length} chapters
+            {book.title} Guidebook · {book.chapters.length} chapters
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "6mm" }}>

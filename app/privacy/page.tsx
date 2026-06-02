@@ -49,9 +49,6 @@ export default function Privacy() {
         future, we will update this page first.
       </p>
 
-      <p className="muted">
-        This summary is provided for transparency and is not legal advice.
-      </p>
     </main>
   );
 }

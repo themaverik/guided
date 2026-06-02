@@ -9,7 +9,19 @@ import { assetBaseFor } from "@/lib/project-routes";
 import { loadProjectBook, projectExists } from "@/lib/project-store";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Guidebook — Print" };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  try {
+    return { title: (await loadProjectBook(slug)).title || "Guidebook" };
+  } catch {
+    return { title: "Guidebook" };
+  }
+}
 
 export default async function ProjectPrint({
   params,

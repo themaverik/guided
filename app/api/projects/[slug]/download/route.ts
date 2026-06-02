@@ -3,7 +3,12 @@
  * dependency-free store-method zip writer.
  */
 import { NextResponse } from "next/server";
-import { collectProjectFiles, projectExists } from "@/lib/project-store";
+import {
+  collectProjectFiles,
+  loadProjectBook,
+  projectExists,
+} from "@/lib/project-store";
+import { downloadName } from "@/lib/server-paths";
 import { buildZip } from "@/lib/zip";
 
 export const runtime = "nodejs";
@@ -18,10 +23,11 @@ export async function GET(_req: Request, { params }: Ctx) {
   }
   const files = await collectProjectFiles(slug);
   const zip = buildZip(files.map((f) => ({ name: `${slug}/${f.name}`, data: f.data })));
+  const name = downloadName((await loadProjectBook(slug)).title, slug);
   return new NextResponse(new Uint8Array(zip), {
     headers: {
       "content-type": "application/zip",
-      "content-disposition": `attachment; filename="${slug}.zip"`,
+      "content-disposition": `attachment; filename="${name}.zip"`,
     },
   });
 }

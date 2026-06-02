@@ -15,6 +15,21 @@ import {
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  try {
+    const book =
+      slug === "demo" ? await loadExampleBook() : await loadProjectBook(slug);
+    return { title: `Guided: ${book.title}` };
+  } catch {
+    return { title: "Guided" };
+  }
+}
+
 export default async function ProjectEditor({
   params,
 }: {

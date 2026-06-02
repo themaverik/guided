@@ -7,7 +7,8 @@
  * Enable locally:  pnpm add -D playwright  &&  npx playwright install chromium
  */
 import { NextResponse } from "next/server";
-import { projectExists } from "@/lib/project-store";
+import { loadProjectBook, projectExists } from "@/lib/project-store";
+import { downloadName } from "@/lib/server-paths";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,10 +53,11 @@ export async function GET(req: Request, { params }: Ctx) {
       printBackground: true,
       preferCSSPageSize: true,
     });
+    const name = downloadName((await loadProjectBook(slug)).title, slug);
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="${slug}.pdf"`,
+        "content-disposition": `attachment; filename="${name}.pdf"`,
       },
     });
   } finally {

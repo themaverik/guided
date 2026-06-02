@@ -12,3 +12,14 @@ export function safeSegment(input: string): string {
 export function chapterDir(chapterId: string): string {
   return path.join(process.cwd(), "public", safeSegment(chapterId));
 }
+
+/** A safe download filename from a book title (falls back to the slug). */
+export function downloadName(title: string, slug: string): string {
+  const base = title
+    .trim()
+    .replace(/[^a-zA-Z0-9 ._-]+/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "")
+    .slice(0, 80);
+  return base || slug;
+}

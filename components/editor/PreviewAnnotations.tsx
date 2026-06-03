@@ -124,7 +124,7 @@ export default function PreviewAnnotations({
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
-  const apply = (p: { x: number; y: number }) => {
+  const apply = (p: { x: number; y: number }, shift = false) => {
     const d = drag.current;
     if (!d) return;
     const a = annotations.find((x) => x.id === d.id);
@@ -156,13 +156,19 @@ export default function PreviewAnnotations({
       ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
     } else {
       // Axis-snap a free endpoint into line with the opposite endpoint, so a
-      // perfectly horizontal/vertical connector is easy to make.
+      // perfectly horizontal/vertical connector is easy to make. Holding Shift
+      // hard-locks to the dominant axis; otherwise snap within a tolerance.
       const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
       let x = snap.x;
       let y = snap.y;
-      const AXIS = 0.02;
-      if (Math.abs(y - other.y) <= AXIS) y = other.y;
-      else if (Math.abs(x - other.x) <= AXIS) x = other.x;
+      if (shift) {
+        if (Math.abs(x - other.x) >= Math.abs(y - other.y)) y = other.y;
+        else x = other.x;
+      } else {
+        const AXIS = 0.04;
+        if (Math.abs(y - other.y) <= AXIS) y = other.y;
+        else if (Math.abs(x - other.x) <= AXIS) x = other.x;
+      }
       ep = { style: cur.style, size: cur.size, x, y };
     }
     updateAnnotation(ci, si, d.id, { [d.part]: ep });
@@ -171,8 +177,9 @@ export default function PreviewAnnotations({
   const onMove = (e: React.PointerEvent) => {
     if (!drag.current) return;
     const p = toN(e);
+    const shift = e.shiftKey;
     if (raf.current != null) cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => apply(p));
+    raf.current = requestAnimationFrame(() => apply(p, shift));
   };
 
   const onUp = (e: React.PointerEvent) => {

@@ -618,6 +618,11 @@
 .preview-anno-handle:active {
   cursor: grabbing;
 }
+.preview-anno-hit {
+  fill: transparent;
+  stroke: transparent;
+  cursor: pointer;
+}
 .preview-anno-snap {
   fill: var(--color-ink);
   opacity: 0.5;

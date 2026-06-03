@@ -16,7 +16,13 @@ import type {
   Endpoint,
   Surface,
 } from "@/lib/book-schema";
-import { anchorPoint, resolveEndpoint, snapPoint } from "@/lib/annotations";
+import {
+  anchorPoint,
+  bracketSegments,
+  connectorPoints,
+  resolveEndpoint,
+  snapPoint,
+} from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -57,6 +63,7 @@ export default function PreviewAnnotations({
   selectedId: string | null;
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
+  const selectAnnotation = useEditor((s) => s.selectAnnotation);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{
     id: string;
@@ -144,11 +151,20 @@ export default function PreviewAnnotations({
     }
     const snap = snapPoint(surfaces, p, 0.025);
     const cur = d.part === "from" ? a.from : a.to;
-    const ep: Endpoint = {
-      style: cur.style,
-      size: cur.size,
-      ...(snap.ref ? { ref: snap.ref, anchor: snap.anchor } : { x: snap.x, y: snap.y }),
-    };
+    let ep: Endpoint;
+    if (snap.ref) {
+      ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
+    } else {
+      // Axis-snap a free endpoint into line with the opposite endpoint, so a
+      // perfectly horizontal/vertical connector is easy to make.
+      const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
+      let x = snap.x;
+      let y = snap.y;
+      const AXIS = 0.02;
+      if (Math.abs(y - other.y) <= AXIS) y = other.y;
+      else if (Math.abs(x - other.x) <= AXIS) x = other.x;
+      ep = { style: cur.style, size: cur.size, x, y };
+    }
     updateAnnotation(ci, si, d.id, { [d.part]: ep });
   };
 
@@ -177,7 +193,80 @@ export default function PreviewAnnotations({
       height={H}
       onPointerMove={onMove}
       onPointerUp={onUp}
+      onPointerDown={(e) => {
+        // Click on empty canvas (the SVG itself, not a shape) clears focus.
+        if (e.target === svgRef.current) selectAnnotation(null);
+      }}
     >
+      {/* Transparent hit-areas: click any annotation to focus it. */}
+      {annotations.map((a) => {
+        const onDown = (e: React.PointerEvent) => {
+          e.stopPropagation();
+          selectAnnotation(a.id);
+        };
+        if (a.kind === "connector") {
+          const pts = connectorPoints(annotations, a)
+            .map((q) => `${q.x * W},${q.y * H}`)
+            .join(" ");
+          return (
+            <polyline
+              key={`hit-${a.id}`}
+              points={pts}
+              fill="none"
+              className="preview-anno-hit"
+              strokeWidth={14}
+              pointerEvents="stroke"
+              onPointerDown={onDown}
+            />
+          );
+        }
+        if (a.kind === "box") {
+          return (
+            <rect
+              key={`hit-${a.id}`}
+              x={a.x * W}
+              y={a.y * H}
+              width={a.w * W}
+              height={a.h * H}
+              className="preview-anno-hit"
+              pointerEvents="all"
+              onPointerDown={onDown}
+            />
+          );
+        }
+        if (a.kind === "line") {
+          return (
+            <line
+              key={`hit-${a.id}`}
+              x1={a.x * W}
+              y1={a.y * H}
+              x2={(a.x + a.w) * W}
+              y2={(a.y + a.h) * H}
+              className="preview-anno-hit"
+              strokeWidth={14}
+              pointerEvents="stroke"
+              onPointerDown={onDown}
+            />
+          );
+        }
+        // bracket — its three segments
+        return (
+          <g key={`hit-${a.id}`} onPointerDown={onDown}>
+            {bracketSegments(a).map(([x1, y1, x2, y2], i) => (
+              <line
+                key={i}
+                x1={x1 * W}
+                y1={y1 * H}
+                x2={x2 * W}
+                y2={y2 * H}
+                className="preview-anno-hit"
+                strokeWidth={14}
+                pointerEvents="stroke"
+              />
+            ))}
+          </g>
+        );
+      })}
       {showSnap
         ? surfaces.flatMap((s) =>
             surfaceAnchors(s).map((an) => {

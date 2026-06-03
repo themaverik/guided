@@ -54,6 +54,22 @@ export default function LandingActions() {
     }
   }, []);
 
+  const clearRecent = () => {
+    if (recoverable.length === 0) return;
+    const ok = window.confirm(
+      `Clear ${recoverable.length} recovery checkpoint${
+        recoverable.length === 1 ? "" : "s"
+      } from this browser? This can't be undone.`,
+    );
+    if (!ok) return;
+    try {
+      for (const r of recoverable) localStorage.removeItem(r.key);
+    } catch {
+      /* localStorage unavailable */
+    }
+    setRecoverable([]);
+  };
+
   const restore = async (item: Recoverable) => {
     setBusy(true);
     setError(null);
@@ -171,9 +187,19 @@ export default function LandingActions() {
 
       {recoverable.length > 0 ? (
         <div className="landing-recover">
-          <p className="landing-recover-title">
-            Recover unsaved work (this browser)
-          </p>
+          <div className="landing-recover-head">
+            <p className="landing-recover-title">
+              Recover unsaved work (this browser)
+            </p>
+            <button
+              type="button"
+              className="landing-recover-clear"
+              onClick={clearRecent}
+              disabled={busy}
+            >
+              Clear all
+            </button>
+          </div>
           {recoverable.map((r) => (
             <button
               key={r.key}

@@ -112,6 +112,12 @@
   flex-direction: column;
   gap: 8px;
 }
+.landing-recover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 .landing-recover-title {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -119,6 +125,25 @@
   text-transform: uppercase;
   color: var(--color-muted);
   margin: 0;
+}
+.landing-recover-clear {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.landing-recover-clear:hover {
+  color: var(--color-ink, #111);
+}
+.landing-recover-clear:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .landing-foot {
   margin-top: 28px;

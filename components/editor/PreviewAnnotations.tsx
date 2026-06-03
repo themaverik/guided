@@ -135,7 +135,22 @@ export default function PreviewAnnotations({
           x: clamp01(p.x - d.grabX),
           y: clamp01(p.y - d.grabY),
         });
+      } else if (a.kind === "line") {
+        // A line points any direction, so allow negative extent (full 360°
+        // rotation). Snap to horizontal/vertical; Shift hard-locks the axis.
+        let w = p.x - a.x;
+        let h = p.y - a.y;
+        if (shift) {
+          if (Math.abs(w) >= Math.abs(h)) h = 0;
+          else w = 0;
+        } else {
+          const AXIS = 0.04;
+          if (Math.abs(h) <= AXIS) h = 0;
+          else if (Math.abs(w) <= AXIS) w = 0;
+        }
+        updateAnnotation(ci, si, d.id, { w, h });
       } else {
+        // Box/bracket need a positive extent.
         updateAnnotation(ci, si, d.id, {
           w: Math.max(0.01, p.x - a.x),
           h: Math.max(0.005, p.y - a.y),

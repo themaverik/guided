@@ -113,10 +113,22 @@ export interface Endpoint {
   size?: EndpointSize;
 }
 
-/** A snap-target shape that is also drawn: box, line, or square bracket. */
+/** Font families offered for text annotations (CSS font-family stacks). */
+export type TextFont =
+  | "sans"
+  | "serif"
+  | "mono"
+  | "open-sans"
+  | "montserrat"
+  | "roboto";
+
+/**
+ * A snap-target shape that is also drawn: box, line, square bracket, diamond,
+ * or a free-floating text label.
+ */
 export interface Surface {
   id: string;
-  kind: "box" | "line" | "bracket";
+  kind: "box" | "line" | "bracket" | "diamond" | "text";
   /** Normalized 0–1 bounds relative to the image slot. */
   x: number;
   y: number;
@@ -128,6 +140,16 @@ export interface Surface {
   stroke: string;
   width: number;
   fill?: string;
+  /** text only: the label content. */
+  text?: string;
+  /** text only: font size in px (at natural page scale). */
+  fontSize?: number;
+  /** text only: font family. */
+  fontFamily?: TextFont;
+  /** text only: text color (defaults to `stroke` when unset). */
+  color?: string;
+  /** text only: horizontal text alignment. */
+  align?: "left" | "center" | "right";
 }
 
 /** An arrow/line drawn between two endpoints (each free or surface-bound). */

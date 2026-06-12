@@ -14,7 +14,16 @@ import type {
   EndpointStyle,
   Surface,
 } from "@/lib/book-schema";
-import { MARKER_PX, bracketSegments, connectorPoints, pct } from "@/lib/annotations";
+import {
+  FONT_STACKS,
+  MARKER_PX,
+  bracketSegments,
+  connectorPoints,
+  pct,
+} from "@/lib/annotations";
+
+/** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
+const CORNER = 10;
 
 function SurfaceShape({ s }: { s: Surface }) {
   const common = {
@@ -45,6 +54,68 @@ function SurfaceShape({ s }: { s: Surface }) {
         y2={pct(s.y + s.h)}
         {...common}
       />
+    );
+  }
+  if (s.kind === "diamond") {
+    // Rounded rhombus. Drawn inside a local 100×100 box that stretches to the
+    // surface bounds; a non-scaling stroke keeps the line crisp (no viewBox
+    // distortion) and the corners get the same soft radius as the box surface.
+    const k = CORNER / Math.SQRT2; // edge inset for each rounded vertex
+    const d = [
+      `M ${50 - k} ${k}`,
+      `Q 50 0 ${50 + k} ${k}`,
+      `L ${100 - k} ${50 - k}`,
+      `Q 100 50 ${100 - k} ${50 + k}`,
+      `L ${50 + k} ${100 - k}`,
+      `Q 50 100 ${50 - k} ${100 - k}`,
+      `L ${k} ${50 + k}`,
+      `Q 0 50 ${k} ${50 - k}`,
+      "Z",
+    ].join(" ");
+    return (
+      <svg
+        x={pct(s.x)}
+        y={pct(s.y)}
+        width={pct(s.w)}
+        height={pct(s.h)}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        overflow="visible"
+      >
+        <path
+          d={d}
+          fill={s.fill ?? "none"}
+          stroke={s.stroke}
+          strokeWidth={s.width}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    );
+  }
+  if (s.kind === "text") {
+    // A free-floating text label. foreignObject hosts a real HTML block so text
+    // wraps and styles the same in the editor preview and the Playwright PDF.
+    return (
+      <foreignObject
+        x={pct(s.x)}
+        y={pct(s.y)}
+        width={pct(s.w)}
+        height={pct(s.h)}
+        overflow="visible"
+      >
+        <div
+          className="anno-text"
+          style={{
+            fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
+            fontSize: s.fontSize ?? 16,
+            color: s.color ?? s.stroke,
+            textAlign: s.align ?? "left",
+          }}
+        >
+          {s.text ?? ""}
+        </div>
+      </foreignObject>
     );
   }
   return (

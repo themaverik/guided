@@ -10,7 +10,18 @@ import type {
   EndpointSize,
   EndpointStyle,
   Surface,
+  TextFont,
 } from "./book-schema";
+
+/** CSS font-family stacks for each text-annotation font option. */
+export const FONT_STACKS: Record<TextFont, string> = {
+  sans: "ui-sans-serif, system-ui, Arial, sans-serif",
+  serif: "ui-serif, Georgia, 'Times New Roman', serif",
+  mono: "ui-monospace, 'SFMono-Regular', Menlo, monospace",
+  "open-sans": "var(--font-open-sans), system-ui, sans-serif",
+  montserrat: "var(--font-montserrat), system-ui, sans-serif",
+  roboto: "var(--font-roboto), system-ui, sans-serif",
+};
 
 export interface Point {
   x: number;
@@ -56,10 +67,31 @@ export function bracketSegments(s: Surface): [number, number, number, number][] 
   ];
 }
 
+/**
+ * The four edges of a diamond (rhombus) as [x1,y1,x2,y2] in normalized coords.
+ * Vertices sit at the bounding-box edge midpoints: top, right, bottom, left.
+ */
+export function diamondSegments(s: Surface): [number, number, number, number][] {
+  const { x, y, w, h } = s;
+  const t: [number, number] = [x + w / 2, y];
+  const r: [number, number] = [x + w, y + h / 2];
+  const b: [number, number] = [x + w / 2, y + h];
+  const l: [number, number] = [x, y + h / 2];
+  return [
+    [...t, ...r] as [number, number, number, number],
+    [...r, ...b] as [number, number, number, number],
+    [...b, ...l] as [number, number, number, number],
+    [...l, ...t] as [number, number, number, number],
+  ];
+}
+
 /** The point of a surface's named anchor, in normalized coords. */
 export function anchorPoint(surface: Surface, anchor: Anchor): Point {
   const { x, y, w, h, kind } = surface;
-  if (kind === "box") {
+  // A diamond's vertices coincide with the box edge midpoints, so the box
+  // anchor math gives the correct on-shape points (top/right/bottom/left tips).
+  // A text box shares the same rectangular anchors.
+  if (kind === "box" || kind === "diamond" || kind === "text") {
     switch (anchor) {
       case "top":
         return { x: x + w / 2, y };
@@ -149,7 +181,7 @@ export function resolveEndpoint(
 
 /** Anchors offered as snap targets per surface kind. */
 function snapAnchors(kind: Surface["kind"]): Anchor[] {
-  if (kind === "box") {
+  if (kind === "box" || kind === "text") {
     return [
       "center",
       "top",
@@ -161,6 +193,11 @@ function snapAnchors(kind: Surface["kind"]): Anchor[] {
       "bottom-left",
       "bottom-right",
     ];
+  }
+  // Diamond: only the four vertices + center are on the shape (corners are
+  // empty space), so those are the useful flowchart snap targets.
+  if (kind === "diamond") {
+    return ["center", "top", "bottom", "left", "right"];
   }
   return ["start", "mid", "end"];
 }

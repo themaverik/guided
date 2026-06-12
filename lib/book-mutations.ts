@@ -303,6 +303,22 @@ const ANNO_STROKE = "#658995";
 export function newSurface(kind: Surface["kind"]): Surface {
   const base = { id: annotationId(), stroke: ANNO_STROKE, width: 2 };
   if (kind === "box") return { ...base, kind, x: 0.3, y: 0.3, w: 0.4, h: 0.3 };
+  if (kind === "diamond") return { ...base, kind, x: 0.35, y: 0.3, w: 0.3, h: 0.3 };
+  if (kind === "text")
+    return {
+      ...base,
+      kind,
+      x: 0.35,
+      y: 0.4,
+      w: 0.3,
+      h: 0.1,
+      width: 0,
+      text: "Text",
+      fontSize: 16,
+      fontFamily: "sans",
+      color: "#555555",
+      align: "left",
+    };
   if (kind === "line") return { ...base, kind, x: 0.2, y: 0.5, w: 0.6, h: 0 };
   // bracket: vertical + inverted, centered on the page by default.
   return {

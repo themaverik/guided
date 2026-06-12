@@ -8,7 +8,7 @@
  * writes changes to the store. Pointer-capture on the SVG makes the drag robust;
  * updates are throttled to one per animation frame.
  */
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type {
   Anchor,
   Annotation,
@@ -17,9 +17,11 @@ import type {
   Surface,
 } from "@/lib/book-schema";
 import {
+  FONT_STACKS,
   anchorPoint,
   bracketSegments,
   connectorPoints,
+  diamondSegments,
   resolveEndpoint,
   snapPoint,
 } from "@/lib/annotations";
@@ -29,7 +31,7 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 type Part = "move" | "resize" | "from" | "to" | "wp";
 
 const surfaceAnchors = (s: Surface): Anchor[] =>
-  s.kind === "box"
+  s.kind === "box" || s.kind === "text"
     ? [
         "center",
         "top",
@@ -41,7 +43,9 @@ const surfaceAnchors = (s: Surface): Anchor[] =>
         "bottom-left",
         "bottom-right",
       ]
-    : ["start", "mid", "end"];
+    : s.kind === "diamond"
+      ? ["center", "top", "bottom", "left", "right"]
+      : ["start", "mid", "end"];
 
 export default function PreviewAnnotations({
   scalerRef,
@@ -74,9 +78,15 @@ export default function PreviewAnnotations({
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(
     null,
   );
+
+  // Leaving a step / deselecting ends any in-progress text edit.
+  useEffect(() => {
+    if (editingId && editingId !== selectedId) setEditingId(null);
+  }, [editingId, selectedId]);
 
   useLayoutEffect(() => {
     const el = scalerRef.current?.querySelectorAll<HTMLElement>(".page")[pageIndex];
@@ -93,6 +103,8 @@ export default function PreviewAnnotations({
   const surfaces = annotations.filter(
     (a): a is Surface => a.kind !== "connector",
   );
+  const editTarget =
+    surfaces.find((s) => s.id === editingId && s.kind === "text") ?? null;
 
   const toN = (e: React.PointerEvent) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -256,6 +268,26 @@ export default function PreviewAnnotations({
             />
           );
         }
+        if (a.kind === "text") {
+          // Double-click anywhere in the box starts inline text editing.
+          return (
+            <rect
+              key={`hit-${a.id}`}
+              x={a.x * W}
+              y={a.y * H}
+              width={a.w * W}
+              height={a.h * H}
+              className="preview-anno-hit"
+              pointerEvents="all"
+              onPointerDown={onDown}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                selectAnnotation(a.id);
+                setEditingId(a.id);
+              }}
+            />
+          );
+        }
         if (a.kind === "line") {
           return (
             <line
@@ -267,6 +299,20 @@ export default function PreviewAnnotations({
               className="preview-anno-hit"
               strokeWidth={14}
               pointerEvents="stroke"
+              onPointerDown={onDown}
+            />
+          );
+        }
+        if (a.kind === "diamond") {
+          const pts = diamondSegments(a)
+            .map(([x1, y1]) => `${x1 * W},${y1 * H}`)
+            .join(" ");
+          return (
+            <polygon
+              key={`hit-${a.id}`}
+              points={pts}
+              className="preview-anno-hit"
+              pointerEvents="all"
               onPointerDown={onDown}
             />
           );
@@ -333,8 +379,18 @@ export default function PreviewAnnotations({
               />
             ))}
           </>
-        ) : (
+        ) : editingId === focused.id ? null : (
           <>
+            {focused.kind === "text" ? (
+              <rect
+                x={focused.x * W}
+                y={focused.y * H}
+                width={focused.w * W}
+                height={focused.h * H}
+                className="preview-anno-textframe"
+                pointerEvents="none"
+              />
+            ) : null}
             <Handle
               pt={{ x: focused.x + focused.w / 2, y: focused.y + focused.h / 2 }}
               W={W}
@@ -352,7 +408,86 @@ export default function PreviewAnnotations({
           </>
         )
       ) : null}
+      {editTarget ? (
+        <TextEditor
+          s={editTarget}
+          W={W}
+          H={H}
+          onChange={(text) => updateAnnotation(ci, si, editTarget.id, { text })}
+          onDone={() => setEditingId(null)}
+        />
+      ) : null}
     </svg>
+  );
+}
+
+/** Inline contentEditable overlay for editing a text annotation's content. */
+function TextEditor({
+  s,
+  W,
+  H,
+  onChange,
+  onDone,
+}: {
+  s: Surface;
+  W: number;
+  H: number;
+  onChange: (text: string) => void;
+  onDone: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.textContent = s.text ?? "";
+    el.focus();
+    // Place the caret at the end of the existing text.
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    // Run once on mount for this editor instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <foreignObject
+      x={s.x * W}
+      y={s.y * H}
+      width={s.w * W}
+      height={s.h * H}
+      overflow="visible"
+    >
+      <div
+        ref={ref}
+        className="anno-text editing"
+        contentEditable
+        suppressContentEditableWarning
+        style={{
+          fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
+          fontSize: s.fontSize ?? 16,
+          color: s.color ?? s.stroke,
+          textAlign: s.align ?? "left",
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        // Persist on every keystroke so the text is never lost if the editor
+        // unmounts (e.g. selection clears) before a blur event can fire.
+        onInput={(e) => onChange(e.currentTarget.textContent ?? "")}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.currentTarget.blur();
+          }
+        }}
+        onBlur={(e) => {
+          onChange(e.currentTarget.textContent ?? "");
+          onDone();
+        }}
+      />
+    </foreignObject>
   );
 }
 

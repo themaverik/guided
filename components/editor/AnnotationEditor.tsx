@@ -14,6 +14,7 @@ import type {
   EndpointSize,
   EndpointStyle,
   Surface,
+  TextFont,
 } from "@/lib/book-schema";
 import { newConnector, newSurface } from "@/lib/book-mutations";
 import { resolveEndpoint } from "@/lib/annotations";
@@ -27,6 +28,23 @@ const STYLES: EndpointStyle[] = [
   "point",
   "bar",
 ];
+const FONTS: TextFont[] = [
+  "sans",
+  "serif",
+  "mono",
+  "open-sans",
+  "montserrat",
+  "roboto",
+];
+const FONT_LABELS: Record<TextFont, string> = {
+  sans: "Sans",
+  serif: "Serif",
+  mono: "Mono",
+  "open-sans": "Open Sans",
+  montserrat: "Montserrat",
+  roboto: "Roboto",
+};
+const ALIGNS: NonNullable<Surface["align"]>[] = ["left", "center", "right"];
 const SIZES: EndpointSize[] = ["small", "medium", "large"];
 const ANCHORS: Anchor[] = [
   "center",
@@ -189,6 +207,12 @@ export default function AnnotationEditor({
         <button onClick={() => addAnnotation(ci, si, newSurface("bracket"))}>
           + Bracket
         </button>
+        <button onClick={() => addAnnotation(ci, si, newSurface("diamond"))}>
+          + Diamond
+        </button>
+        <button onClick={() => addAnnotation(ci, si, newSurface("text"))}>
+          + Text
+        </button>
         <button onClick={() => addAnnotation(ci, si, newConnector())}>
           + Connector
         </button>
@@ -279,6 +303,60 @@ export default function AnnotationEditor({
                     />
                     Invert
                   </label>
+                </div>
+              ) : null}
+              {a.kind === "text" ? (
+                <div className="anno-text-ctrls">
+                  <label className="anno-num">
+                    size
+                    <input
+                      type="number"
+                      min={6}
+                      max={120}
+                      value={a.fontSize ?? 16}
+                      onChange={(e) =>
+                        updateAnnotation(ci, si, a.id, {
+                          fontSize: Math.max(6, Number(e.target.value) || 16),
+                        })
+                      }
+                    />
+                  </label>
+                  <select
+                    value={a.fontFamily ?? "sans"}
+                    onChange={(e) =>
+                      updateAnnotation(ci, si, a.id, {
+                        fontFamily: e.target.value as TextFont,
+                      })
+                    }
+                  >
+                    {FONTS.map((f) => (
+                      <option key={f} value={f}>
+                        {FONT_LABELS[f]}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={a.align ?? "left"}
+                    onChange={(e) =>
+                      updateAnnotation(ci, si, a.id, {
+                        align: e.target.value as Surface["align"],
+                      })
+                    }
+                  >
+                    {ALIGNS.map((al) => (
+                      <option key={al} value={al}>
+                        {al}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="color"
+                    value={a.color ?? a.stroke}
+                    onChange={(e) =>
+                      updateAnnotation(ci, si, a.id, { color: e.target.value })
+                    }
+                    title="Text color"
+                  />
                 </div>
               ) : null}
             </>

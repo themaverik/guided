@@ -7,7 +7,10 @@
  */
 import { useRef, useState } from "react";
 import type { WatermarkPosition } from "@/lib/book-schema";
-import { DEFAULT_WATERMARK_OPACITY } from "@/lib/book-schema";
+import {
+  DEFAULT_WATERMARK_OPACITY,
+  DEFAULT_WATERMARK_SCALE,
+} from "@/lib/book-schema";
 import { assetUrl, uploadApiFor } from "@/lib/project-routes";
 import { useEditor } from "@/lib/store";
 
@@ -30,6 +33,7 @@ export default function WatermarkSettings() {
 
   const enabled = wm?.enabled ?? false;
   const opacity = wm?.opacity ?? DEFAULT_WATERMARK_OPACITY;
+  const scale = wm?.scale ?? DEFAULT_WATERMARK_SCALE;
 
   const onUploadIcon = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,6 +106,20 @@ export default function WatermarkSettings() {
               value={opacity}
               onChange={(e) =>
                 updateWatermark({ opacity: Number(e.target.value) })
+              }
+            />
+          </div>
+
+          <div className="ctrl-row">
+            <span className="ctrl-label">Size {scale.toFixed(2)}×</span>
+            <input
+              type="range"
+              min={0.3}
+              max={2.5}
+              step={0.05}
+              value={scale}
+              onChange={(e) =>
+                updateWatermark({ scale: Number(e.target.value) })
               }
             />
           </div>

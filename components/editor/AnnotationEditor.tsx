@@ -19,7 +19,14 @@ import { newConnector, newSurface } from "@/lib/book-mutations";
 import { resolveEndpoint } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
-const STYLES: EndpointStyle[] = ["none", "arrow", "circle", "point", "bar"];
+const STYLES: EndpointStyle[] = [
+  "none",
+  "arrow",
+  "circle",
+  "diamond",
+  "point",
+  "bar",
+];
 const SIZES: EndpointSize[] = ["small", "medium", "large"];
 const ANCHORS: Anchor[] = [
   "center",

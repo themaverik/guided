@@ -87,6 +87,23 @@ function endpointMarker(
           <circle cx={s / 2} cy={s / 2} r={r} fill="#ffffff" stroke={color} strokeWidth={1.5} />
         </marker>
       );
+    case "diamond": {
+      // Hollow rhombus centered on the endpoint — reads as a flowchart node
+      // terminus, like the circle cap.
+      const dd = s * 0.34;
+      const cx = s / 2;
+      const cy = s / 2;
+      return (
+        <marker {...common} refX={cx} refY={cy}>
+          <path
+            d={`M${cx},${cy - dd} L${cx + dd},${cy} L${cx},${cy + dd} L${cx - dd},${cy} z`}
+            fill="#ffffff"
+            stroke={color}
+            strokeWidth={1.5}
+          />
+        </marker>
+      );
+    }
     case "point":
       return (
         <marker {...common} refX={s / 2} refY={s / 2}>

@@ -110,12 +110,12 @@
   justify-content: center;
 }
 .wm-center .wm-text {
-  font-size: 64pt;
+  font-size: calc(64pt * var(--wm-scale, 1));
   transform: rotate(-30deg);
 }
 .wm-center .wm-icon {
-  width: 60%;
-  max-width: 120mm;
+  width: calc(60% * var(--wm-scale, 1));
+  max-width: calc(120mm * var(--wm-scale, 1));
 }
 
 /* corners: small, inset ~10mm */
@@ -142,11 +142,11 @@
   justify-content: flex-end;
 }
 .watermark:not(.wm-center) .wm-text {
-  font-size: 13pt;
+  font-size: calc(13pt * var(--wm-scale, 1));
   letter-spacing: 1.5px;
 }
 .watermark:not(.wm-center) .wm-icon {
-  width: 24mm;
+  width: calc(24mm * var(--wm-scale, 1));
 }
 
 /* ────────────── COVER ────────────── */

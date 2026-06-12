@@ -5,8 +5,12 @@
  * configured opacity; `center` is rotated ~-30° and centered, corners are small
  * and inset ~10mm. An icon (if set) renders instead of the text.
  */
+import type { CSSProperties } from "react";
 import type { Watermark as WatermarkData } from "@/lib/book-schema";
-import { DEFAULT_WATERMARK_OPACITY } from "@/lib/book-schema";
+import {
+  DEFAULT_WATERMARK_OPACITY,
+  DEFAULT_WATERMARK_SCALE,
+} from "@/lib/book-schema";
 
 export default function Watermark({
   watermark,
@@ -18,9 +22,11 @@ export default function Watermark({
 
   const position = watermark.position ?? "center";
   const opacity = watermark.opacity ?? DEFAULT_WATERMARK_OPACITY;
+  const scale = watermark.scale ?? DEFAULT_WATERMARK_SCALE;
+  const style = { opacity, "--wm-scale": scale } as CSSProperties;
 
   return (
-    <div className={`watermark wm-${position}`} style={{ opacity }} aria-hidden>
+    <div className={`watermark wm-${position}`} style={style} aria-hidden>
       {watermark.icon ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img className="wm-icon" src={watermark.icon} alt="" />

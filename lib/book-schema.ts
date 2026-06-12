@@ -91,7 +91,13 @@ export type Anchor =
   | "end"
   | "mid";
 
-export type EndpointStyle = "none" | "arrow" | "circle" | "point" | "bar";
+export type EndpointStyle =
+  | "none"
+  | "arrow"
+  | "circle"
+  | "diamond"
+  | "point"
+  | "bar";
 
 export type EndpointSize = "small" | "medium" | "large";
 
@@ -234,6 +240,8 @@ export interface Watermark {
   position?: WatermarkPosition;
   /** 0–1, default 0.06. */
   opacity?: number;
+  /** Size multiplier for the text/icon mark, default 1. */
+  scale?: number;
 }
 
 /** Per-section font override. */
@@ -298,6 +306,7 @@ export const DEFAULT_CALLOUT_LAYOUT: CalloutLayout = "side";
 export const DEFAULT_CALLOUT_COLS: CalloutCols = 2;
 export const DEFAULT_BORDER = true;
 export const DEFAULT_WATERMARK_OPACITY = 0.06;
+export const DEFAULT_WATERMARK_SCALE = 1;
 
 /**
  * Resolve a row/step layout per the README's resolution order:

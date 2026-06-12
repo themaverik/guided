@@ -623,10 +623,26 @@
   stroke: transparent;
   cursor: pointer;
 }
+/* Inline text-annotation editor: an opaque box covers the static label beneath
+   while typing. */
+.anno-text.editing {
+  outline: 1.5px solid var(--color-accent, #658995);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 3px;
+  cursor: text;
+}
 .preview-anno-snap {
   fill: var(--color-ink);
   opacity: 0.5;
   pointer-events: none;
+}
+/* Dashed frame shown around a focused text box so its bounds are visible. */
+.preview-anno-textframe {
+  fill: none;
+  stroke: var(--color-accent, #658995);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
 }
 .preview-anno-wp {
   fill: #fff;
@@ -749,6 +765,21 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   align-items: end;
+}
+.anno-text-ctrls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.anno-text-ctrls .anno-num {
+  width: 64px;
+}
+.anno-text-ctrls select {
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 6px;
 }
 .anno-num {
   display: flex;

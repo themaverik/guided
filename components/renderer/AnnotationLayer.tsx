@@ -29,7 +29,8 @@ function SurfaceShape({ s }: { s: Surface }) {
         y={pct(s.y)}
         width={pct(s.w)}
         height={pct(s.h)}
-        rx={2}
+        rx={6}
+        ry={6}
         {...common}
         fill={s.fill ?? "none"}
       />
@@ -100,6 +101,7 @@ function endpointMarker(
             fill="#ffffff"
             stroke={color}
             strokeWidth={1.5}
+            strokeLinejoin="round"
           />
         </marker>
       );

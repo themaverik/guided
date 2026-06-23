@@ -103,19 +103,30 @@
 .wm-icon {
   object-fit: contain;
 }
+/* Logo + text stack as one unit so they position (and rotate) together. */
+.wm-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(3mm * var(--wm-scale, 1));
+}
 
 /* center: large, rotated, centered */
 .wm-center {
   align-items: center;
   justify-content: center;
 }
+.wm-center .wm-mark {
+  transform: rotate(-30deg);
+  gap: calc(6mm * var(--wm-scale, 1));
+}
 .wm-center .wm-text {
   font-size: calc(64pt * var(--wm-scale, 1));
-  transform: rotate(-30deg);
 }
 .wm-center .wm-icon {
-  width: calc(60% * var(--wm-scale, 1));
-  max-width: calc(120mm * var(--wm-scale, 1));
+  width: calc(120mm * var(--wm-scale, 1));
+  height: auto;
 }
 
 /* corners: small, inset ~10mm */
@@ -124,6 +135,12 @@
 .wm-bottom-left,
 .wm-bottom-right {
   padding: 10mm;
+}
+/* Top corners sit tighter to the edge so the mark clears the chapter
+   subheading text that runs along the top of the page. */
+.wm-top-left,
+.wm-top-right {
+  padding-top: 4mm;
 }
 .wm-top-left {
   align-items: flex-start;

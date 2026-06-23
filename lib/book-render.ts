@@ -34,6 +34,28 @@ export function displayPath(chapterId: string, file?: string): string {
   return `public/${chapterId}/${file ?? ""}`;
 }
 
+/** Folder (under a project's assets) where watermark logos are stored. */
+export const WATERMARK_ASSET_FOLDER = "_watermark";
+
+/**
+ * Browser URL for the watermark logo. The icon is stored as a bare filename so
+ * it stays portable across download/re-import (it resolves against whatever
+ * project is currently serving it, like chapter images). Legacy values that
+ * were saved as a full `/api/projects/<oldslug>/assets/_watermark/<file>` URL
+ * are re-homed to the current project; any other absolute/external URL is left
+ * untouched.
+ */
+export function watermarkIconSrc(
+  assetBase: string,
+  icon?: string,
+): string | undefined {
+  if (!icon) return undefined;
+  const legacy = icon.match(/(?:^|\/)_watermark\/([^/]+)$/);
+  if (legacy) return `${assetBase}/${WATERMARK_ASSET_FOLDER}/${legacy[1]}`;
+  if (icon.includes("/")) return icon; // some other absolute/external URL
+  return `${assetBase}/${WATERMARK_ASSET_FOLDER}/${icon}`;
+}
+
 /**
  * The second slot's filename for a `double` row. Prefer an explicit `image2`
  * (the model's recommended field); otherwise derive it from the `-2`-before-

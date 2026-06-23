@@ -11,7 +11,8 @@ import {
   DEFAULT_WATERMARK_OPACITY,
   DEFAULT_WATERMARK_SCALE,
 } from "@/lib/book-schema";
-import { assetUrl, uploadApiFor } from "@/lib/project-routes";
+import { assetBaseFor, uploadApiFor } from "@/lib/project-routes";
+import { watermarkIconSrc } from "@/lib/book-render";
 import { useEditor } from "@/lib/store";
 
 const POSITIONS: WatermarkPosition[] = [
@@ -47,7 +48,9 @@ export default function WatermarkSettings() {
       const res = await fetch(uploadApiFor(slug), { method: "POST", body: fd });
       const data = (await res.json()) as { filename?: string };
       if (res.ok && data.filename) {
-        updateWatermark({ icon: assetUrl(slug, ICON_FOLDER, data.filename) });
+        // Store a bare filename so the logo survives download/re-import; it is
+        // resolved against the current project at render time.
+        updateWatermark({ icon: data.filename });
       }
     } finally {
       setUploading(false);
@@ -101,7 +104,7 @@ export default function WatermarkSettings() {
             <input
               type="range"
               min={0}
-              max={0.3}
+              max={1}
               step={0.01}
               value={opacity}
               onChange={(e) =>
@@ -125,16 +128,20 @@ export default function WatermarkSettings() {
           </div>
 
           <div className="editor-field">
-            <label>Icon (optional — overrides text)</label>
+            <label>Logo (optional — shown above the text)</label>
             {wm?.icon ? (
               <div className="wm-icon-row">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="wm-icon-preview" src={wm.icon} alt="" />
+                <img
+                  className="wm-icon-preview"
+                  src={watermarkIconSrc(assetBaseFor(slug), wm.icon)}
+                  alt=""
+                />
                 <span className="img-picker-name">{wm.icon}</span>
                 <button
                   className="mini-btn danger"
                   onClick={() => updateWatermark({ icon: undefined })}
-                  aria-label="Remove icon"
+                  aria-label="Remove logo"
                 >
                   ×
                 </button>
@@ -145,7 +152,7 @@ export default function WatermarkSettings() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
             >
-              {uploading ? "Uploading…" : wm?.icon ? "Replace icon…" : "Upload icon…"}
+              {uploading ? "Uploading…" : wm?.icon ? "Replace logo…" : "Upload logo…"}
             </button>
             <input
               ref={fileRef}

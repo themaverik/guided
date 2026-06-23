@@ -13,7 +13,12 @@
  */
 import { Fragment } from "react";
 import type { Book } from "@/lib/book-schema";
-import { bookFitKey, computePaging, themeVars } from "@/lib/book-render";
+import {
+  bookFitKey,
+  computePaging,
+  themeVars,
+  watermarkIconSrc,
+} from "@/lib/book-render";
 import BackCover from "./BackCover";
 import BookCanvas from "./BookCanvas";
 import ChapterIntro from "./ChapterIntro";
@@ -31,7 +36,11 @@ export interface A4BookProps {
 
 export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
   const paging = computePaging(book);
-  const wm = book.watermark;
+  // Resolve the watermark logo to a URL for the current project so it survives
+  // download/re-import (the stored value is a portable bare filename).
+  const wm = book.watermark
+    ? { ...book.watermark, icon: watermarkIconSrc(assetBase, book.watermark.icon) }
+    : undefined;
   const bg = book.background;
 
   return (

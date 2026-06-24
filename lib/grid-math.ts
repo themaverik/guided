@@ -87,7 +87,7 @@ export function redistributeProportional(
   result[index] = clamped;
 
   const others = sizes.map((_, i) => i).filter((i) => i !== index);
-  let pool = total - clamped;
+  const pool = total - clamped;
   const pinned = new Set<number>();
 
   // Water-fill: pin any entry whose proportional share falls below the floor,

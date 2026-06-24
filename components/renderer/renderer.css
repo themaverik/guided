@@ -58,7 +58,10 @@
 
 /* Inner padding wrapper. Sits above the watermark overlay (z-index 0). */
 .page-inner {
-  padding: var(--margin);
+  padding:
+    calc(var(--page-margin) + var(--page-header-h, 0mm))
+    var(--page-margin)
+    calc(var(--page-margin) + var(--page-footer-h, 0mm));
   height: 100%;
   display: flex;
   flex-direction: column;

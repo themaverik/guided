@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pageDimensions, bodyRegion } from "@/lib/grid-math";
+import { pageDimensions, bodyRegion, resizeAdjacent } from "@/lib/grid-math";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/book-schema";
 
 describe("pageDimensions", () => {
@@ -30,5 +30,18 @@ describe("bodyRegion", () => {
     // A4 210×297; x=left margin=15; y=top margin+header=25; w=210−15−15=180;
     // h = 297 − 15(top) − 15(bottom) − 10(header) − 20(footer) = 237
     expect(bodyRegion(cfg)).toEqual({ x: 15, y: 25, w: 180, h: 237 });
+  });
+});
+
+describe("resizeAdjacent", () => {
+  it("transfers delta from one neighbor to the other (Σ unchanged)", () => {
+    expect(resizeAdjacent([0.5, 0.5], 0, 0.1, 0.1)).toEqual([0.6, 0.4]);
+  });
+  it("blocks at the floor when shrinking past minSize", () => {
+    // row1 would go to 0.05 < floor 0.1 → clamp: row0 max = total2 - floor = 0.9
+    expect(resizeAdjacent([0.5, 0.5], 0, 0.45, 0.1)).toEqual([0.9, 0.1]);
+  });
+  it("leaves untouched rows alone", () => {
+    expect(resizeAdjacent([0.3, 0.3, 0.4], 1, 0.1, 0.05)).toEqual([0.3, 0.4, 0.3]);
   });
 });

@@ -393,10 +393,21 @@ export interface Book {
 
 export const CURRENT_SCHEMA_VERSION = 2;
 
+/** New-project page defaults (PRD Decision 13). Author-editable. */
 export const DEFAULT_PAGE_CONFIG: PageConfig = {
   size: "A4",
   orientation: "portrait",
   margins: { top: 15, right: 15, bottom: 15, left: 15 },
+  headerH: 15,
+  footerH: 10,
+};
+
+/** Migration target for pre-grid books — reproduces the current rendered
+ *  geometry (18mm margins, no header/footer) so existing books are pixel-identical. */
+export const LEGACY_PAGE_CONFIG: PageConfig = {
+  size: "A4",
+  orientation: "portrait",
+  margins: { top: 18, right: 18, bottom: 18, left: 18 },
   headerH: 0,
   footerH: 0,
 };

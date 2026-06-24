@@ -10,6 +10,8 @@
 import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Book } from "./book-schema";
+import { CURRENT_SCHEMA_VERSION, DEFAULT_PAGE_CONFIG } from "./book-schema";
+import { migrateBook } from "./book-migrate";
 
 export const DATA_ROOT = path.join(process.cwd(), "data", "projects");
 // Idle TTL before a project is swept. Default is 1 day (1440 min); override
@@ -79,6 +81,8 @@ export async function uniqueSlug(name: string): Promise<string> {
 /** A minimal starter book for a brand-new project. */
 export function defaultBook(name: string): Book {
   return {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    pageConfig: DEFAULT_PAGE_CONFIG,
     title: name,
     subtitle: "",
     author: "",
@@ -181,7 +185,7 @@ export async function resolveAsset(
 
 export async function loadProjectBook(slug: string): Promise<Book> {
   const raw = await readFile(bookPath(slug), "utf8");
-  return JSON.parse(raw) as Book;
+  return migrateBook(JSON.parse(raw) as Book);
 }
 
 export async function saveProjectBook(slug: string, book: Book): Promise<void> {

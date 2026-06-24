@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { pageDimensions, bodyRegion, resizeAdjacent } from "@/lib/grid-math";
+import { redistributeProportional, normalizeFractions } from "@/lib/grid-math";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/book-schema";
 
 describe("pageDimensions", () => {
@@ -55,5 +56,30 @@ describe("resizeAdjacent", () => {
     const result = resizeAdjacent([0.5, 0.5], 0, -0.45, 0.1);
     expect(result[0]).toBeCloseTo(0.1);
     expect(result[1]).toBeCloseTo(0.9);
+  });
+});
+
+describe("normalizeFractions", () => {
+  it("scales weights to sum 1", () => {
+    expect(normalizeFractions([1, 1, 2])).toEqual([0.25, 0.25, 0.5]);
+  });
+  it("equal-splits when all zero", () => {
+    expect(normalizeFractions([0, 0])).toEqual([0.5, 0.5]);
+  });
+});
+
+describe("redistributeProportional", () => {
+  it("grows one entry, shrinking others proportionally (Σ=1)", () => {
+    // T=1; set index0 to 0.6; others were [0.3,0.1]→ pool 0.4 split 3:1 → [0.3,0.1]
+    const r = redistributeProportional([0.6, 0.3, 0.1], 0, 0.8, 0.05);
+    expect(r[0]).toBeCloseTo(0.8, 6);
+    expect(r[1]).toBeCloseTo(0.15, 6); // 0.3/0.4 * 0.2
+    expect(r[2]).toBeCloseTo(0.05, 6); // 0.1/0.4 * 0.2
+    expect(r.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
+  });
+  it("clamps target so others keep the floor", () => {
+    const r = redistributeProportional([0.5, 0.5], 0, 0.99, 0.1);
+    expect(r[0]).toBeCloseTo(0.9, 6); // maxTarget = 1 - 1*0.1
+    expect(r[1]).toBeCloseTo(0.1, 6);
   });
 });

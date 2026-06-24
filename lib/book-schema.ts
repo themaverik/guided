@@ -124,11 +124,11 @@ export type TextFont =
 
 /**
  * A snap-target shape that is also drawn: box, line, square bracket, diamond,
- * or a free-floating text label.
+ * polygon, or a free-floating text label.
  */
 export interface Surface {
   id: string;
-  kind: "box" | "line" | "bracket" | "diamond" | "text";
+  kind: "box" | "line" | "bracket" | "diamond" | "text" | "polygon";
   /** Normalized 0–1 bounds relative to the image slot. */
   x: number;
   y: number;
@@ -150,6 +150,14 @@ export interface Surface {
   color?: string;
   /** text only: horizontal text alignment. */
   align?: "left" | "center" | "right";
+  /** polygon only: closed-shape vertices, normalized 0–1. */
+  vertices?: { x: number; y: number }[];
+  /** polygon only: preset that constrains authoring (e.g. a decision diamond). */
+  preset?: "diamond";
+  /** Rounded corners (px at natural scale); 0 = sharp. */
+  cornerRadius?: number;
+  /** Palette token id; resolved stroke/fill remain the render source. */
+  swatchId?: string;
 }
 
 /** An arrow/line drawn between two endpoints (each free or surface-bound). */
@@ -160,14 +168,66 @@ export interface Connector {
   to: Endpoint;
   stroke: string;
   width: number;
-  /** Path style: a straight line or a rectangular (elbow) route. */
-  routing?: "straight" | "elbow";
+  /** Path style: a straight line or an orthogonal (square/elbow) route. */
+  routing?: "straight" | "square";
+  /** Default true — endpoints snap to object anchors without a modifier. */
+  snapToAnchors?: boolean;
+  /** Default endpoint style for new connectors (default "arrow"). */
+  defaultEndpoint?: EndpointStyle;
+  /** Palette token id; resolved stroke/fill remain the render source. */
+  swatchId?: string;
   /** Intermediate points the path passes through (normalized 0–1). Editor-only
    *  handles shape these; they print as the resulting bent path. */
   waypoints?: { x: number; y: number }[];
 }
 
 export type Annotation = Surface | Connector;
+
+export type PageSize = "A4" | "Letter" | "A5" | "Legal" | "Custom";
+
+export interface PageConfig {
+  size: PageSize;
+  /** Required when size = "Custom" (mm). */
+  custom?: { w: number; h: number };
+  /** landscape swaps W/H. */
+  orientation: "portrait" | "landscape";
+  /** mm. */
+  margins: { top: number; right: number; bottom: number; left: number };
+  /** Fixed author-set header height (mm), default 0. Not content-measured. */
+  headerH: number;
+  /** Fixed author-set footer height (mm), default 0. Not content-measured. */
+  footerH: number;
+}
+
+/** One stacked object inside a cell: a primary anchor or a companion. */
+export interface StackedObject {
+  id: string;
+  role: "primary" | "secondary";
+  kind: "image" | "callout" | "text";
+  /** 0–1 within the cell. In-cell drag clamps to these bounds. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** image filename / callout payload ref. */
+  ref?: string;
+  /** Cell-anchored annotations (0–1 of the cell). */
+  annotations?: Annotation[];
+}
+
+/** A grid cell: a fractional-width column holding an object stack. */
+export interface GridCell {
+  /** Fraction of the row width; Σ across a row = 1. */
+  widthFr: number;
+  objects: StackedObject[];
+}
+
+/** A grid row: a fractional-height band of cells. */
+export interface GridRow {
+  /** Fraction of bodyH; Σ across a step = 1. */
+  heightFr: number;
+  cells: GridCell[];
+}
 
 export interface ImageRow {
   /** Bare filename, e.g. "01-double.jpg" (slot A). */
@@ -234,6 +294,11 @@ export interface Step {
 
   // form (B) multi-row — when present, overrides the single-image fields:
   images?: ImageRow[];
+
+  /** Flexible grid. When present, overrides images[] / legacy single-image fields. */
+  grid?: GridRow[];
+  /** Free annotation layer (0–1 of the body region), constrained to grid bounds. */
+  freeAnnotations?: Annotation[];
 }
 
 export interface Chapter {
@@ -318,9 +383,23 @@ export interface Book {
   /** Closing-page content (title, ending text). */
   ending?: Ending;
   chapters: Chapter[];
+  /** Schema generation; absent/1 = pre-grid. Migrated to CURRENT_SCHEMA_VERSION on load. */
+  schemaVersion?: number;
+  /** Page size/orientation/margins/header-footer. Defaults to DEFAULT_PAGE_CONFIG. */
+  pageConfig?: PageConfig;
 }
 
 // --- Defaults (centralize the README's documented fallbacks) ---
+
+export const CURRENT_SCHEMA_VERSION = 2;
+
+export const DEFAULT_PAGE_CONFIG: PageConfig = {
+  size: "A4",
+  orientation: "portrait",
+  margins: { top: 15, right: 15, bottom: 15, left: 15 },
+  headerH: 0,
+  footerH: 0,
+};
 
 export const DEFAULT_CALLOUT_TYPE: CalloutType = "info";
 export const DEFAULT_ROW_LAYOUT: RowLayout = "single";

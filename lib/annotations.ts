@@ -157,7 +157,7 @@ export function connectorPoints(
   const wps = c.waypoints ?? [];
   // Manual waypoints take over the path shape (straight segments through them).
   if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
-  if (c.routing !== "elbow") return [a, b];
+  if (c.routing !== "square") return [a, b];
   const corner =
     Math.abs(b.x - a.x) >= Math.abs(b.y - a.y)
       ? { x: b.x, y: a.y }

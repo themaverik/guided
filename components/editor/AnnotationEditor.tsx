@@ -373,7 +373,7 @@ export default function AnnotationEditor({
                   }
                 >
                   <option value="straight">straight</option>
-                  <option value="elbow">rectangular</option>
+                  <option value="square">rectangular</option>
                 </select>
               </div>
               <div className="ctrl-row">

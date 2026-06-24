@@ -20,6 +20,7 @@ import type {
   Connector,
   Ending,
   ImageRow,
+  PageConfig,
   SectionFont,
   Step,
   Surface,
@@ -27,7 +28,7 @@ import type {
   ThemeSection,
   Watermark,
 } from "./book-schema";
-import { DEFAULT_WATERMARK_OPACITY } from "./book-schema";
+import { DEFAULT_WATERMARK_OPACITY, DEFAULT_PAGE_CONFIG } from "./book-schema";
 import * as M from "./book-mutations";
 
 export interface Selection {
@@ -60,6 +61,7 @@ export interface EditorState {
   updateWatermark: (patch: Partial<Watermark>) => void;
   updateTheme: (section: ThemeSection, patch: Partial<SectionFont>) => void;
   updateBackground: (patch: Partial<Background>) => void;
+  updatePageConfig: (patch: Partial<PageConfig>) => void;
   updateEnding: (patch: Partial<Ending>) => void;
   setOverflows: (overflows: string[]) => void;
 
@@ -204,6 +206,11 @@ export function createEditorStore(
         const current: Background = s.book.background ?? {};
         const next: Background = { ...current, ...patch };
         return { book: { ...s.book, background: next } };
+      }),
+    updatePageConfig: (patch) =>
+      set((s) => {
+        const current: PageConfig = s.book.pageConfig ?? DEFAULT_PAGE_CONFIG;
+        return { book: { ...s.book, pageConfig: { ...current, ...patch } } };
       }),
     updateEnding: (patch) =>
       set((s) => {

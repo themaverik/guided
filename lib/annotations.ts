@@ -145,7 +145,7 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
 
 /**
  * The polyline points of a connector in normalized coords. `straight` is two
- * points; `elbow` inserts a right-angle corner (rectangular route). The corner
+ * points; `square` inserts a right-angle corner (orthogonal route). The corner
  * goes horizontal-first when the run is wider than tall, else vertical-first.
  */
 export function connectorPoints(

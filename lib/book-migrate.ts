@@ -43,6 +43,8 @@ export function legacyStepToGrid(step: Step): GridRow[] {
   const heights = normalizeFractions(rows.map(() => 1));
   return rows.map((src, i) => {
     const layout = resolveLayout(src.layout, src.image);
+    // P1 skeleton flattens non-double layouts (including single-wide) to a single full-width cell;
+    // images[] without an image field yields a primary object with ref: undefined (Phase B object work, Plan 3).
     if (layout === "double") {
       return {
         heightFr: heights[i],
@@ -80,7 +82,10 @@ function migrateStep(step: Step): Step {
   };
 }
 
-/** Bring a Book up to the current schema version. Idempotent + lossless. */
+/**
+ * Bring a Book up to the current schema version. Idempotent + lossless.
+ * Idempotency holds via the schemaVersion early-return: legacyStepToGrid mints random ids (annotationId), so re-running migration on an un-stamped v1 book is NOT value-stable — the version gate is what guarantees no-op on already-migrated books.
+ */
 export function migrateBook(book: Book): Book {
   if ((book.schemaVersion ?? 1) >= CURRENT_SCHEMA_VERSION) return book;
   return {

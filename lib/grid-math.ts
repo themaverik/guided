@@ -35,3 +35,27 @@ export function bodyRegion(cfg: PageConfig): BodyRegion {
     h: h - top - bottom - cfg.headerH - cfg.footerH,
   };
 }
+
+/**
+ * Move `delta` across the divider between `dividerIndex` and `dividerIndex+1`.
+ * Both sides are floored at `minSize`; the pair's total is conserved, so all
+ * other entries are untouched. Returns a new array.
+ */
+export function resizeAdjacent(
+  sizes: number[],
+  dividerIndex: number,
+  delta: number,
+  minSize: number,
+): number[] {
+  const i = dividerIndex;
+  const j = dividerIndex + 1;
+  if (i < 0 || j >= sizes.length) return sizes.slice();
+  const pairTotal = sizes[i] + sizes[j];
+  const lo = minSize;
+  const hi = pairTotal - minSize;
+  const newI = Math.min(Math.max(sizes[i] + delta, lo), hi);
+  const out = sizes.slice();
+  out[i] = Math.round(newI * 1e10) / 1e10;
+  out[j] = Math.round((pairTotal - newI) * 1e10) / 1e10;
+  return out;
+}

@@ -251,3 +251,43 @@ to edges/grid/anchors, rendered identically in editor and PDF.
 - Asset dedup and total-size limits per ephemeral project.
 - Whether the existing seed becomes the `/demo` project's content.
 - Snapping UX depth for Phase 11 (grid granularity, anchor authoring).
+
+---
+
+# v3 — Flexible Grid + Annotation Standardization ("v-next")  [in progress]
+
+Third wave (`PRD.md` + design system `DESIGN.md` + `ADR-006`): replace fixed row presets with a
+flexible, user-resizable grid; standardize annotations on ISO 32000 names; unify color on OKLCH
+paired tokens — zero regression to existing features. Executed as sequenced plans under
+`docs/superpowers/plans/`, each via subagent-driven development (fresh subagent per task + per-task
+review + final whole-branch review). Branch: `feature/improvement-rev2`. CLAUDE.md was corrected (it
+had described a non-existent TipTap stack). Decisions of record live in `PRD.md` (Decisions 1–14)
+and `ADR-006`.
+
+## Plan 1 — Foundations  [done]
+
+Tested data-model + pure-logic foundation, zero runtime change. `vitest` harness (none existed);
+`PageConfig`/grid/cell/object schema types + `schemaVersion`; `lib/grid-math.ts` (page/body
+geometry, conserved-total resize, proportional water-fill redistribution); `lib/book-migrate.ts`
+(lossless, idempotent, version-gated migration). 23 unit tests; 10 commits; deliberately not wired
+into the live path. Plan: `docs/superpowers/plans/2026-06-23-grid-annotation-foundations.md`.
+
+## Plan 2 — Page configuration  [written, pending execution]
+
+Author-configurable page size / orientation / margins / header / footer end-to-end: presets
+(new-project 15/15/10 mm + legacy-preserving 18/0/0 mm), migrate-on-load wiring, `pageVars` CSS-var
+geometry, header/footer body bands, PDF `@page` size, left-pane Page settings. Zero-regression by
+construction. Plan: `docs/superpowers/plans/2026-06-24-page-configuration.md`.
+
+## Plans 3–5 — roadmapped (detailed just-in-time)
+
+- **Plan 3 — Cell stacks + grid renderer:** move images + callouts into the cell object stack;
+  `GridStep` renderer consuming `step.grid`; `fitSteps`→`fitGrid`; then on-canvas divider resize +
+  grid-visibility toggle. (Resequenced — the grid renderer + drag-resize ship here with the content
+  model; Decision 12.)
+- **Plan 4 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
+  cell-anchored coords + free layer; 8-handle selection; segment-drag connector reshape; snapping
+  defaults; connector arrow-snap-on-by-default.
+- **Plan 5 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
+  (OKLCH + PDF /C·/IC via `swatchId`); editor-only fill tint, full opacity in export; unify
+  callouts.

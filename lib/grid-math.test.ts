@@ -35,13 +35,25 @@ describe("bodyRegion", () => {
 
 describe("resizeAdjacent", () => {
   it("transfers delta from one neighbor to the other (Σ unchanged)", () => {
-    expect(resizeAdjacent([0.5, 0.5], 0, 0.1, 0.1)).toEqual([0.6, 0.4]);
+    const result = resizeAdjacent([0.5, 0.5], 0, 0.1, 0.1);
+    expect(result[0]).toBeCloseTo(0.6);
+    expect(result[1]).toBeCloseTo(0.4);
   });
   it("blocks at the floor when shrinking past minSize", () => {
     // row1 would go to 0.05 < floor 0.1 → clamp: row0 max = total2 - floor = 0.9
-    expect(resizeAdjacent([0.5, 0.5], 0, 0.45, 0.1)).toEqual([0.9, 0.1]);
+    const result = resizeAdjacent([0.5, 0.5], 0, 0.45, 0.1);
+    expect(result[0]).toBeCloseTo(0.9);
+    expect(result[1]).toBeCloseTo(0.1);
   });
   it("leaves untouched rows alone", () => {
-    expect(resizeAdjacent([0.3, 0.3, 0.4], 1, 0.1, 0.05)).toEqual([0.3, 0.4, 0.3]);
+    const result = resizeAdjacent([0.3, 0.3, 0.4], 1, 0.1, 0.05);
+    expect(result[0]).toBeCloseTo(0.3);
+    expect(result[1]).toBeCloseTo(0.4);
+    expect(result[2]).toBeCloseTo(0.3);
+  });
+  it("handles a negative delta (shrinks the dragged side, floored)", () => {
+    const result = resizeAdjacent([0.5, 0.5], 0, -0.45, 0.1);
+    expect(result[0]).toBeCloseTo(0.1);
+    expect(result[1]).toBeCloseTo(0.9);
   });
 });

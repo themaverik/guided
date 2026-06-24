@@ -55,7 +55,7 @@ export function resizeAdjacent(
   const hi = pairTotal - minSize;
   const newI = Math.min(Math.max(sizes[i] + delta, lo), hi);
   const out = sizes.slice();
-  out[i] = Math.round(newI * 1e10) / 1e10;
-  out[j] = Math.round((pairTotal - newI) * 1e10) / 1e10;
+  out[i] = newI;
+  out[j] = pairTotal - newI;
   return out;
 }

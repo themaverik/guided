@@ -168,7 +168,7 @@ export interface Connector {
   to: Endpoint;
   stroke: string;
   width: number;
-  /** Path style: a straight line or an orthogonal (square/elbow) route. */
+  /** Path style: a straight line or an orthogonal (square) route. */
   routing?: "straight" | "square";
   /** Default true — endpoints snap to object anchors without a modifier. */
   snapToAnchors?: boolean;

@@ -14,6 +14,14 @@ describe("pageDimensions", () => {
     expect(pageDimensions({ ...DEFAULT_PAGE_CONFIG, size: "Custom", custom: { w: 100, h: 200 } }))
       .toEqual({ w: 100, h: 200 });
   });
+  it("applies landscape to custom dimensions", () => {
+    expect(
+      pageDimensions({ ...DEFAULT_PAGE_CONFIG, size: "Custom", custom: { w: 100, h: 200 }, orientation: "landscape" }),
+    ).toEqual({ w: 200, h: 100 });
+  });
+  it("falls back to A4 when size is Custom but custom dims are missing (deliberate safe default)", () => {
+    expect(pageDimensions({ ...DEFAULT_PAGE_CONFIG, size: "Custom" })).toEqual({ w: 210, h: 297 });
+  });
 });
 
 describe("bodyRegion", () => {

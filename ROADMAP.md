@@ -272,12 +272,16 @@ geometry, conserved-total resize, proportional water-fill redistribution); `lib/
 (lossless, idempotent, version-gated migration). 23 unit tests; 10 commits; deliberately not wired
 into the live path. Plan: `docs/superpowers/plans/2026-06-23-grid-annotation-foundations.md`.
 
-## Plan 2 — Page configuration  [written, pending execution]
+## Plan 2 — Page configuration  [done]
 
 Author-configurable page size / orientation / margins / header / footer end-to-end: presets
 (new-project 15/15/10 mm + legacy-preserving 18/0/0 mm), migrate-on-load wiring, `pageVars` CSS-var
 geometry, header/footer body bands, PDF `@page` size, left-pane Page settings. Zero-regression by
 construction. Plan: `docs/superpowers/plans/2026-06-24-page-configuration.md`.
+Shipped on `feature/improvement-rev2` (commits `fa74912..2dee054`, 7 commits; suite 28/28, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, zero-regression holds). Deferred follow-ups: a
+before/after PDF smoke check on a real legacy project, and `Custom`-size width/height inputs (the size
+is selectable but currently falls back to A4).
 
 ## Plans 3–5 — roadmapped (detailed just-in-time)
 

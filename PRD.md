@@ -75,11 +75,11 @@ Authors need precise, predictable control over how screenshots and callouts sit 
 
 **Grid & layout**
 - **Page configuration:** selectable size — **A4, Letter, A5, US Legal, and Custom (W × H)**; **portrait by default with a landscape toggle** (swaps W/H). Margins default to **1.5 cm**.
-- **Header / footer:** **fixed, author-set heights** (default **none**). They are *not* content-measured — this keeps `bodyH` a constant, which the conserved-total grid depends on. If header/footer content exceeds its set height, clip or warn (do not reflow the grid).
+- **Header / footer:** **fixed, author-set heights**, author-confirmable in the settings UI. **New-project defaults: header 1.5 cm, footer 1 cm** (margins 1.5 cm). **Existing books migrate to header 0 / footer 0 / margins 1.8 cm** — their current effective geometry — so they render pixel-identically (zero regression); see Appendix A.4. They are *not* content-measured — this keeps `bodyH` a constant, which the conserved-total grid depends on. If header/footer content exceeds its set height, clip or warn (do not reflow the grid).
 - **Body-region math:** `bodyH = pageH − marginTop − marginBottom − headerH − footerH`; `bodyW = pageW − marginLeft − marginRight`. The grid is bounded to the body region and must never overlap header, footer, or margins.
 - **Rows-first grid:** author sets N rows; initial heights distributed equally (`bodyH / N`). Per-row column count is independently configurable; initial widths split equally within each row.
 - **Conserved-total resize:** dragging a row divider redistributes height between adjacent rows (Σ = bodyH); dragging a column border redistributes width within the row (Σ = row width). Redistribution is **proportional** — affected neighbors shrink in proportion to their current size (flexbox `fr` behavior), not by an equal split. A **minimum size floor** blocks further shrink.
-- **Cell = object stack:** a cell contains an ordered stack of objects — one **primary** anchor plus zero or more **secondary** companions (e.g. image + callouts). Objects are bounded by the cell.
+- **Cell = object stack:** a cell contains an ordered stack of objects — an optional **primary** anchor plus zero or more **secondary** companions (e.g. image + callouts). **A cell may be empty** (no primary object) — empty cells still hold grid space and are resizable. Objects are bounded by the cell.
 - **Content-driven height:** a row's height tracks the max content height across its cells; rows redistribute to conserve bodyH.
 - **Shrink-to-fit backstop:** when redistribution + floor cannot fit content, **scale the whole page down** so the page never overflows and cross-cell alignment/relative scale is preserved; surface the existing non-blocking overflow warning. **Protocol:** conserved-total redistribution runs first (store/React, before paint); the DOM backstop (the existing `fitSteps`, renamed **`fitGrid`** and re-targeted at the grid cell DOM) runs after paint in `useLayoutEffect` and **only scales the DOM — it never writes fractional heights back to the store**. See Appendix A.
 - **In-cell object drag:** an object can be repositioned anywhere inside its cell without crossing the cell border.
@@ -194,6 +194,14 @@ Authors need precise, predictable control over how screenshots and callouts sit 
 | 10 | **Color persisted via `swatchId`; fill full-opacity in export** | Hex→swatch is lossy — `swatchId` keeps live OKLCH/PDF readouts reliable; tint is an editor affordance, not print intent. |
 | 11 | **`schemaVersion` + migrate-on-load (lossless, read-old/write-new)** | The only way the "zero regression" goal is verifiable; gated by a unit-test baseline (Phase 0). |
 
+*Resolved 2026-06-24 (Plan 2 scoping).*
+
+| # | Decision | Rationale |
+|---|---|---|
+| 12 | **Phase A is resequenced:** ship **page-configuration** (size/orientation/margins/header/footer + migration + export) first; the grid renderer + on-canvas divider resize ship later, together with the cell-stack content model (Phase B). | Plan 1 deliberately kept callouts out of the grid skeleton, so the renderer can't switch to the grid without losing callouts. Page-config is independent, low-risk, additive, and immediately useful. |
+| 13 | **New-project page defaults = margins 15 mm / header 15 mm / footer 10 mm; existing books migrate to 18 mm / 0 / 0** (current geometry). Author-confirmable in the settings UI. | Honors the 1.5 cm / 1 cm intent for new guides while guaranteeing pixel-identical rendering for existing books. |
+| 14 | **Cells may be empty** (no primary object); an empty cell still holds resizable grid space. | Authors arrange the grid before placing content; a cell shouldn't require an object to exist. |
+
 No blocking questions remain. Non-blocking items are captured as P1/P2. Full data model and migration rules are normative in **Appendix A** and **ADR-006**.
 
 ---
@@ -273,7 +281,8 @@ interface Connector {
 
 ### A.4 Versioning & migration
 
-- Add **`schemaVersion: number`** to `Book`. Migrate-on-load in `lib/book-io.ts` **before** the book reaches the store; re-save at the current version. **Lossless, read-old/write-new.**
+- Add **`schemaVersion: number`** to `Book`. Migrate-on-load at the server load points (`loadProjectBook`, `loadExampleBook`) **before** the book reaches the store; re-save at the current version. **Lossless, read-old/write-new.**
+- **Two page-config presets:** new projects are created with `DEFAULT_PAGE_CONFIG` (A4 / portrait / margins 15 mm / header 15 mm / footer 10 mm); **migration of pre-grid books uses `LEGACY_PAGE_CONFIG`** (A4 / portrait / margins 18 mm / header 0 / footer 0) = today's exact rendered geometry, so existing books are pixel-identical. Both are author-editable afterward.
 - **Legacy single-image step** → one `GridRow` (heightFr 1) × one `GridCell` (widthFr 1) with the image as the `primary` object.
 - **`images: ImageRow[]`** → N rows; each row's `RowLayout` preset maps to columns (`single`→1, `double`→2, `single-wide`→1 full-bleed). Callouts become `secondary` objects in the cell.
 - **Page-anchored annotations** (today on `step.annotations`, normalized to the whole page) → re-normalized to their cell on migration; where the image fills the cell (every legacy case) this is an **identity transform**. Genuinely free marks move to `step.freeAnnotations`.

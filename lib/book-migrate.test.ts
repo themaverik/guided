@@ -1,7 +1,7 @@
 // lib/book-migrate.test.ts
 import { describe, it, expect } from "vitest";
 import { migrateBook, legacyStepToGrid } from "@/lib/book-migrate";
-import { CURRENT_SCHEMA_VERSION, DEFAULT_PAGE_CONFIG, type Book } from "@/lib/book-schema";
+import { CURRENT_SCHEMA_VERSION, LEGACY_PAGE_CONFIG, type Book } from "@/lib/book-schema";
 
 const baseBook = (steps: Book["chapters"][0]["steps"]): Book => ({
   title: "T", subtitle: "", author: "", edition: "", cover: "",
@@ -34,10 +34,10 @@ describe("legacyStepToGrid", () => {
 });
 
 describe("migrateBook", () => {
-  it("adds pageConfig default, grid, and stamps the version", () => {
+  it("adds the legacy page config, grid, and stamps the version", () => {
     const out = migrateBook(baseBook([{ image: "a.jpg" }]));
     expect(out.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(out.pageConfig).toEqual(DEFAULT_PAGE_CONFIG);
+    expect(out.pageConfig).toEqual(LEGACY_PAGE_CONFIG);
     expect(out.chapters[0].steps[0].grid).toBeDefined();
   });
   it("is idempotent for an already-migrated book", () => {

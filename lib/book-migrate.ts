@@ -11,7 +11,7 @@
  */
 import {
   CURRENT_SCHEMA_VERSION,
-  DEFAULT_PAGE_CONFIG,
+  LEGACY_PAGE_CONFIG,
   resolveLayout,
   type Annotation,
   type Book,
@@ -91,7 +91,7 @@ export function migrateBook(book: Book): Book {
   return {
     ...book,
     schemaVersion: CURRENT_SCHEMA_VERSION,
-    pageConfig: book.pageConfig ?? DEFAULT_PAGE_CONFIG,
+    pageConfig: book.pageConfig ?? LEGACY_PAGE_CONFIG,
     chapters: book.chapters.map((ch) => ({
       ...ch,
       steps: ch.steps.map(migrateStep),

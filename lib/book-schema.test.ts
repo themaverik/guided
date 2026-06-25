@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_PAGE_CONFIG, LEGACY_PAGE_CONFIG, CURRENT_SCHEMA_VERSION, stepLayoutMode, type Step } from "@/lib/book-schema";
+import { DEFAULT_PAGE_CONFIG, LEGACY_PAGE_CONFIG, CURRENT_SCHEMA_VERSION, stepLayoutMode, DEFAULT_IMAGE_FIT, type Step } from "@/lib/book-schema";
 
 describe("schema defaults", () => {
   it("new-project default: A4 portrait, 15mm margins, header 15mm, footer 10mm", () => {
@@ -34,5 +34,11 @@ describe("stepLayoutMode", () => {
   });
   it("returns legacy when explicitly legacy", () => {
     expect(stepLayoutMode({ layoutMode: "legacy" } as Step)).toBe("legacy");
+  });
+});
+
+describe("DEFAULT_IMAGE_FIT", () => {
+  it("defaults images to maintain-ratio (contain)", () => {
+    expect(DEFAULT_IMAGE_FIT).toBe("contain");
   });
 });

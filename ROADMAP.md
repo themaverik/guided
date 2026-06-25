@@ -298,13 +298,16 @@ rule.
 (Scope split from the old "renderer + resize + cell stacks" sketch — drag-resize and cell stacks
 are now their own plans below, keeping each slice small and zero-regression-safe.)
 
-## Plan 4 — On-canvas divider resize  [written, pending execution]
+## Plan 4 — On-canvas divider resize  [done]
 
 `PreviewGridResize` editor overlay (modelled on `PreviewAnnotations`) draws draggable row/column
 divider handles over a grid-mode step; dragging applies Plan-1 `resizeAdjacent` (conserved-total,
 mm min-floor via `bodyRegion`) live with a mm readout, writing fractions through new
 `resizeGridRow`/`resizeGridColumn` store mutations. Editor-only — the renderer/print path is
-untouched. Plan: `docs/superpowers/plans/2026-06-25-grid-resize.md`. (Scope: row + column resize +
+untouched. Plan: `docs/superpowers/plans/2026-06-25-grid-resize.md`.
+Shipped on `feature/improvement-rev2` (commits `606f9c8..435dbbe`, 4 commits; suite 39/39, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, editor-only/print-clean holds — zero renderer/print
+changes). Deferred: mm-readout gap accuracy, in-browser drag manual check. (Scope: row + column resize +
 mm readout; the grid-guides visibility toggle moved to Plan 6 where snapping makes guides useful.)
 
 ## Plans 5–7 — roadmapped (detailed just-in-time)

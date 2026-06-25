@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book } from "@/lib/book-schema";
 
+const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
+  title: "T", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "ch1", title: "C", description: "", steps: [step] }],
+});
+
 function legacyBook(): Book {
   return {
     schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
@@ -35,6 +40,40 @@ describe("setStepLayoutMode", () => {
     setStepLayoutMode(book, 0, 0, "grid");
     expect(book.chapters[0].steps[0].layoutMode).toBeUndefined();
     expect(book.chapters[0].steps[0].grid).toBeUndefined();
+  });
+});
+
+describe("setStepLayoutMode — carries callouts", () => {
+  it("rebuilds the grid (with callouts) when toggling a legacy step to grid", () => {
+    // Simulate a migrated step: has an image-only grid skeleton (no callout cell)
+    // but layoutMode is NOT "grid" yet. The callouts live on the legacy fields.
+    const book = bookWith({
+      image: "a.jpg", layout: "single",
+      callouts: [{ type: "info", body: "hi" }], calloutLayout: "side",
+      // Pre-existing image-only skeleton (as migration produces): only 1 cell (no callout cell)
+      grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [{ id: "x", role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: "a.jpg" }] }] }],
+    });
+    const out = setStepLayoutMode(book, 0, 0, "grid");
+    const grid = out.chapters[0].steps[0].grid!;
+    expect(grid[0].cells).toHaveLength(2);
+    expect(grid[0].cells[1].objects[0].callout).toMatchObject({ body: "hi" });
+    expect(out.chapters[0].steps[0].layoutMode).toBe("grid");
+  });
+
+  it("does not rebuild a step already in grid mode (preserves edits)", () => {
+    const edited = bookWith({
+      image: "a.jpg", layoutMode: "grid",
+      grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
+    });
+    const out = setStepLayoutMode(edited, 0, 0, "grid");
+    expect(out.chapters[0].steps[0].grid).toEqual(edited.chapters[0].steps[0].grid);
+  });
+
+  it("does not mutate the input book", () => {
+    const book = bookWith({ image: "a.jpg", callouts: [{ type: "info", body: "x" }] });
+    const snapshot = structuredClone(book);
+    setStepLayoutMode(book, 0, 0, "grid");
+    expect(book).toEqual(snapshot);
   });
 });
 

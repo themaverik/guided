@@ -128,3 +128,23 @@ to the store.
   standardized shape; `Polygon` provides it with zero regression via the preset.
 - **Store resolved hex only (no `swatchId`)** — rejected: lossy for the live OKLCH/PDF inspector.
 - **Curved (bezier) routing in P0** — rejected: dropped to P1 to keep the connector engine minimal.
+
+## Amendment (2026-06-25) — Opt-in `layoutMode` for grid rendering
+
+Plan 3 introduces the grid *renderer* (read-only). Because migration stamps a
+`grid` skeleton on every step (image-only), "render the grid whenever `grid` is
+present" would switch every existing book to grid rendering at once and regress
+callout layout. Grid rendering is therefore **gated on an explicit per-step
+`layoutMode`**:
+
+- `Step.layoutMode?: "legacy" | "grid"`; effective mode = `layoutMode ?? "legacy"`.
+- Migration leaves `layoutMode` unset → existing steps render through the proven
+  `StepPage`/`ImageRow` path, pixel-identical (structural zero regression).
+- The renderer switches to `GridStep` only for steps explicitly set to `"grid"`.
+- Plan 3 renders **image cells only**. Moving callouts into the cell object stack,
+  on-canvas divider resize, and the `fitSteps`→`fitGrid` backstop are later plans.
+  Image cells are overflow-free by construction (fractions of a fixed body region
+  + `object-fit: contain`), so no backstop is required yet.
+
+This supersedes the original `grid?` field note "When present, overrides
+images[]": presence alone no longer switches rendering; `layoutMode` does.

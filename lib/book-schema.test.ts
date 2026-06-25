@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_PAGE_CONFIG, LEGACY_PAGE_CONFIG, CURRENT_SCHEMA_VERSION } from "@/lib/book-schema";
+import { DEFAULT_PAGE_CONFIG, LEGACY_PAGE_CONFIG, CURRENT_SCHEMA_VERSION, stepLayoutMode, type Step } from "@/lib/book-schema";
 
 describe("schema defaults", () => {
   it("new-project default: A4 portrait, 15mm margins, header 15mm, footer 10mm", () => {
@@ -22,5 +22,17 @@ describe("schema defaults", () => {
   });
   it("current schema version is 2", () => {
     expect(CURRENT_SCHEMA_VERSION).toBe(2);
+  });
+});
+
+describe("stepLayoutMode", () => {
+  it("defaults to legacy when unset", () => {
+    expect(stepLayoutMode({} as Step)).toBe("legacy");
+  });
+  it("returns grid when explicitly grid", () => {
+    expect(stepLayoutMode({ layoutMode: "grid" } as Step)).toBe("grid");
+  });
+  it("returns legacy when explicitly legacy", () => {
+    expect(stepLayoutMode({ layoutMode: "legacy" } as Step)).toBe("legacy");
   });
 });

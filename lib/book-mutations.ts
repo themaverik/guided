@@ -23,7 +23,7 @@ import {
   DEFAULT_PAGE_CONFIG,
 } from "./book-schema";
 import { annotationId } from "./annotations";
-import { resizeAdjacent, bodyRegion, MIN_CELL_MM } from "./grid-math";
+import { resizeAdjacent, bodyRegion, MIN_CELL_MM, normalizeFractions } from "./grid-math";
 
 const clone = <T>(v: T): T => structuredClone(v);
 
@@ -429,6 +429,55 @@ export function resizeGridColumn(
   const sizes = row.cells.map((c) => c.widthFr);
   const out = resizeAdjacent(sizes, dividerIndex, deltaFr, minFr);
   row.cells = row.cells.map((c, i) => ({ ...c, widthFr: out[i] }));
+  return next;
+}
+
+// ── Grid structure ─────────────────────────────────────────
+
+/** Append a row (one empty cell) and renormalize row heights to Σ = 1. */
+export function addGridRow(book: Book, ci: number, si: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid) return book;
+  const oldN = step.grid.length;
+  const heights = normalizeFractions([...step.grid.map((r) => r.heightFr), 1 / oldN]);
+  step.grid = [...step.grid, { heightFr: 0, cells: [{ widthFr: 1, objects: [] }] }]
+    .map((r, i) => ({ ...r, heightFr: heights[i] }));
+  return next;
+}
+
+/** Remove row `ri` and renormalize; keeps at least one row. */
+export function removeGridRow(book: Book, ci: number, si: number, ri: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid || step.grid.length <= 1) return book;
+  const kept = step.grid.filter((_, i) => i !== ri);
+  const heights = normalizeFractions(kept.map((r) => r.heightFr));
+  step.grid = kept.map((r, i) => ({ ...r, heightFr: heights[i] }));
+  return next;
+}
+
+/** Append a cell to row `ri` and renormalize cell widths to Σ = 1. */
+export function addGridColumn(book: Book, ci: number, si: number, ri: number): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row) return book;
+  const oldN = row.cells.length;
+  const widths = normalizeFractions([...row.cells.map((c) => c.widthFr), 1 / oldN]);
+  row.cells = [...row.cells, { widthFr: 0, objects: [] }].map((c, i) => ({ ...c, widthFr: widths[i] }));
+  return next;
+}
+
+/** Remove cell `cellIndex` from row `ri` and renormalize; keeps at least one cell. */
+export function removeGridColumn(
+  book: Book, ci: number, si: number, ri: number, cellIndex: number,
+): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row || row.cells.length <= 1) return book;
+  const kept = row.cells.filter((_, i) => i !== cellIndex);
+  const widths = normalizeFractions(kept.map((c) => c.widthFr));
+  row.cells = kept.map((c, i) => ({ ...c, widthFr: widths[i] }));
   return next;
 }
 

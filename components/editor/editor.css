@@ -1131,3 +1131,20 @@
   color: var(--color-ink-text);
   padding: 4px 0;
 }
+
+.grid-canvas-btn { pointer-events: all; cursor: pointer; }
+.grid-canvas-btn circle {
+  fill: #fff;
+  stroke: #3b82f6;
+  stroke-width: 1.5;
+}
+.grid-canvas-btn text {
+  fill: #3b82f6;
+  font-size: 12px;
+  font-family: var(--font-body, sans-serif);
+  pointer-events: none;
+  user-select: none;
+}
+.grid-canvas-btn.danger circle { stroke: #a11; }
+.grid-canvas-btn.danger text { fill: #a11; }
+.grid-canvas-btn:hover circle { fill: #eef4ff; }

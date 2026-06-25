@@ -34,6 +34,10 @@ export default function PreviewGridResize({
 }) {
   const resizeRow = useEditor((s) => s.resizeGridRow);
   const resizeCol = useEditor((s) => s.resizeGridColumn);
+  const addRow = useEditor((s) => s.addGridRow);
+  const removeRow = useEditor((s) => s.removeGridRow);
+  const addCol = useEditor((s) => s.addGridColumn);
+  const removeCol = useEditor((s) => s.removeGridColumn);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
   const raf = useRef<number | null>(null);
@@ -132,6 +136,7 @@ export default function PreviewGridResize({
       onPointerMove={onMove}
       onPointerUp={onUp}
     >
+
       {/* Row dividers: between row i and i+1, at the gap midpoint. */}
       {rows.slice(0, -1).map((r, i) => {
         const y = r.t - box.t + r.h + (rows[i + 1].t - (r.t + r.h)) / 2;
@@ -163,9 +168,67 @@ export default function PreviewGridResize({
           );
         }),
       )}
+      {/* Add-row (bottom edge) + add-column (each row's right edge). */}
+      <CanvasBtn x={box.w / 2} y={box.h - 2} label="+" title="Add row" onTap={() => addRow(ci, si)} />
+      {rows.map((r, ri) => (
+        <CanvasBtn
+          key={`addcol-${ri}`}
+          x={box.w - 2}
+          y={r.t - box.t + r.h / 2}
+          label="+"
+          title="Add column"
+          onTap={() => addCol(ci, si, ri)}
+        />
+      ))}
+      {/* Remove-row (left edge) + remove-cell (each cell top-right). */}
+      {rows.length > 1
+        ? rows.map((r, ri) => (
+            <CanvasBtn
+              key={`delrow-${ri}`}
+              x={10}
+              y={r.t - box.t + 10}
+              label="×"
+              title="Remove row"
+              danger
+              onTap={() => removeRow(ci, si, ri)}
+            />
+          ))
+        : null}
+      {cells.map((rowCells, ri) =>
+        rowCells.length > 1
+          ? rowCells.map((c, j) => (
+              <CanvasBtn
+                key={`delcell-${ri}-${j}`}
+                x={c.l - box.l + c.w - 10}
+                y={c.t - box.t + 10}
+                label="×"
+                title="Remove column"
+                danger
+                onTap={() => removeCol(ci, si, ri, j)}
+              />
+            ))
+          : null,
+      )}
       {readout ? (
         <text x={readout.x} y={readout.y} className="grid-readout">{readout.text}</text>
       ) : null}
     </svg>
+  );
+}
+
+function CanvasBtn({
+  x, y, label, title, danger, onTap,
+}: {
+  x: number; y: number; label: string; title: string; danger?: boolean; onTap: () => void;
+}) {
+  return (
+    <g
+      className={`grid-canvas-btn${danger ? " danger" : ""}`}
+      onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onTap(); }}
+    >
+      <title>{title}</title>
+      <circle cx={x} cy={y} r={9} />
+      <text x={x} y={y + 3.5} textAnchor="middle">{label}</text>
+    </g>
   );
 }

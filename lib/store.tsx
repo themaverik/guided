@@ -107,6 +107,10 @@ export interface EditorState {
     dividerIndex: number,
     deltaFr: number,
   ) => void;
+  addGridRow: (ci: number, si: number) => void;
+  removeGridRow: (ci: number, si: number, ri: number) => void;
+  addGridColumn: (ci: number, si: number, ri: number) => void;
+  removeGridColumn: (ci: number, si: number, ri: number, cellIndex: number) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -320,6 +324,13 @@ export function createEditorStore(
       set((s) => ({ book: M.resizeGridRow(s.book, ci, si, dividerIndex, deltaFr) })),
     resizeGridColumn: (ci, si, ri, dividerIndex, deltaFr) =>
       set((s) => ({ book: M.resizeGridColumn(s.book, ci, si, ri, dividerIndex, deltaFr) })),
+    addGridRow: (ci, si) => set((s) => ({ book: M.addGridRow(s.book, ci, si) })),
+    removeGridRow: (ci, si, ri) =>
+      set((s) => ({ book: M.removeGridRow(s.book, ci, si, ri) })),
+    addGridColumn: (ci, si, ri) =>
+      set((s) => ({ book: M.addGridColumn(s.book, ci, si, ri) })),
+    removeGridColumn: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.removeGridColumn(s.book, ci, si, ri, cellIndex) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

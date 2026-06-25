@@ -36,6 +36,25 @@ describe("updateStep layoutMode", () => {
   });
 });
 
+describe("grid structure actions", () => {
+  const oneByOne = (): Book => ({
+    schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
+    title: "T", subtitle: "", author: "", edition: "", cover: "",
+    chapters: [{ id: "c", title: "C", description: "", steps: [{
+      layoutMode: "grid",
+      grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
+    }] }],
+  });
+
+  it("addGridRow then addGridColumn update the store grid", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridRow(0, 0);
+    expect(store.getState().book.chapters[0].steps[0].grid).toHaveLength(2);
+    store.getState().addGridColumn(0, 0, 0);
+    expect(store.getState().book.chapters[0].steps[0].grid![0].cells).toHaveLength(2);
+  });
+});
+
 describe("grid resize actions", () => {
   const gridBook = (): Book => ({
     schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,

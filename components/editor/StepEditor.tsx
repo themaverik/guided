@@ -6,6 +6,7 @@
  * authoring forms via rowsOf(); adding a 2nd row migrates the step to multi-row.
  */
 import { rowsOf } from "@/lib/book-mutations";
+import { stepLayoutMode } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
 import AnnotationEditor from "./AnnotationEditor";
 import RichTextArea from "./RichTextArea";
@@ -39,6 +40,23 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
           value={step.instruction ?? ""}
           onChange={(v) => updateStep(ci, si, { instruction: v })}
         />
+      </div>
+
+      <div className="editor-field">
+        <label>Layout</label>
+        <select
+          value={stepLayoutMode(step)}
+          onChange={(e) =>
+            updateStep(ci, si, { layoutMode: e.target.value as "legacy" | "grid" })
+          }
+        >
+          <option value="legacy">Legacy (rows)</option>
+          <option value="grid">Grid (preview)</option>
+        </select>
+        <p className="editor-help">
+          Grid renders image cells from the flexible grid. Callouts and
+          drag-resize are coming in a later update.
+        </p>
       </div>
 
       <h3 className="editor-subtitle">Rows</h3>

@@ -81,7 +81,7 @@ export interface EditorState {
   updateStep: (
     ci: number,
     si: number,
-    patch: Partial<Pick<Step, "title" | "instruction">>,
+    patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
   ) => void;
 
   // rows

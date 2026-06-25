@@ -83,6 +83,7 @@ export interface EditorState {
     si: number,
     patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
   ) => void;
+  setStepLayoutMode: (ci: number, si: number, mode: "legacy" | "grid") => void;
 
   // rows
   addRow: (ci: number, si: number) => void;
@@ -305,6 +306,8 @@ export function createEditorStore(
       set((s) => ({ book: M.moveStep(s.book, ci, si, dir) })),
     updateStep: (ci, si, patch) =>
       set((s) => ({ book: M.updateStep(s.book, ci, si, patch) })),
+    setStepLayoutMode: (ci, si, mode) =>
+      set((s) => ({ book: M.setStepLayoutMode(s.book, ci, si, mode) })),
 
     // ── rows ──
     addRow: (ci, si) =>

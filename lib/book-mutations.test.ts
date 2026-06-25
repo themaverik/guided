@@ -1,6 +1,42 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book } from "@/lib/book-schema";
+
+function legacyBook(): Book {
+  return {
+    schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
+    title: "T", subtitle: "", author: "", edition: "", cover: "",
+    chapters: [{ id: "c", title: "C", description: "", steps: [{
+      title: "S", instruction: "", image: "a.jpg", layout: "single",
+    }] }],
+  };
+}
+
+describe("setStepLayoutMode", () => {
+  it("seeds a grid from the step content when switching to grid with no grid", () => {
+    const out = setStepLayoutMode(legacyBook(), 0, 0, "grid");
+    const step = out.chapters[0].steps[0];
+    expect(step.layoutMode).toBe("grid");
+    expect(step.grid).toBeDefined();
+    expect(step.grid!.length).toBeGreaterThan(0);
+    // the existing image carries over as the primary object
+    expect(step.grid![0].cells[0].objects[0]?.ref).toBe("a.jpg");
+  });
+
+  it("does not overwrite an existing grid", () => {
+    const seeded = setStepLayoutMode(legacyBook(), 0, 0, "grid");
+    const before = seeded.chapters[0].steps[0].grid;
+    const again = setStepLayoutMode(seeded, 0, 0, "grid");
+    expect(again.chapters[0].steps[0].grid).toEqual(before);
+  });
+
+  it("does not mutate the input book", () => {
+    const book = legacyBook();
+    setStepLayoutMode(book, 0, 0, "grid");
+    expect(book.chapters[0].steps[0].layoutMode).toBeUndefined();
+    expect(book.chapters[0].steps[0].grid).toBeUndefined();
+  });
+});
 
 function gridBook(): Book {
   return {

@@ -24,8 +24,31 @@ import {
 } from "./book-schema";
 import { annotationId } from "./annotations";
 import { resizeAdjacent, bodyRegion, MIN_CELL_MM, normalizeFractions } from "./grid-math";
+import { legacyStepToGrid } from "./book-migrate";
 
 const clone = <T>(v: T): T => structuredClone(v);
+
+/**
+ * Set a step's layout mode. Switching to "grid" when the step has no grid yet
+ * seeds one from the step's current content (`legacyStepToGrid`) — so the grid
+ * renderer, guides, and structure controls have data to show. Without this,
+ * toggling a fresh (un-migrated) step to grid is a silent no-op.
+ */
+export function setStepLayoutMode(
+  book: Book,
+  ci: number,
+  si: number,
+  mode: "legacy" | "grid",
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step) return book;
+  step.layoutMode = mode;
+  if (mode === "grid" && (!step.grid || step.grid.length === 0)) {
+    step.grid = legacyStepToGrid(step);
+  }
+  return next;
+}
 
 /*
  * Fields that belong to a ROW (not the page), used to split a legacy step into

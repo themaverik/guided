@@ -20,6 +20,7 @@ import type {
   Connector,
   Ending,
   ImageRow,
+  PageConfig,
   SectionFont,
   Step,
   Surface,
@@ -27,7 +28,7 @@ import type {
   ThemeSection,
   Watermark,
 } from "./book-schema";
-import { DEFAULT_WATERMARK_OPACITY } from "./book-schema";
+import { DEFAULT_WATERMARK_OPACITY, DEFAULT_PAGE_CONFIG } from "./book-schema";
 import * as M from "./book-mutations";
 
 export interface Selection {
@@ -60,6 +61,7 @@ export interface EditorState {
   updateWatermark: (patch: Partial<Watermark>) => void;
   updateTheme: (section: ThemeSection, patch: Partial<SectionFont>) => void;
   updateBackground: (patch: Partial<Background>) => void;
+  updatePageConfig: (patch: Partial<PageConfig>) => void;
   updateEnding: (patch: Partial<Ending>) => void;
   setOverflows: (overflows: string[]) => void;
 
@@ -79,8 +81,9 @@ export interface EditorState {
   updateStep: (
     ci: number,
     si: number,
-    patch: Partial<Pick<Step, "title" | "instruction">>,
+    patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
   ) => void;
+  setStepLayoutMode: (ci: number, si: number, mode: "legacy" | "grid") => void;
 
   // rows
   addRow: (ci: number, si: number) => void;
@@ -92,6 +95,23 @@ export interface EditorState {
     ri: number,
     patch: Partial<ImageRow>,
   ) => void;
+  resizeGridRow: (
+    ci: number,
+    si: number,
+    dividerIndex: number,
+    deltaFr: number,
+  ) => void;
+  resizeGridColumn: (
+    ci: number,
+    si: number,
+    ri: number,
+    dividerIndex: number,
+    deltaFr: number,
+  ) => void;
+  addGridRow: (ci: number, si: number) => void;
+  removeGridRow: (ci: number, si: number, ri: number) => void;
+  addGridColumn: (ci: number, si: number, ri: number) => void;
+  removeGridColumn: (ci: number, si: number, ri: number, cellIndex: number) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -205,6 +225,11 @@ export function createEditorStore(
         const next: Background = { ...current, ...patch };
         return { book: { ...s.book, background: next } };
       }),
+    updatePageConfig: (patch) =>
+      set((s) => {
+        const current: PageConfig = s.book.pageConfig ?? DEFAULT_PAGE_CONFIG;
+        return { book: { ...s.book, pageConfig: { ...current, ...patch } } };
+      }),
     updateEnding: (patch) =>
       set((s) => {
         const current: Ending = s.book.ending ?? {};
@@ -281,6 +306,8 @@ export function createEditorStore(
       set((s) => ({ book: M.moveStep(s.book, ci, si, dir) })),
     updateStep: (ci, si, patch) =>
       set((s) => ({ book: M.updateStep(s.book, ci, si, patch) })),
+    setStepLayoutMode: (ci, si, mode) =>
+      set((s) => ({ book: M.setStepLayoutMode(s.book, ci, si, mode) })),
 
     // ── rows ──
     addRow: (ci, si) =>
@@ -296,6 +323,17 @@ export function createEditorStore(
       set((s) => ({ book: M.moveRow(s.book, ci, si, ri, dir) })),
     updateRow: (ci, si, ri, patch) =>
       set((s) => ({ book: M.updateRow(s.book, ci, si, ri, patch) })),
+    resizeGridRow: (ci, si, dividerIndex, deltaFr) =>
+      set((s) => ({ book: M.resizeGridRow(s.book, ci, si, dividerIndex, deltaFr) })),
+    resizeGridColumn: (ci, si, ri, dividerIndex, deltaFr) =>
+      set((s) => ({ book: M.resizeGridColumn(s.book, ci, si, ri, dividerIndex, deltaFr) })),
+    addGridRow: (ci, si) => set((s) => ({ book: M.addGridRow(s.book, ci, si) })),
+    removeGridRow: (ci, si, ri) =>
+      set((s) => ({ book: M.removeGridRow(s.book, ci, si, ri) })),
+    addGridColumn: (ci, si, ri) =>
+      set((s) => ({ book: M.addGridColumn(s.book, ci, si, ri) })),
+    removeGridColumn: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.removeGridColumn(s.book, ci, si, ri, cellIndex) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

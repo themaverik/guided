@@ -9,6 +9,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Book } from "./book-schema";
+import { migrateBook } from "./book-migrate";
 
 export const BOOK_JS_PATH = path.join(process.cwd(), "public", "book.js");
 
@@ -37,7 +38,7 @@ export function parseBookSource(source: string): Book {
   if (!shim.BOOK) {
     throw new Error("book.js did not assign window.BOOK");
   }
-  return shim.BOOK;
+  return migrateBook(shim.BOOK);
 }
 
 /** Load and parse public/book.js from disk. */
@@ -55,5 +56,5 @@ export const EXAMPLE_BOOK_PATH = path.join(
 );
 
 export async function loadExampleBook(): Promise<Book> {
-  return JSON.parse(await readFile(EXAMPLE_BOOK_PATH, "utf8")) as Book;
+  return migrateBook(JSON.parse(await readFile(EXAMPLE_BOOK_PATH, "utf8")) as Book);
 }

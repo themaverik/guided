@@ -251,3 +251,87 @@ to edges/grid/anchors, rendered identically in editor and PDF.
 - Asset dedup and total-size limits per ephemeral project.
 - Whether the existing seed becomes the `/demo` project's content.
 - Snapping UX depth for Phase 11 (grid granularity, anchor authoring).
+
+---
+
+# v3 — Flexible Grid + Annotation Standardization ("v-next")  [in progress]
+
+Third wave (`PRD.md` + design system `DESIGN.md` + `ADR-006`): replace fixed row presets with a
+flexible, user-resizable grid; standardize annotations on ISO 32000 names; unify color on OKLCH
+paired tokens — zero regression to existing features. Executed as sequenced plans under
+`docs/superpowers/plans/`, each via subagent-driven development (fresh subagent per task + per-task
+review + final whole-branch review). Branch: `feature/improvement-rev2`. CLAUDE.md was corrected (it
+had described a non-existent TipTap stack). Decisions of record live in `PRD.md` (Decisions 1–14)
+and `ADR-006`.
+
+## Plan 1 — Foundations  [done]
+
+Tested data-model + pure-logic foundation, zero runtime change. `vitest` harness (none existed);
+`PageConfig`/grid/cell/object schema types + `schemaVersion`; `lib/grid-math.ts` (page/body
+geometry, conserved-total resize, proportional water-fill redistribution); `lib/book-migrate.ts`
+(lossless, idempotent, version-gated migration). 23 unit tests; 10 commits; deliberately not wired
+into the live path. Plan: `docs/superpowers/plans/2026-06-23-grid-annotation-foundations.md`.
+
+## Plan 2 — Page configuration  [done]
+
+Author-configurable page size / orientation / margins / header / footer end-to-end: presets
+(new-project 15/15/10 mm + legacy-preserving 18/0/0 mm), migrate-on-load wiring, `pageVars` CSS-var
+geometry, header/footer body bands, PDF `@page` size, left-pane Page settings. Zero-regression by
+construction. Plan: `docs/superpowers/plans/2026-06-24-page-configuration.md`.
+Shipped on `feature/improvement-rev2` (commits `fa74912..2dee054`, 7 commits; suite 28/28, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, zero-regression holds). Deferred follow-ups: a
+before/after PDF smoke check on a real legacy project, and `Custom`-size width/height inputs (the size
+is selectable but currently falls back to A4).
+
+## Plan 3 — Grid renderer (read-only, opt-in)  [done]
+
+`GridStep` renderer consuming `step.grid` (rows × cells × primary image), gated on a new opt-in
+per-step `layoutMode` so migrated books render pixel-identically through the proven path; a
+step-editor Layout toggle makes it visible in the live preview. Image cells are overflow-free by
+construction, so the `fitSteps`→`fitGrid` backstop is deferred (not needed until cells hold
+overflow-capable content). Plan: `docs/superpowers/plans/2026-06-25-grid-renderer.md`.
+Shipped on `feature/improvement-rev2` (commits `2e4610f..608384f`, 5 commits; suite 35/35, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, zero-regression holds — migration never sets
+`layoutMode`, legacy JSX byte-identical, `fitSteps` skips grid pages). Deferred follow-up: style or drop
+the `.editor-help` class; manual preview/PDF check of a grid-mode step. ADR-006 amended with the opt-in
+rule.
+(Scope split from the old "renderer + resize + cell stacks" sketch — drag-resize and cell stacks
+are now their own plans below, keeping each slice small and zero-regression-safe.)
+
+## Plan 4 — On-canvas divider resize  [done]
+
+`PreviewGridResize` editor overlay (modelled on `PreviewAnnotations`) draws draggable row/column
+divider handles over a grid-mode step; dragging applies Plan-1 `resizeAdjacent` (conserved-total,
+mm min-floor via `bodyRegion`) live with a mm readout, writing fractions through new
+`resizeGridRow`/`resizeGridColumn` store mutations. Editor-only — the renderer/print path is
+untouched. Plan: `docs/superpowers/plans/2026-06-25-grid-resize.md`.
+Shipped on `feature/improvement-rev2` (commits `606f9c8..435dbbe`, 4 commits; suite 39/39, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, editor-only/print-clean holds — zero renderer/print
+changes). Deferred: mm-readout gap accuracy, in-browser drag manual check. (Scope: row + column resize +
+mm readout; the grid-guides visibility toggle moved to Plan 6 where snapping makes guides useful.)
+
+## Plan 5 — Grid structure editing + visible guides  [done]
+
+Makes a grid-mode step operable: editor-only **guides** (dashed cell outlines scoped to
+`.preview-scaler` + faint resting divider lines) so the grid is visible, plus **add/remove rows &
+columns** from **both** a left-panel Grid section (steppers) and on-canvas +/× affordances — backed
+by new `addGridRow`/`removeGridRow`/`addGridColumn`/`removeGridColumn` mutations that renormalize
+fractions (Σ = 1; min 1 row / 1 cell). Editor-only; renderer/print untouched. Closes the usability gap
+from Plans 3–4 (you couldn't see the grid or set row/column counts).
+Plan: `docs/superpowers/plans/2026-06-25-grid-structure-editing.md`.
+Shipped on `feature/improvement-rev2` (commits `3145cef..86c25e0`, 5 commits; suite 45/45, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, editor-only/print-clean holds). Deferred: on-canvas
+button fire-on-pointerdown UX polish; out-of-bounds index guards.
+
+## Plans 6–8 — roadmapped (detailed just-in-time)
+
+- **Plan 6 — Cell object stacks:** move images + callouts into the cell object stack as
+  primary/secondary objects; in-cell drag; migrate legacy `callouts` → `secondary` objects. This is
+  where `fitSteps`→`fitGrid` becomes necessary (cells gain overflow-capable content). Cell-anchored
+  annotation coords + the free annotation layer (`step.freeAnnotations`).
+- **Plan 7 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
+  8-handle selection; segment-drag connector reshape; snapping defaults; connector
+  arrow-snap-on-by-default; grid-guides on/off toggle.
+- **Plan 8 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
+  (OKLCH + PDF /C·/IC via `swatchId`); editor-only fill tint, full opacity in export; unify
+  callouts.

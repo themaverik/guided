@@ -58,7 +58,10 @@
 
 /* Inner padding wrapper. Sits above the watermark overlay (z-index 0). */
 .page-inner {
-  padding: var(--margin);
+  padding:
+    calc(var(--page-margin) + var(--page-header-h, 0mm))
+    var(--page-margin)
+    calc(var(--page-margin) + var(--page-footer-h, 0mm));
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -821,6 +824,38 @@
   color: var(--muted);
   max-width: 80mm;
   line-height: 1.4;
+}
+
+/* ────────────── FLEXIBLE GRID (read-only renderer, Plan 3) ────────────── */
+/* Fills the body region in place of .step-body; rows/cells distribute by fr
+   via flex-grow (set inline). Image cells contain-fit, so the grid is
+   overflow-free by construction. */
+.grid-step {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+}
+.grid-row {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  gap: 4mm;
+}
+.grid-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+}
+.grid-cell .img-slot {
+  width: 100%;
+  height: 100%;
+}
+.grid-cell .img-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* ────────────── PRINT ────────────── */

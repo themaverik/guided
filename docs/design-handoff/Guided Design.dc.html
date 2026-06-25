@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</helmet>
+
+<div style="--ink:oklch(0.34 0.045 200);--inks:oklch(0.48 0.04 200);--sur2:oklch(0.975 0.004 200);--ln:oklch(0.92 0.006 200);--ln2:oklch(0.88 0.008 200);--sel:oklch(0.62 0.17 250);background:oklch(0.84 0.009 200);min-width:100%;width:max-content;min-height:100vh;padding:48px;box-sizing:border-box;display:flex;flex-direction:column;gap:64px;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;">
+
+  <!-- ════════════════════════════════════════════════
+       01 — LANDING
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">01 — Landing</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">full viewport · card centered</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Landing page — full viewport (1280×760), card centered</div>
+        <div style="width:1280px;height:760px;background:oklch(0.93 0.005 200);border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:32px;">
+          <div style="width:100%;max-width:400px;background:#fff;border-radius:12px;box-shadow:0 2px 8px oklch(0.4 0.03 200/.07),0 16px 56px oklch(0.4 0.03 200/.13);overflow:hidden;">
+            <!-- Card header -->
+            <div style="background:var(--sur2);padding:36px 36px 28px;border-bottom:1px solid var(--ln);">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--inks);margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span>Guidebook</span><span style="opacity:0.35;">·</span><span>Editor</span></div>
+              <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:42px;line-height:1;letter-spacing:-0.03em;color:var(--ink);margin-bottom:12px;">Guid<em style="font-style:italic;">ed</em></div>
+              <div style="font-size:13.5px;line-height:1.6;color:var(--inks);max-width:280px;">A simple, minimalist, image-driven, print-ready guidebook editor.</div>
+            </div>
+            <!-- Card body -->
+            <div style="padding:28px 36px 32px;">
+              <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <input style="flex:1;height:38px;border:1px solid var(--ln2);border-radius:8px;padding:0 12px;font-family:'Inter',sans-serif;font-size:13px;color:oklch(0.55 0.02 200);outline:none;background:#fff;" placeholder="Name your project…" readonly />
+                <button style="height:38px;padding:0 16px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;">Create →</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="flex:1;height:1px;background:var(--ln);"></div>
+                <span style="font-size:11px;color:var(--inks);">or</span>
+                <div style="flex:1;height:1px;background:var(--ln);"></div>
+              </div>
+              <button style="width:100%;height:38px;border:1px solid var(--ln2);border-radius:8px;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:8px;">View demo</button>
+              <button style="width:100%;height:38px;border:1px solid var(--ln2);border-radius:8px;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:24px;">View quickstart</button>
+              <div style="height:1px;background:var(--ln);margin-bottom:18px;"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--inks);">Recent</span>
+                <button style="background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--inks);cursor:pointer;padding:0;text-decoration:underline;opacity:0.7;">Clear all</button>
+              </div>
+              <!-- Project card 1 -->
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:1px solid var(--ln);cursor:pointer;margin-bottom:6px;">
+                <div style="width:28px;height:28px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="13" height="15" viewBox="0 0 13 15" fill="none"><rect x="0.75" y="0.75" width="11.5" height="13.5" rx="1.5" stroke="oklch(0.48 0.04 200)" stroke-width="1.2"/><line x1="3" y1="5" x2="10" y2="5" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/><line x1="3" y1="7.5" x2="10" y2="7.5" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/><line x1="3" y1="10" x2="7" y2="10" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/></svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">iOS Onboarding Guide</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);margin-top:1px;">3 chapters · 2m ago</div>
+                </div>
+                <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M2 2l4 4-4 4" stroke="oklch(0.62 0.02 200)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <!-- Project card 2: expiring soon -->
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:1px solid oklch(0.87 0.04 80);cursor:pointer;background:oklch(0.996 0.008 90);margin-bottom:6px;">
+                <div style="width:28px;height:28px;border-radius:5px;background:oklch(0.965 0.045 92);border:1px solid oklch(0.87 0.04 80);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="13" height="15" viewBox="0 0 13 15" fill="none"><rect x="0.75" y="0.75" width="11.5" height="13.5" rx="1.5" stroke="oklch(0.48 0.06 80)" stroke-width="1.2"/><line x1="3" y1="5" x2="10" y2="5" stroke="oklch(0.48 0.06 80)" stroke-width="0.9"/><line x1="3" y1="7.5" x2="10" y2="7.5" stroke="oklch(0.48 0.06 80)" stroke-width="0.9"/><line x1="3" y1="10" x2="7" y2="10" stroke="oklch(0.48 0.06 80)" stroke-width="0.9"/></svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:500;color:oklch(0.32 0.07 78);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">API Reference Guide</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.45 0.06 80);margin-top:1px;">5 chapters · 1h ago</div>
+                </div>
+                <div style="background:oklch(0.96 0.05 75);border:1px solid oklch(0.76 0.09 72);border-radius:4px;padding:2px 7px;font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.35 0.09 68);white-space:nowrap;letter-spacing:0.5px;">⚡ 48m</div>
+              </div>
+              <!-- Project card 3 -->
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:1px solid var(--ln);cursor:pointer;margin-bottom:22px;">
+                <div style="width:28px;height:28px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="13" height="15" viewBox="0 0 13 15" fill="none"><rect x="0.75" y="0.75" width="11.5" height="13.5" rx="1.5" stroke="oklch(0.48 0.04 200)" stroke-width="1.2"/><line x1="3" y1="5" x2="10" y2="5" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/><line x1="3" y1="7.5" x2="10" y2="7.5" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/><line x1="3" y1="10" x2="7" y2="10" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/></svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Setup Guide v3</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);margin-top:1px;">2 chapters · 3h ago</div>
+                </div>
+                <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M2 2l4 4-4 4" stroke="oklch(0.62 0.02 200)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:center;font-size:11px;color:var(--inks);">
+                <a href="#" style="color:var(--inks);text-decoration:none;">Terms of Use</a>
+                <span>·</span>
+                <a href="#" style="color:var(--inks);text-decoration:none;">Privacy Policy</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       02 — EDITOR SHELL
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">02 — Editor Shell</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">1280 × 820px · step editing state</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Full two-pane editor — desktop primary target</div>
+        <div style="width:1280px;height:820px;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;display:flex;flex-direction:column;">
+
+          <!-- Ephemeral notice -->
+          <div style="flex:0 0 36px;display:flex;align-items:center;justify-content:center;gap:14px;padding:0 16px;background:oklch(0.965 0.04 90);border-bottom:1px solid oklch(0.87 0.045 80);">
+            <span style="font-size:12px;color:oklch(0.32 0.07 78);">⏱ This project expires in approximately 48 minutes. Download to keep your work.</span>
+            <a href="#" style="background:var(--ink);color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap;font-family:'Inter',sans-serif;">Download ZIP</a>
+          </div>
+
+          <!-- Top bar (spans full width) -->
+          <div style="flex:0 0 48px;background:#fff;border-bottom:1px solid var(--ln);display:flex;align-items:center;padding:0 16px;gap:10px;">
+            <div style="width:28px;height:28px;background:var(--ink);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:-0.04em;">G</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+              <span style="font-size:12px;color:var(--inks);letter-spacing:-0.01em;">Guided</span>
+              <span style="color:var(--ln2);font-size:16px;line-height:1;">/</span>
+              <span style="font-size:13px;font-weight:500;color:var(--ink);">iOS Onboarding Guide</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style="opacity:0.4;"><path d="M9 2l1 1L3 10l-2 .5.5-2L9 2z" stroke="oklch(0.48 0.04 200)" stroke-width="1.1" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="flex:1;"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink);display:flex;align-items:center;gap:5px;"><span style="font-size:8px;color:oklch(0.52 0.13 150);">●</span> Saved 2m ago</span>
+            <button style="width:32px;height:32px;border:1px solid var(--ln2);border-radius:7px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Toggle grid">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="0.7" fill="oklch(0.88 0.008 200)"/><rect x="8" y="1" width="5" height="5" rx="0.7" fill="oklch(0.88 0.008 200)"/><rect x="1" y="8" width="5" height="5" rx="0.7" fill="oklch(0.88 0.008 200)"/><rect x="8" y="8" width="5" height="5" rx="0.7" fill="oklch(0.88 0.008 200)"/></svg>
+            </button>
+            <button style="height:32px;padding:0 12px;border:1px solid var(--ln2);border-radius:7px;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;">Download</button>
+            <button style="height:32px;padding:0 12px;border:1px solid var(--ln2);border-radius:7px;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;">Print</button>
+            <button style="height:32px;padding:0 14px;border:none;border-radius:7px;background:var(--ink);color:#fff;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;">Export PDF</button>
+          </div>
+
+          <!-- Editor body -->
+          <div style="flex:1;min-height:0;display:flex;overflow:hidden;">
+
+            <!-- LEFT PANE -->
+            <div style="flex:0 0 380px;width:380px;height:100%;overflow-y:auto;background:#fff;border-right:1px solid var(--ln);">
+
+              <!-- BOOK SETTINGS -->
+              <div style="border-bottom:1px solid var(--ln);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;cursor:pointer;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Book Settings</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="oklch(0.48 0.04 200)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px;">
+                  <label style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Title</span><input style="height:32px;border:1px solid var(--ln2);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;" value="iOS Onboarding Guide" readonly /></label>
+                  <label style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Subtitle</span><input style="height:32px;border:1px solid var(--ln2);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;" value="An interactive walkthrough" readonly /></label>
+                  <div style="display:flex;gap:8px;">
+                    <label style="flex:1;display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Author</span><input style="width:100%;height:32px;border:1px solid var(--ln2);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;" value="ACME Corp." readonly /></label>
+                    <label style="flex:0 0 76px;display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Edition</span><input style="width:100%;height:32px;border:1px solid var(--ln2);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;" value="v1.0" readonly /></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FONTS: collapsed -->
+              <div style="border-bottom:1px solid var(--ln);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;cursor:pointer;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Fonts</span>
+                  <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:var(--inks);">Custom</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="oklch(0.48 0.04 200)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+              </div>
+
+              <!-- CHAPTERS -->
+              <div style="border-bottom:1px solid var(--ln);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;cursor:pointer;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Chapters</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="transform:rotate(180deg);"><path d="M3 4.5l3 3 3-3" stroke="oklch(0.48 0.04 200)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div style="padding:0 16px 12px;">
+                  <!-- Chapter 01 expanded -->
+                  <div style="border:1px solid var(--ln);border-radius:8px;overflow:hidden;margin-bottom:6px;">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:oklch(0.972 0.007 200);cursor:pointer;">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);font-weight:500;min-width:18px;">01</span>
+                      <span style="flex:1;font-size:12.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Getting Started</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">3 steps</span>
+                      <div style="display:flex;gap:2px;">
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↑</button>
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↓</button>
+                        <button style="width:20px;height:20px;border:1px solid oklch(0.87 0.04 25);border-radius:5px;background:#fff;cursor:pointer;font-size:11px;color:oklch(0.52 0.13 25);display:flex;align-items:center;justify-content:center;">×</button>
+                      </div>
+                    </div>
+                    <div style="margin:4px 0 8px 10px;padding-left:8px;border-left:2px solid var(--ln);display:flex;flex-direction:column;gap:2px;">
+                      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);min-width:20px;">01</span>
+                        <span style="font-size:12px;color:var(--inks);flex:1;">Introduction</span>
+                      </div>
+                      <!-- Step 02: active -->
+                      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:oklch(0.948 0.016 200);border:1px solid oklch(0.34 0.045 200);cursor:pointer;">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink);min-width:20px;font-weight:500;">02</span>
+                        <span style="font-size:12px;color:var(--ink);flex:1;font-weight:600;">Connect your data</span>
+                        <div style="width:6px;height:6px;border-radius:50%;background:var(--ink);flex-shrink:0;"></div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);min-width:20px;">03</span>
+                        <span style="font-size:12px;color:var(--inks);flex:1;">Configure settings</span>
+                      </div>
+                    </div>
+                    <div style="margin:0 10px 8px;"><button style="width:100%;height:28px;border:1px dashed var(--ln2);border-radius:6px;background:transparent;color:var(--inks);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;">+ Add step</button></div>
+                  </div>
+                  <!-- Chapter 02 collapsed -->
+                  <div style="border:1px solid var(--ln);border-radius:8px;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);min-width:18px;">02</span>
+                      <span style="flex:1;font-size:12.5px;color:var(--inks);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Core Features</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">4 steps</span>
+                      <div style="display:flex;gap:2px;">
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↑</button>
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↓</button>
+                        <button style="width:20px;height:20px;border:1px solid oklch(0.87 0.04 25);border-radius:5px;background:#fff;cursor:pointer;font-size:11px;color:oklch(0.52 0.13 25);display:flex;align-items:center;justify-content:center;">×</button>
+                      </div>
+                    </div>
+                  </div>
+                  <button style="width:100%;height:32px;border:1px dashed var(--ln2);border-radius:8px;background:transparent;color:var(--ink);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;">+ Add chapter</button>
+                </div>
+              </div>
+
+              <!-- STEP editor -->
+              <div style="border-bottom:1px solid var(--ln);">
+                <div style="display:flex;align-items:center;padding:0 16px;height:44px;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Step</span>
+                  <span style="font-size:11px;color:var(--inks);margin-left:8px;">02 · Connect your data</span>
+                </div>
+                <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;">
+                  <label style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Page title</span><input style="height:32px;border:1px solid var(--ink);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;box-shadow:0 0 0 2.5px oklch(0.34 0.045 200 / 0.15);" value="Connect your data" readonly /></label>
+                  <label style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Page instruction</span><textarea style="height:58px;border:1px solid var(--ln2);border-radius:7px;padding:7px 10px;font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink);background:#fff;outline:none;resize:none;line-height:1.45;" readonly>Same phone-shaped screen, with a column of callouts to the right pointing out elements.</textarea></label>
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);margin-top:2px;">Rows</div>
+                  <!-- Row card -->
+                  <div style="border:1px solid var(--ink);border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px oklch(0.34 0.045 200 / 0.12);">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:oklch(0.972 0.007 200);cursor:pointer;">
+                      <span style="flex:1;font-size:12px;font-weight:600;color:var(--ink);">Row 1</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">1 col</span>
+                      <div style="display:flex;gap:2px;">
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--inks);">↑</button>
+                        <button style="width:20px;height:20px;border:1px solid var(--ln2);border-radius:5px;background:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--inks);">↓</button>
+                        <button style="width:20px;height:20px;border:1px solid oklch(0.87 0.04 25);border-radius:5px;background:#fff;cursor:pointer;font-size:11px;color:oklch(0.52 0.13 25);display:flex;align-items:center;justify-content:center;">×</button>
+                      </div>
+                    </div>
+                    <div style="padding:10px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ln);">
+                      <!-- Image picker -->
+                      <div><span style="font-size:11px;color:var(--inks);display:block;margin-bottom:3px;">Image</span>
+                        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--ln2);border-radius:7px;background:#fff;cursor:pointer;">
+                          <div style="width:24px;height:24px;border-radius:4px;background:var(--sur2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1.5" stroke="oklch(0.48 0.04 200)" stroke-width="1.1"/><path d="M3 9l2.5-3 2 2.5 1.5-1.5L11 9" stroke="oklch(0.48 0.04 200)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                          <span style="flex:1;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--inks);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">02-connect.png</span>
+                          <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 1l3 3 3-3" stroke="oklch(0.55 0.02 200)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                      </div>
+                      <!-- Placement -->
+                      <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:11px;color:var(--inks);">Placement</span>
+                        <div style="display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;">
+                          <button style="padding:4px 12px;border:none;background:var(--ink);color:#fff;font-family:'Inter',sans-serif;font-size:11.5px;cursor:pointer;">Side</button>
+                          <button style="padding:4px 12px;border:none;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-size:11.5px;cursor:pointer;border-left:1px solid var(--ln2);">Below</button>
+                        </div>
+                      </div>
+                      <!-- Callout count -->
+                      <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:11px;color:var(--inks);">Callouts</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <button style="width:24px;height:24px;border:1px solid var(--ln2);border-radius:6px;background:#fff;font-size:14px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink);min-width:16px;text-align:center;">2</span>
+                          <button style="width:24px;height:24px;border:1px solid var(--ln2);border-radius:6px;background:#fff;font-size:14px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+                        </div>
+                      </div>
+                      <!-- Callout 1 -->
+                      <div style="border:1px solid var(--ln);border-radius:7px;padding:8px;background:#fff;display:flex;flex-direction:column;gap:5px;">
+                        <div style="display:flex;align-items:center;gap:6px;"><select style="height:26px;border:1px solid var(--ln2);border-radius:5px;font-size:11.5px;padding:0 6px;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;"><option>info</option></select><div style="margin-left:auto;display:flex;gap:2px;"><button style="width:18px;height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fff;cursor:pointer;font-size:9px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↑</button><button style="width:18px;height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fff;cursor:pointer;font-size:9px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↓</button><button style="width:18px;height:18px;border:1px solid oklch(0.87 0.04 25);border-radius:4px;background:#fff;cursor:pointer;font-size:10px;color:oklch(0.52 0.13 25);display:flex;align-items:center;justify-content:center;">×</button></div></div>
+                        <input style="width:100%;height:26px;border:1px solid var(--ln2);border-radius:5px;padding:0 8px;font-size:12px;font-family:'Inter',sans-serif;color:var(--ink);" value="Header" readonly />
+                        <textarea style="width:100%;height:38px;border:1px solid var(--ln2);border-radius:5px;padding:4px 8px;font-size:11.5px;font-family:'Inter',sans-serif;color:var(--inks);resize:none;line-height:1.35;box-sizing:border-box;" readonly>Describe the labelled area at the top.</textarea>
+                      </div>
+                      <!-- Callout 2 -->
+                      <div style="border:1px solid var(--ln);border-radius:7px;padding:8px;background:#fff;display:flex;flex-direction:column;gap:5px;">
+                        <div style="display:flex;align-items:center;gap:6px;"><select style="height:26px;border:1px solid var(--ln2);border-radius:5px;font-size:11.5px;padding:0 6px;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;"><option>warning</option></select><div style="margin-left:auto;display:flex;gap:2px;"><button style="width:18px;height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fff;cursor:pointer;font-size:9px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↑</button><button style="width:18px;height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fff;cursor:pointer;font-size:9px;color:var(--inks);display:flex;align-items:center;justify-content:center;">↓</button><button style="width:18px;height:18px;border:1px solid oklch(0.87 0.04 25);border-radius:4px;background:#fff;cursor:pointer;font-size:10px;color:oklch(0.52 0.13 25);display:flex;align-items:center;justify-content:center;">×</button></div></div>
+                        <input style="width:100%;height:26px;border:1px solid var(--ln2);border-radius:5px;padding:0 8px;font-size:12px;font-family:'Inter',sans-serif;color:var(--ink);" value="Required" readonly />
+                        <textarea style="width:100%;height:38px;border:1px solid var(--ln2);border-radius:5px;padding:4px 8px;font-size:11.5px;font-family:'Inter',sans-serif;color:var(--inks);resize:none;line-height:1.35;box-sizing:border-box;" readonly>Flag a precondition before continuing.</textarea>
+                      </div>
+                    </div>
+                  </div>
+                  <button style="width:100%;height:32px;border:1px dashed var(--ln2);border-radius:8px;background:transparent;color:var(--inks);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;">+ Add row</button>
+                </div>
+              </div>
+
+              <!-- ANNOTATIONS: collapsed -->
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;cursor:pointer;">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Annotations</span>
+                    <span style="background:var(--sur2);border:1px solid var(--ln);border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">0</span>
+                  </div>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="oklch(0.48 0.04 200)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+
+            </div><!-- /left pane -->
+
+            <!-- RESIZER -->
+            <div style="flex:0 0 5px;background:var(--ln);cursor:col-resize;"></div>
+
+            <!-- RIGHT PANE -->
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--sur2);">
+              <!-- Preview toolbar -->
+              <div style="flex:0 0 40px;background:#fff;border-bottom:1px solid var(--ln);display:flex;align-items:center;padding:0 16px;gap:10px;">
+                <button style="height:28px;padding:0 10px;border:1px solid var(--ln2);border-radius:6px;background:#fff;color:var(--ink);font-size:12.5px;font-family:'Inter',sans-serif;cursor:pointer;">‹ Prev</button>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--inks);">Page 2 / 14</span>
+                <button style="height:28px;padding:0 10px;border:1px solid var(--ln2);border-radius:6px;background:#fff;color:var(--ink);font-size:12.5px;font-family:'Inter',sans-serif;cursor:pointer;">Next ›</button>
+                <div style="flex:1;"></div>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <span style="font-size:11.5px;color:var(--inks);">Grid</span>
+                  <div style="width:32px;height:18px;border-radius:9px;background:var(--ink);position:relative;cursor:pointer;"><div style="position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff;"></div></div>
+                </div>
+              </div>
+              <!-- Preview area -->
+              <div style="flex:1;min-height:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding-top:20px;position:relative;">
+                <!-- A4 page at 75% scale: 595 × 842px -->
+                <div style="width:595px;height:842px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 8px 40px rgba(0,0,0,0.1);position:relative;overflow:hidden;">
+                  <!-- Active page selection outline -->
+                  <div style="position:absolute;inset:0;border:3px solid oklch(0.34 0.045 200);pointer-events:none;z-index:10;"></div>
+                  <!-- Faint grid margin guides -->
+                  <div style="position:absolute;top:51px;left:0;right:0;height:1px;background:oklch(0.62 0.17 250 / 0.15);pointer-events:none;z-index:2;"></div>
+                  <div style="position:absolute;left:51px;top:0;bottom:0;width:1px;background:oklch(0.62 0.17 250 / 0.15);pointer-events:none;z-index:2;"></div>
+                  <div style="position:absolute;right:51px;top:0;bottom:0;width:1px;background:oklch(0.62 0.17 250 / 0.15);pointer-events:none;z-index:2;"></div>
+                  <!-- Page content: 51px margin -->
+                  <div style="position:absolute;top:51px;left:51px;right:51px;bottom:45px;display:flex;flex-direction:column;gap:11px;overflow:hidden;">
+                    <!-- Step head -->
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:0.8px solid oklch(0.92 0.006 200);padding-bottom:7px;flex-shrink:0;">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.8px;text-transform:uppercase;color:oklch(0.34 0.045 200);">STEP 02 OF 14</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:oklch(0.48 0.04 200);">CH. 01 — GETTING STARTED</span>
+                    </div>
+                    <!-- Step title -->
+                    <h2 style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;line-height:1.2;color:oklch(0.34 0.045 200);margin:0;letter-spacing:-0.01em;flex-shrink:0;">Connect your data</h2>
+                    <!-- Instruction -->
+                    <div style="display:flex;gap:7px;align-items:flex-start;flex-shrink:0;">
+                      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.34 0.045 200);color:#fff;font-size:7px;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;flex-shrink:0;margin-top:0.5px;">1</div>
+                      <p style="font-size:8.5px;line-height:1.55;color:oklch(0.48 0.04 200);margin:0;">Same phone-shaped screen, with a column of callouts to the right pointing out elements on the screen.</p>
+                    </div>
+                    <!-- Image + callouts row -->
+                    <div style="display:flex;gap:16px;align-items:flex-start;flex:1;min-height:0;">
+                      <!-- Phone image slot -->
+                      <div style="width:125px;flex-shrink:0;background:#f2f4f4;border:4px solid #d7dede;border-radius:3.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;gap:5px;aspect-ratio:294/492;">
+                        <div style="width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #d7dede;display:flex;align-items:center;justify-content:center;"><svg width="10" height="10" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1.5" stroke="oklch(0.48 0.04 200)" stroke-width="1"/><path d="M3 9l2.5-3 2 2.5 1.5-2 2.5 2.5" stroke="oklch(0.48 0.04 200)" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:5.5px;letter-spacing:0.5px;text-transform:uppercase;color:oklch(0.34 0.045 200);">SCREEN</span>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:4.5px;color:oklch(0.48 0.04 200);text-align:center;word-break:break-all;padding:1.5px 3px;background:#fff;border:0.5px solid #d7dede;border-radius:1px;">public/ch1/02-connect.jpg</span>
+                      </div>
+                      <!-- Callout column -->
+                      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+                        <div style="padding:7px 8px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.18);border-radius:2px;">
+                          <div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:7.5px;color:oklch(0.34 0.045 200);margin-bottom:3px;">Header</div>
+                          <div style="font-size:7px;color:oklch(0.48 0.04 200);line-height:1.45;">Describe the labelled area at the top of the screen.</div>
+                        </div>
+                        <div style="padding:7px 8px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.18);border-radius:2px;">
+                          <div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:7.5px;color:oklch(0.34 0.045 200);margin-bottom:3px;">Action</div>
+                          <div style="font-size:7px;color:oklch(0.48 0.04 200);line-height:1.45;">Explain the primary control the user interacts with here.</div>
+                        </div>
+                        <div style="padding:7px 8px;background:#fdf5dc;border:0.8px solid rgba(200,154,30,0.38);border-radius:2px;">
+                          <div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:7.5px;color:#7a5a08;margin-bottom:3px;">Required</div>
+                          <div style="font-size:7px;color:#4a3a0a;line-height:1.45;">Flag a precondition or required field before the user can continue.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Page footer -->
+                  <div style="position:absolute;bottom:14px;left:51px;right:51px;display:flex;justify-content:space-between;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1.2px;text-transform:uppercase;color:oklch(0.48 0.04 200);">CHAPTER 01 — GETTING STARTED</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1.2px;text-transform:uppercase;color:oklch(0.48 0.04 200);">STEP 02 / 14</span>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /right pane -->
+          </div><!-- /editor body -->
+        </div><!-- /editor frame card -->
+      </div>
+    </div>
+  </div><!-- /section 02 -->
+
+  <!-- ════════════════════════════════════════════════
+       03 — ANNOTATION SYSTEM  (signature element)
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">03 — Annotation System</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">signature element — drawn on the canvas</span>
+    </div>
+    <p style="font-size:12px;color:var(--inks);margin:-12px 0 20px;max-width:820px;line-height:1.55;">Annotations are drawn, selected, dragged, and snapped <b style="color:var(--ink);font-weight:600;">directly on the page canvas</b>. The tools + palette ride in a <b style="color:var(--ink);font-weight:600;">floating toolbar</b> over the canvas, and the inspector opens as a <b style="color:var(--ink);font-weight:600;">popover anchored to the selection</b> — the side panel is never the drawing surface (too small); it only lists shapes + numeric properties. The detail panels below document the toolbar/inspector contents.</p>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+
+      <!-- Frame 0: on-canvas composition (floating toolbar + draw + inspector popover) -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">On the page canvas — floating toolbar, draw &amp; select, inspector popover</div>
+        <div style="width:640px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Draw on Canvas</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">toolbar floats · inspector popover</span>
+          </div>
+          <div style="background:var(--sur2);padding:0;">
+            <div style="position:relative;width:600px;height:450px;margin:0 auto;">
+              <!-- page + grid system -->
+              <div style="position:absolute;inset:0;background:#fff;z-index:0;"></div>
+              <div style="position:absolute;left:22px;right:22px;top:62px;bottom:48px;background:oklch(0.62 0.17 250 / 0.035);z-index:1;"></div>
+              <div style="position:absolute;top:22px;left:22px;right:22px;bottom:22px;border:1px dashed oklch(0.62 0.17 250 / 0.45);z-index:1;"></div>
+              <div style="position:absolute;left:22px;right:22px;top:62px;border-top:1px dashed oklch(0.62 0.17 250 / 0.4);z-index:1;"></div>
+              <div style="position:absolute;left:22px;right:22px;bottom:48px;border-top:1px dashed oklch(0.62 0.17 250 / 0.4);z-index:1;"></div>
+              <!-- label -->
+              <div style="position:absolute;left:372px;top:130px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.5px;color:var(--inks);z-index:6;">primary objects — snap targets</div>
+              <!-- PRIMARY OBJECTS (layer 1): image slot + callouts -->
+              <div style="position:absolute;left:44px;top:150px;width:150px;height:220px;background:#f2f4f4;border:4px solid #d7dede;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:2;">
+                <div style="width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid #d7dede;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="2.5" width="14" height="11" rx="2" stroke="oklch(0.48 0.04 200)" stroke-width="1.2"/><circle cx="5" cy="6" r="1.2" fill="oklch(0.48 0.04 200)"/><path d="M2 12l4-4 3 3 2.5-2.5L14 12" stroke="oklch(0.48 0.04 200)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:7px;letter-spacing:1px;color:oklch(0.34 0.045 200);">SCREEN</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:6px;color:oklch(0.48 0.04 200);background:#fff;border:0.5px solid #d7dede;border-radius:2px;padding:1px 4px;">public/chapter1/</span>
+              </div>
+              <div style="position:absolute;left:372px;top:150px;width:196px;height:60px;background:#e2f2ff;border:1px solid rgba(33,127,208,0.4);border-radius:3px;padding:9px 11px;z-index:2;"><div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:11px;color:oklch(0.34 0.045 200);margin-bottom:3px;">Header</div><div style="font-size:9px;color:oklch(0.48 0.04 200);line-height:1.4;">Labelled area at the top of the screen.</div></div>
+              <div style="position:absolute;left:372px;top:224px;width:196px;height:60px;background:#fdf5dc;border:1px solid rgba(200,154,30,0.45);border-radius:3px;padding:9px 11px;z-index:2;"><div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:11px;color:#7a5a08;margin-bottom:3px;">Required</div><div style="font-size:9px;color:#4a3a0a;line-height:1.4;">Flag a precondition before continuing.</div></div>
+              <!-- ANNOTATION connector (square, rounded) from callout → region on the image -->
+              <svg width="600" height="450" viewBox="0 0 600 450" style="position:absolute;inset:0;z-index:4;overflow:visible;"><defs><marker id="arrCanvas" markerWidth="8" markerHeight="8" refX="5" refY="3.4" orient="auto"><path d="M0.6 0.6L6 3.4 0.6 6.2" fill="none" stroke="oklch(0.5 0.04 215)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs><path d="M372 180 H284 Q276 180 276 188 V294 Q276 302 268 302 H190" fill="none" stroke="oklch(0.5 0.04 215)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrCanvas)"/></svg>
+              <!-- box annotation (Red, ~50% fill tint) snapped onto the image -->
+              <div style="position:absolute;left:60px;top:270px;width:120px;height:64px;background:rgba(255,232,228,0.55);border:2px solid #cb4a47;border-radius:6px;z-index:4;"></div>
+              <!-- connector endpoint anchors (snapped to object edges) -->
+              <div style="position:absolute;left:372px;top:180px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:5;"></div>
+              <div style="position:absolute;left:180px;top:302px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:5;"></div>
+              <!-- connector SEGMENT midpoint handles — drag to reshape (no manual waypoints) -->
+              <div style="position:absolute;left:324px;top:180px;width:10px;height:10px;border-radius:3px;background:#fff;border:1.5px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:5;"></div>
+              <div style="position:absolute;left:228px;top:302px;width:10px;height:10px;border-radius:3px;background:#fff;border:1.5px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:5;"></div>
+              <div style="position:absolute;left:276px;top:241px;width:13px;height:13px;border-radius:3px;background:oklch(0.62 0.17 250);border:2px solid #fff;box-shadow:0 0 0 1.5px oklch(0.62 0.17 250);transform:translate(-50%,-50%);z-index:6;"></div>
+              <div style="position:absolute;left:293px;top:234px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:oklch(0.5 0.13 250);z-index:6;white-space:nowrap;">↔ drag segment</div>
+              <!-- floating toolbar -->
+              <div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--ln);border-radius:10px;box-shadow:0 2px 12px oklch(0.4 0.03 200/.16);padding:6px 9px;z-index:7;">
+                <div style="display:flex;gap:3px;">
+                  <div style="width:26px;height:24px;border-radius:6px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="2.5" width="11" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><line x1="3" y1="13" x2="13" y2="3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><polyline points="3,13 6,5 9,10 13,3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><polygon points="8,2.5 13.5,6 13.5,10.5 8,14 2.5,10.5 2.5,6" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M12.5 2.5l1.5 1.5L5 13l-2.5.5.5-2.5L12.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M8 4v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+                  <div style="width:26px;height:24px;border-radius:6px;background:#fff;border:1px solid var(--ln2);color:var(--ink);display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="9.5" width="12" height="4.5" rx="1" fill="currentColor" opacity="0.32"/><line x1="4.5" y1="9.5" x2="4.5" y2="3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11.5" y1="9.5" x2="11.5" y2="3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="3.5" x2="11.5" y2="3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+                </div>
+                <div style="width:1px;height:22px;background:var(--ln);"></div>
+                <div style="display:flex;gap:4px;">
+                  <div style="width:18px;height:18px;border-radius:5px;background:#e6f1f2;border:1.5px solid #024450;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#ffe8e4;border:1.5px solid #cb4a47;box-shadow:0 0 0 1.5px #fff,0 0 0 3px oklch(0.62 0.17 250);"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#ffecd8;border:1.5px solid #b56410;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#fef3d2;border:1.5px solid #957800;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#e0f7e4;border:1.5px solid #369150;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#daf7f6;border:1.5px solid #188d8d;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#e2f2ff;border:1.5px solid #217fd0;"></div>
+                  <div style="width:18px;height:18px;border-radius:5px;background:#f1edff;border:1.5px solid #8464cf;"></div>
+                </div>
+              </div>
+              <!-- inspector popover anchored to the selected connector -->
+              <div style="position:absolute;left:356px;top:300px;width:216px;background:#fff;border:1px solid var(--ln);border-radius:9px;box-shadow:0 6px 24px oklch(0.4 0.03 200/.18);z-index:8;overflow:hidden;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid var(--ln);"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Inspector · Connector</span><span style="color:var(--inks);font-size:12px;">×</span></div>
+                <div style="padding:10px 11px;display:flex;flex-direction:column;gap:9px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.5px;text-transform:uppercase;color:var(--inks);">Routing</span>
+                    <div style="display:inline-flex;border:1px solid var(--ln2);border-radius:6px;overflow:hidden;"><span style="padding:3px 9px;font-size:10px;color:var(--ink);background:#fff;">Straight</span><span style="padding:3px 9px;font-size:10px;color:var(--ink);background:#fff;border-left:1px solid var(--ln2);">Curved</span><span style="padding:3px 9px;font-size:10px;color:#fff;background:var(--ink);border-left:1px solid var(--ln2);">Square</span></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:7px;background:var(--sur2);border-radius:6px;padding:7px 9px;">
+                    <div style="width:13px;height:13px;border-radius:3px;background:oklch(0.62 0.17 250);flex-shrink:0;"></div>
+                    <span style="font-size:10.5px;color:var(--ink);line-height:1.35;">Reshape by <b style="font-weight:600;">dragging any segment</b> — bends &amp; rounded corners update automatically.</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.5px;text-transform:uppercase;color:var(--inks);">From</span><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink);">callout · Header</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.5px;text-transform:uppercase;color:var(--inks);">To</span><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink);">image · region</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-size:11px;color:var(--inks);line-height:1.5;">Annotations are drawn over the <b style="color:var(--ink);font-weight:600;">primary objects</b> (image, callouts) on the gridded page. A square connector links a callout to a region on the image; its ends snap to object edges, and you <b style="color:var(--ink);font-weight:600;">reshape it by dragging any segment</b> — bends and rounded corners update automatically, with no manual waypoint points.</div>
+        </div>
+      </div>
+
+      <!-- Frame A: Palette + inspector (interactive) -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Toolbar + inspector contents — detail (interactive: click tools &amp; swatches)</div>
+        <div style="width:440px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+
+          <!-- TOOLS -->
+          <div style="padding:16px 20px 14px;border-bottom:1px solid var(--ln);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);margin-bottom:10px;">Tools</div>
+            <div style="display:flex;gap:4px;">
+              <button onClick="{{ tBox.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tBox.bc }};background:{{ tBox.bg }};color:{{ tBox.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Box"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="2.5" width="11" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/></svg></button>
+              <button onClick="{{ tCircle.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tCircle.bc }};background:{{ tCircle.bg }};color:{{ tCircle.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Circle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/></svg></button>
+              <button onClick="{{ tLine.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tLine.bc }};background:{{ tLine.bg }};color:{{ tLine.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Line"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2.5" y1="13.5" x2="13.5" y2="2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+              <button onClick="{{ tPolyLine.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tPolyLine.bc }};background:{{ tPolyLine.bg }};color:{{ tPolyLine.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="PolyLine"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,13 5.5,5 9,10 13,3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+              <button onClick="{{ tPolygon.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tPolygon.bc }};background:{{ tPolygon.bg }};color:{{ tPolygon.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Polygon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polygon points="8,2 13.5,5.5 13.5,10.5 8,14 2.5,10.5 2.5,5.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>
+              <button onClick="{{ tInkPen.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tInkPen.bc }};background:{{ tInkPen.bg }};color:{{ tInkPen.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Ink"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.5 2.5l1.5 1.5L5 13l-2.5.5.5-2.5L12.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+              <button onClick="{{ tText.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tText.bc }};background:{{ tText.bg }};color:{{ tText.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Text"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M8 4v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+              <button onClick="{{ tHighlight.fn }}" style="width:42px;height:36px;border-radius:7px;border-width:1px;border-style:solid;border-color:{{ tHighlight.bc }};background:{{ tHighlight.bg }};color:{{ tHighlight.co }};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Highlight"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="9.5" width="12" height="4.5" rx="1" fill="currentColor" opacity="0.32"/><line x1="4.5" y1="9.5" x2="4.5" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11.5" y1="9.5" x2="11.5" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="3" x2="11.5" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+            </div>
+          </div>
+
+          <!-- PALETTE -->
+          <div style="padding:14px 20px;border-bottom:1px solid var(--ln);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);margin-bottom:10px;">Palette</div>
+            <div style="display:flex;gap:6px;">
+              <button onClick="{{ s0.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s0.s }};background:{{ s0.f }};box-shadow:{{ s0.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Ink"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s0.s }};"></div></button>
+              <button onClick="{{ s1.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s1.s }};background:{{ s1.f }};box-shadow:{{ s1.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Red"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s1.s }};"></div></button>
+              <button onClick="{{ s2.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s2.s }};background:{{ s2.f }};box-shadow:{{ s2.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Orange"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s2.s }};"></div></button>
+              <button onClick="{{ s3.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s3.s }};background:{{ s3.f }};box-shadow:{{ s3.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Amber"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s3.s }};"></div></button>
+              <button onClick="{{ s4.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s4.s }};background:{{ s4.f }};box-shadow:{{ s4.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Green"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s4.s }};"></div></button>
+              <button onClick="{{ s5.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s5.s }};background:{{ s5.f }};box-shadow:{{ s5.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Teal"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s5.s }};"></div></button>
+              <button onClick="{{ s6.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s6.s }};background:{{ s6.f }};box-shadow:{{ s6.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Blue"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s6.s }};"></div></button>
+              <button onClick="{{ s7.fn }}" style="width:38px;height:38px;border-radius:8px;border-width:2px;border-style:solid;border-color:{{ s7.s }};background:{{ s7.f }};box-shadow:{{ s7.ring }};cursor:pointer;position:relative;overflow:hidden;" title="Violet"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:4px 0 8px 0;background:{{ s7.s }};"></div></button>
+            </div>
+          </div>
+
+          <!-- INSPECTOR -->
+          <div style="padding:16px 20px 20px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);margin-bottom:14px;">Inspector · {{ swN }}</div>
+
+            <!-- Fill + Stroke chips + OKLCH values -->
+            <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;">
+              <div style="display:flex;flex-direction:column;gap:5px;align-items:center;">
+                <div style="width:52px;height:52px;border-radius:8px;background:{{ swF }};border:1.5px solid var(--ln2);"></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--inks);">Fill</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);margin-top:-3px;">{{ swHF }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;align-items:center;">
+                <div style="width:52px;height:52px;border-radius:8px;background:{{ swS }};border:1.5px solid var(--ln2);"></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--inks);">Stroke</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);margin-top:-3px;">{{ swHS }}</span>
+              </div>
+              <div style="flex:1;min-width:0;background:var(--sur2);border-radius:7px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;justify-content:center;height:52px;box-sizing:border-box;">
+                <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);flex-shrink:0;">fill</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ swOF }}</span>
+                </div>
+                <div style="height:1px;background:var(--ln);"></div>
+                <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);flex-shrink:0;">stroke</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ swOS }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- PDF mapping -->
+            <div style="background:var(--sur2);border-radius:7px;padding:11px 13px;margin-bottom:14px;">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--inks);margin-bottom:8px;">PDF Mapping</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;gap:14px;align-items:baseline;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink);min-width:22px;font-weight:500;">/C</span>
+                  <code style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);">[ {{ swCC }} ]</code>
+                </div>
+                <div style="display:flex;gap:14px;align-items:baseline;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink);min-width:22px;font-weight:500;">/IC</span>
+                  <code style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);">[ {{ swIC }} ]</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stroke width -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--inks);">Stroke Width</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:96px;height:4px;background:var(--ln2);border-radius:2px;position:relative;">
+                  <div style="position:absolute;left:0;top:0;width:36px;height:4px;background:var(--ink);border-radius:2px;"></div>
+                  <div style="position:absolute;top:-5px;left:28px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);min-width:24px;">2pt</span>
+              </div>
+            </div>
+
+            <!-- Corner radius (rounded corners on every corner-bearing shape + connector elbows) -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--inks);">Corner Radius</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:96px;height:4px;background:var(--ln2);border-radius:2px;position:relative;">
+                  <div style="position:absolute;left:0;top:0;width:30px;height:4px;background:var(--ink);border-radius:2px;"></div>
+                  <div style="position:absolute;top:-5px;left:22px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);min-width:24px;">8px</span>
+              </div>
+            </div>
+
+            <!-- Fill / No-fill — closed shapes only (Box / Circle / Polygon) -->
+            <sc-if value="{{ showFill }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--inks);">Fill</span>
+                <div style="display:inline-flex;gap:8px;">
+                  <button title="Fill — light background + dark border" style="width:32px;height:26px;border-radius:7px;background:{{ swF }};border-width:2px;border-style:solid;border-color:{{ swS }};box-shadow:0 0 0 2px #fff, 0 0 0 3.5px var(--sel);cursor:pointer;padding:0;"></button>
+                  <button title="No fill — border only" style="width:32px;height:26px;border-radius:7px;background:transparent;border-width:2px;border-style:solid;border-color:{{ swS }};cursor:pointer;padding:0;"></button>
+                </div>
+              </div>
+              <div style="font-size:10.5px;color:var(--inks);line-height:1.4;margin-bottom:10px;">Filled = light fill + dark stroke (the paired swatch). No-fill = dark stroke only, transparent interior.</div>
+            </sc-if>
+
+            <!-- Endpoints (line / polyline only) -->
+            <sc-if value="{{ showEp }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px solid var(--ln);padding-top:13px;margin-top:4px;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--inks);margin-bottom:10px;">Routing</div>
+                <div style="display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;margin-bottom:14px;">
+                  <button style="padding:5px 13px;border:none;background:#fff;color:var(--ink);font-size:11.5px;cursor:pointer;">Straight</button>
+                  <button style="padding:5px 13px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:11.5px;cursor:pointer;">Curved</button>
+                  <button style="padding:5px 13px;border:none;border-left:1px solid var(--ln2);background:var(--ink);color:#fff;font-size:11.5px;cursor:pointer;">Square</button>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--inks);margin-bottom:10px;">Endpoints</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);min-width:38px;">From</span>
+                    <div style="display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;">
+                      <button style="padding:5px 11px;border:none;background:var(--ink);color:#fff;font-size:12px;cursor:pointer;" title="none">—</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="arrow">→</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="circle">●</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="diamond">◇</button>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);min-width:38px;">To</span>
+                    <div style="display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;">
+                      <button style="padding:5px 11px;border:none;background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="none">—</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:var(--ink);color:#fff;font-size:12px;cursor:pointer;" title="arrow">→</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="circle">●</button>
+                      <button style="padding:5px 11px;border:none;border-left:1px solid var(--ln2);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;" title="diamond">◇</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame B: Swatch states + full palette reference -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Component states + full palette token reference (OKLCH + sRGB hex)</div>
+        <div style="width:288px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <!-- States -->
+          <div style="padding:16px 20px 14px;border-bottom:1px solid var(--ln);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);margin-bottom:12px;">Swatch States (Ink)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <div style="width:44px;height:44px;border-radius:9px;background:oklch(0.95 0.012 200);border:2px solid oklch(0.34 0.045 200);position:relative;overflow:hidden;"><div style="position:absolute;bottom:0;right:0;width:13px;height:13px;background:oklch(0.34 0.045 200);border-radius:4px 0 9px 0;"></div></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">Default</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <div style="width:44px;height:44px;border-radius:9px;background:oklch(0.92 0.018 200);border:2px solid oklch(0.34 0.045 200);position:relative;overflow:hidden;box-shadow:0 2px 8px oklch(0.34 0.045 200 / 0.2);"><div style="position:absolute;bottom:0;right:0;width:13px;height:13px;background:oklch(0.34 0.045 200);border-radius:4px 0 9px 0;"></div></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">Hover</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <div style="width:44px;height:44px;border-radius:9px;background:oklch(0.95 0.012 200);border:2px solid oklch(0.34 0.045 200);position:relative;overflow:hidden;box-shadow:0 0 0 2.5px #fff,0 0 0 5px oklch(0.62 0.17 250);"><div style="position:absolute;bottom:0;right:0;width:13px;height:13px;background:oklch(0.34 0.045 200);border-radius:4px 0 9px 0;"></div></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">Selected</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <div style="width:44px;height:44px;border-radius:9px;background:oklch(0.95 0.012 200);border:2px solid oklch(0.34 0.045 200);position:relative;overflow:hidden;outline:2.5px dashed oklch(0.62 0.17 250);outline-offset:2px;"><div style="position:absolute;bottom:0;right:0;width:13px;height:13px;background:oklch(0.34 0.045 200);border-radius:4px 0 9px 0;"></div></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">Focus</span>
+              </div>
+            </div>
+          </div>
+          <!-- Full palette -->
+          <div style="padding:16px 20px 20px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);margin-bottom:12px;">Full Palette</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.95 0.012 200);border:2px solid oklch(0.34 0.045 200);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.34 0.045 200);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Ink</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#e6f1f2</span> <span style="color:var(--inks);">oklch(0.95 0.012 200)</span><br /><span style="color:var(--ink);">#024450</span> <span style="color:var(--inks);">oklch(0.34 0.045 200)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.955 0.035 25);border:2px solid oklch(0.585 0.165 25);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.165 25);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Red</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#ffe8e4</span> <span style="color:var(--inks);">oklch(0.955 0.035 25)</span><br /><span style="color:var(--ink);">#cb4a47</span> <span style="color:var(--inks);">oklch(0.585 0.165 25)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.96 0.04 58);border:2px solid oklch(0.585 0.135 58);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.135 58);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Orange</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#ffecd8</span> <span style="color:var(--inks);">oklch(0.96 0.04 58)</span><br /><span style="color:var(--ink);">#b56410</span> <span style="color:var(--inks);">oklch(0.585 0.135 58)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.965 0.045 92);border:2px solid oklch(0.585 0.12 92);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.12 92);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Amber</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#fef3d2</span> <span style="color:var(--inks);">oklch(0.965 0.045 92)</span><br /><span style="color:var(--ink);">#957800</span> <span style="color:var(--inks);">oklch(0.585 0.12 92)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.955 0.035 150);border:2px solid oklch(0.585 0.13 150);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.13 150);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Green</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#e0f7e4</span> <span style="color:var(--inks);">oklch(0.955 0.035 150)</span><br /><span style="color:var(--ink);">#369150</span> <span style="color:var(--inks);">oklch(0.585 0.13 150)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.955 0.03 195);border:2px solid oklch(0.585 0.095 195);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.095 195);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Teal</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#daf7f6</span> <span style="color:var(--inks);">oklch(0.955 0.03 195)</span><br /><span style="color:var(--ink);">#188d8d</span> <span style="color:var(--inks);">oklch(0.585 0.095 195)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.955 0.03 250);border:2px solid oklch(0.585 0.15 250);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.15 250);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Blue</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#e2f2ff</span> <span style="color:var(--inks);">oklch(0.955 0.03 250)</span><br /><span style="color:var(--ink);">#217fd0</span> <span style="color:var(--inks);">oklch(0.585 0.15 250)</span></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:6px;background:oklch(0.955 0.03 295);border:2px solid oklch(0.585 0.16 295);position:relative;overflow:hidden;flex-shrink:0;"><div style="position:absolute;bottom:0;right:0;width:8px;height:8px;background:oklch(0.585 0.16 295);border-radius:2px 0 6px 0;"></div></div><div><div style="font-size:12px;font-weight:500;color:var(--ink);">Violet</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.7;"><span style="color:var(--ink);">#f1edff</span> <span style="color:var(--inks);">oklch(0.955 0.03 295)</span><br /><span style="color:var(--ink);">#8464cf</span> <span style="color:var(--inks);">oklch(0.585 0.16 295)</span></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame C: on-canvas annotation preview -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">On-canvas preview — the palette applied to live annotations</div>
+        <div style="width:392px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Live Preview</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">fill 50% · stroke 100%</span>
+          </div>
+          <div style="background:var(--sur2);padding:26px;display:flex;justify-content:center;">
+            <!-- phone screenshot mock + annotation overlay -->
+            <div style="position:relative;width:208px;height:306px;">
+              <div style="position:absolute;inset:0;background:#fff;border:1px solid var(--ln);border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                <div style="height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;"><span style="font-size:8px;font-weight:600;color:var(--ink);">9:41</span><div style="display:flex;gap:3px;align-items:center;"><div style="width:14px;height:7px;border:1px solid var(--ink);border-radius:2px;"></div></div></div>
+                <div style="height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--ln);"><span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;color:var(--ink);">Settings</span></div>
+                <div style="padding:8px 0;">
+                  <div style="height:38px;display:flex;align-items:center;gap:10px;padding:0 16px;"><div style="width:18px;height:18px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);"></div><span style="flex:1;font-size:11px;color:var(--ink);">Account</span><svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1l3.5 4-3.5 4" stroke="oklch(0.62 0.02 200)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div style="height:38px;display:flex;align-items:center;gap:10px;padding:0 16px;"><div style="width:18px;height:18px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);"></div><span style="flex:1;font-size:11px;color:var(--ink);">Notifications</span><div style="width:28px;height:16px;border-radius:8px;background:var(--ln2);position:relative;"><div style="position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;"></div></div></div>
+                  <div style="height:38px;display:flex;align-items:center;gap:10px;padding:0 16px;"><div style="width:18px;height:18px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);"></div><span style="flex:1;font-size:11px;color:var(--ink);">Privacy</span><svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1l3.5 4-3.5 4" stroke="oklch(0.62 0.02 200)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div style="height:38px;display:flex;align-items:center;gap:10px;padding:0 16px;"><div style="width:18px;height:18px;border-radius:5px;background:var(--sur2);border:1px solid var(--ln);"></div><span style="flex:1;font-size:11px;color:var(--ink);">Help &amp; support</span><svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1l3.5 4-3.5 4" stroke="oklch(0.62 0.02 200)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+                <div style="padding:14px 16px;"><div style="height:34px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;"><span style="font-size:11px;font-weight:500;color:#fff;">Save changes</span></div></div>
+              </div>
+              <!-- annotation overlay -->
+              <svg width="208" height="306" viewBox="0 0 208 306" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;">
+                <defs><marker id="arrAmber" markerWidth="7" markerHeight="7" refX="5" refY="3.2" orient="auto"><path d="M0.5 0.5L6 3.2 0.5 5.9" fill="none" stroke="oklch(0.585 0.12 92)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+                <!-- Green highlight over Account row -->
+                <rect x="12" y="80" width="184" height="34" rx="3" fill="oklch(0.955 0.035 150)" fill-opacity="0.55"/>
+                <!-- Red box around the title -->
+                <rect x="8" y="28" width="192" height="42" rx="4" fill="oklch(0.955 0.035 25)" fill-opacity="0.32" stroke="oklch(0.585 0.165 25)" stroke-width="2"/>
+                <!-- Blue circle around the toggle -->
+                <circle cx="178" cy="153" r="16" fill="oklch(0.955 0.03 250)" fill-opacity="0.4" stroke="oklch(0.585 0.15 250)" stroke-width="2"/>
+                <!-- Amber connector from freetext to the toggle -->
+                <path d="M70 214 Q120 200 162 166" fill="none" stroke="oklch(0.585 0.12 92)" stroke-width="2" stroke-linecap="round" marker-end="url(#arrAmber)"/>
+              </svg>
+              <!-- FreeText annotation (Ink) -->
+              <div style="position:absolute;left:8px;top:214px;font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:oklch(0.34 0.045 200);background:rgba(255,255,255,0.85);padding:2px 5px;border-radius:3px;">Turn this on first</div>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);line-height:1.6;">Box · Red &nbsp;·&nbsp; Highlight · Green &nbsp;·&nbsp; Circle · Blue &nbsp;·&nbsp; Line + FreeText · Amber</div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /section 03 -->
+
+  <!-- ════════════════════════════════════════════════
+       04 — CANVAS INTERACTIONS
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">04 — Canvas Interactions</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">grid · snapping · dividers · object drag</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+
+      <!-- Frame 4a: Grid visibility -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Show / hide grid — toggle in the top bar &amp; preview toolbar (≈120ms fade)</div>
+        <div style="width:600px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:10px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Grid Visibility</span>
+            <div style="flex:1;"></div>
+            <span style="font-size:11px;color:var(--inks);">Grid</span>
+            <div style="width:32px;height:18px;border-radius:9px;background:var(--ink);position:relative;"><div style="position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff;"></div></div>
+          </div>
+          <div style="background:var(--sur2);padding:26px;display:flex;gap:40px;justify-content:center;">
+            <!-- OFF thumbnail -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div style="position:relative;width:236px;height:334px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                <div style="position:absolute;top:20px;left:20px;right:20px;display:flex;flex-direction:column;gap:10px;">
+                  <div style="height:9px;width:55%;background:oklch(0.34 0.045 200);border-radius:1px;opacity:0.85;"></div>
+                  <div style="height:5px;width:80%;background:var(--ln2);border-radius:1px;"></div>
+                  <div style="display:flex;gap:10px;margin-top:6px;"><div style="width:78px;height:124px;background:#f2f4f4;border:3px solid #d7dede;border-radius:3px;"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;"><div style="height:30px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.16);border-radius:2px;"></div><div style="height:30px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.16);border-radius:2px;"></div><div style="height:30px;background:#fdf5dc;border:0.8px solid rgba(200,154,30,0.34);border-radius:2px;"></div></div></div>
+                </div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--inks);">Grid off</span>
+            </div>
+            <!-- ON thumbnail -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div style="position:relative;width:236px;height:334px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                <!-- body band tint -->
+                <div style="position:absolute;left:20px;right:20px;top:58px;bottom:48px;background:oklch(0.62 0.17 250 / 0.04);"></div>
+                <!-- margin guides -->
+                <div style="position:absolute;top:20px;left:20px;right:20px;bottom:20px;border:1px dashed oklch(0.62 0.17 250 / 0.5);"></div>
+                <!-- header zone divider -->
+                <div style="position:absolute;left:20px;right:20px;top:58px;border-top:1px dashed oklch(0.62 0.17 250 / 0.45);"></div>
+                <!-- footer zone divider -->
+                <div style="position:absolute;left:20px;right:20px;bottom:48px;border-top:1px dashed oklch(0.62 0.17 250 / 0.45);"></div>
+                <!-- row divider + handle -->
+                <div style="position:absolute;left:20px;right:20px;top:200px;border-top:1.5px solid oklch(0.62 0.17 250 / 0.55);"></div>
+                <div style="position:absolute;right:14px;top:194px;width:13px;height:13px;border-radius:3px;background:#fff;border:1.5px solid oklch(0.62 0.17 250);"></div>
+                <!-- column divider + handle (within top row) -->
+                <div style="position:absolute;left:128px;top:58px;height:142px;border-left:1.5px solid oklch(0.62 0.17 250 / 0.55);"></div>
+                <div style="position:absolute;left:122px;top:122px;width:13px;height:13px;border-radius:3px;background:#fff;border:1.5px solid oklch(0.62 0.17 250);"></div>
+                <!-- faint content -->
+                <div style="position:absolute;top:68px;left:30px;width:80px;height:110px;background:#f2f4f4;border:3px solid #d7dede;border-radius:3px;opacity:0.7;"></div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">Grid on — margins · body band · dividers</span>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-size:11px;color:var(--inks);line-height:1.5;">Dashed <span style="color:oklch(0.55 0.15 250);">selection-blue</span> lines mark margins, the header/footer zones, and row/column dividers. The body band is faintly tinted so it reads apart from the margin and header/footer zones. Respects <code style="font-family:'JetBrains Mono',monospace;font-size:10px;">prefers-reduced-motion</code>.</div>
+        </div>
+      </div>
+
+      <!-- Frame 4b: Direct manipulation -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Direct manipulation — divider drag, snapping &amp; in-cell object drag</div>
+        <div style="width:520px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">A Row · Two Columns</span></div>
+          <div style="background:var(--sur2);padding:24px;">
+            <div style="position:relative;width:460px;height:284px;margin:0 auto;">
+              <!-- width readouts -->
+              <div style="position:absolute;left:20px;top:0;width:235px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);">92 mm</div>
+              <div style="position:absolute;left:255px;top:0;width:185px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);">78 mm</div>
+              <!-- row container -->
+              <div style="position:absolute;left:20px;top:24px;width:420px;height:240px;background:#fff;border:1px solid var(--ln2);border-radius:4px;overflow:hidden;">
+                <!-- right cell content -->
+                <div style="position:absolute;left:236px;top:14px;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;"><div style="height:34px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.16);border-radius:2px;"></div><div style="height:34px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.16);border-radius:2px;"></div><div style="height:34px;background:#fdf5dc;border:0.8px solid rgba(200,154,30,0.34);border-radius:2px;"></div></div>
+                <!-- left cell bounds (dashed) -->
+                <div style="position:absolute;left:14px;top:14px;width:207px;bottom:14px;border:1.5px dashed oklch(0.62 0.17 250 / 0.45);border-radius:3px;"></div>
+                <!-- dragged object (image) within left cell -->
+                <div style="position:absolute;left:40px;top:46px;width:92px;height:148px;background:#f2f4f4;border:3px solid #d7dede;border-radius:3px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(2,68,80,0.16);"><svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="1" y="2.5" width="14" height="11" rx="1.5" stroke="oklch(0.48 0.04 200)" stroke-width="1.1"/><path d="M3 10l3-3.5 2.5 3 2-2.5 2.5 3" stroke="oklch(0.48 0.04 200)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <!-- snap guide line (object left edge aligned) -->
+                <div style="position:absolute;left:40px;top:0;bottom:0;border-left:1.5px dashed oklch(0.62 0.17 250);"></div>
+                <div style="position:absolute;left:37px;top:43px;width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.17 250);"></div>
+                <div style="position:absolute;left:37px;top:191px;width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.17 250);"></div>
+              </div>
+              <!-- column divider + grab handle -->
+              <div style="position:absolute;left:255px;top:24px;height:240px;border-left:2px solid oklch(0.62 0.17 250);"></div>
+              <div style="position:absolute;left:250px;top:128px;width:12px;height:34px;border-radius:6px;background:#fff;border:1.5px solid oklch(0.62 0.17 250);box-shadow:0 2px 6px rgba(2,68,80,0.18);display:flex;align-items:center;justify-content:center;"><div style="width:2px;height:16px;background:oklch(0.62 0.17 250);border-radius:1px;"></div></div>
+              <!-- numbered markers -->
+              <div style="position:absolute;left:248px;top:96px;width:17px;height:17px;border-radius:50%;background:var(--ink);color:#fff;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">1</div>
+              <div style="position:absolute;left:78px;top:108px;width:17px;height:17px;border-radius:50%;background:var(--ink);color:#fff;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">2</div>
+              <div style="position:absolute;left:48px;top:236px;width:17px;height:17px;border-radius:50%;background:oklch(0.62 0.17 250);color:#fff;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">3</div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--ln);display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="flex:0 0 17px;width:17px;height:17px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">1</span><span style="font-size:12px;color:var(--ink);line-height:1.45;"><b style="font-weight:600;">Drag a divider left/right</b> to redistribute column width within the row. The neighbour shrinks; live mm readouts update; drag stops at a minimum floor (resize cursor on hover, thicken on grab).</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="flex:0 0 17px;width:17px;height:17px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">2</span><span style="font-size:12px;color:var(--ink);line-height:1.45;"><b style="font-weight:600;">Drag a layer-1 primary object freely</b> inside its cell. Movement is clamped to the cell bounds (dashed) — it never crosses into a neighbouring cell.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="flex:0 0 17px;width:17px;height:17px;border-radius:50%;background:oklch(0.62 0.17 250);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">3</span><span style="font-size:12px;color:var(--ink);line-height:1.45;"><b style="font-weight:600;">Snap guides</b> appear within threshold — a solid blue line plus anchor dots highlight the edge/center the object is snapping to. Row dividers behave the same vertically.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /section 04 -->
+
+  <!-- ════════════════════════════════════════════════
+       05 — CONNECTORS & FLOW
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">05 — Connectors &amp; Flow</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">FigJam-grade · square + curved · snap to objects</span>
+    </div>
+    <p style="font-size:12px;color:var(--inks);margin:-12px 0 20px;max-width:760px;line-height:1.55;">Every shape (rectangle, square, polygon) and every connector elbow carries a <b style="color:var(--ink);font-weight:600;">corner radius</b> (default 8px) — no hard 90° corners. Connectors route <b style="color:var(--ink);font-weight:600;">Straight · Curved · Square</b> and their ends snap to object anchor points (edge mid-points, shown in <span style="color:oklch(0.55 0.15 250);">blue</span>).</p>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+
+      <!-- Frame A: Square (elbow) connectors -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Square connectors — rounded elbow corners (8px)</div>
+        <div style="width:380px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Square Routing</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">elbow · r 8px</span>
+          </div>
+          <div style="background:var(--sur2);padding:20px;">
+            <div style="position:relative;width:320px;height:350px;margin:0 auto;">
+              <svg width="320" height="350" viewBox="0 0 320 350" style="position:absolute;inset:0;z-index:1;overflow:visible;">
+                <defs><marker id="arrSq" markerWidth="8" markerHeight="8" refX="4.4" refY="3.4" orient="auto"><path d="M0.6 0.6L6 3.4 0.6 6.2" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+                <path d="M160 58 L160 94 Q160 102 152 102 L86 102 Q78 102 78 110 L78 145" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrSq)"/>
+                <path d="M160 58 L160 94 Q160 102 168 102 L234 102 Q242 102 242 110 L242 145" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrSq)"/>
+                <path d="M78 185 L78 227 Q78 235 86 235 L144 235 Q152 235 152 243 L152 285" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrSq)"/>
+                <path d="M242 185 L242 227 Q242 235 234 235 L176 235 Q168 235 168 243 L168 285" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrSq)"/>
+              </svg>
+              <!-- nodes (primary objects) -->
+              <div style="position:absolute;left:100px;top:18px;width:120px;height:40px;border-radius:10px;background:#e2f2ff;border:1.5px solid #217fd0;display:flex;align-items:center;justify-content:center;gap:6px;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">New project</span></div>
+              <div style="position:absolute;left:18px;top:145px;width:120px;height:40px;border-radius:10px;background:#daf7f6;border:1.5px solid #188d8d;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Add chapter</span></div>
+              <div style="position:absolute;left:182px;top:145px;width:120px;height:40px;border-radius:10px;background:#fef3d2;border:1.5px solid #957800;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Add step</span></div>
+              <div style="position:absolute;left:100px;top:285px;width:120px;height:40px;border-radius:10px;background:#e0f7e4;border:1.5px solid #369150;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Export PDF</span></div>
+              <!-- N1 anchor points (snap targets) -->
+              <div style="position:absolute;left:160px;top:18px;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid oklch(0.62 0.17 250 / 0.5);z-index:3;"></div>
+              <div style="position:absolute;left:220px;top:38px;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid oklch(0.62 0.17 250 / 0.5);z-index:3;"></div>
+              <div style="position:absolute;left:100px;top:38px;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid oklch(0.62 0.17 250 / 0.5);z-index:3;"></div>
+              <div style="position:absolute;left:160px;top:58px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <!-- active snap anchors on other nodes -->
+              <div style="position:absolute;left:78px;top:145px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:242px;top:145px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:78px;top:185px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:242px;top:185px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:152px;top:285px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:168px;top:285px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <!-- teaching label -->
+              <div style="position:absolute;left:228px;top:30px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:oklch(0.55 0.13 250);z-index:5;">anchor points</div>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-size:11px;color:var(--inks);line-height:1.5;">Orthogonal elbow, every bend filleted to an 8px arc. Reshape by dragging a segment's midpoint handle (Figma-style) — bends follow automatically, no manual waypoint points. Ends bind to object anchors and re-route live.</div>
+        </div>
+      </div>
+
+      <!-- Frame B: Curved connectors -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Curved connectors — bezier routing</div>
+        <div style="width:380px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Curved Routing</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">bezier</span>
+          </div>
+          <div style="background:var(--sur2);padding:20px;">
+            <div style="position:relative;width:320px;height:350px;margin:0 auto;">
+              <svg width="320" height="350" viewBox="0 0 320 350" style="position:absolute;inset:0;z-index:1;overflow:visible;">
+                <defs><marker id="arrCv" markerWidth="8" markerHeight="8" refX="4.4" refY="3.4" orient="auto"><path d="M0.6 0.6L6 3.4 0.6 6.2" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+                <path d="M160 58 C160 106 78 98 78 145" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" marker-end="url(#arrCv)"/>
+                <path d="M160 58 C160 106 242 98 242 145" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" marker-end="url(#arrCv)"/>
+                <path d="M78 185 C78 238 152 232 152 285" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" marker-end="url(#arrCv)"/>
+                <path d="M242 185 C242 238 168 232 168 285" fill="none" stroke="oklch(0.46 0.03 200)" stroke-width="2" stroke-linecap="round" marker-end="url(#arrCv)"/>
+              </svg>
+              <div style="position:absolute;left:100px;top:18px;width:120px;height:40px;border-radius:10px;background:#e2f2ff;border:1.5px solid #217fd0;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">New project</span></div>
+              <div style="position:absolute;left:18px;top:145px;width:120px;height:40px;border-radius:10px;background:#daf7f6;border:1.5px solid #188d8d;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Add chapter</span></div>
+              <div style="position:absolute;left:182px;top:145px;width:120px;height:40px;border-radius:10px;background:#fef3d2;border:1.5px solid #957800;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Add step</span></div>
+              <div style="position:absolute;left:100px;top:285px;width:120px;height:40px;border-radius:10px;background:#e0f7e4;border:1.5px solid #369150;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(2,68,80,0.08);"><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:oklch(0.34 0.045 200);">Export PDF</span></div>
+              <div style="position:absolute;left:160px;top:58px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:78px;top:145px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:242px;top:145px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:78px;top:185px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:242px;top:185px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+              <div style="position:absolute;left:160px;top:285px;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.17 250);box-shadow:0 0 0 2px #fff;z-index:4;"></div>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-size:11px;color:var(--inks);line-height:1.5;">Smooth bezier between the same snapped anchors — toggle routing per connector in the inspector (Straight · Curved · Square).</div>
+        </div>
+      </div>
+
+      <!-- Frame C: editor view — selected shapes + bound connector (mirrors the live app) -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Editor view — selected shapes + bound connector (mirrors the live app)</div>
+        <div style="width:340px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="padding:13px 20px;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--inks);">Selection Handles</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--inks);">snap-bound</span>
+          </div>
+          <div style="background:var(--sur2);padding:20px;display:flex;justify-content:center;">
+            <div style="position:relative;width:300px;height:440px;background:oklch(0.972 0.006 200);border:1px solid var(--ln);border-radius:18px;">
+              <!-- connector line (behind content) -->
+              <svg width="300" height="440" viewBox="0 0 300 440" style="position:absolute;inset:0;z-index:1;overflow:visible;"><line x1="150" y1="162" x2="150" y2="296" stroke="oklch(0.5 0.04 215)" stroke-width="2" stroke-linecap="round"/></svg>
+              <!-- image slot -->
+              <div style="position:absolute;left:50%;top:198px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;">
+                <div style="width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--ln2);display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2.5" width="14" height="11" rx="2" stroke="oklch(0.48 0.04 200)" stroke-width="1.2"/><circle cx="5" cy="6" r="1.2" fill="oklch(0.48 0.04 200)"/><path d="M2 12l4-4 3 3 2.5-2.5L14 12" stroke="oklch(0.48 0.04 200)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;color:oklch(0.34 0.045 200);">SCREEN</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.48 0.04 200);background:#fff;border:1px solid var(--ln);border-radius:3px;padding:2px 5px;">public/chapter1/</span>
+              </div>
+              <!-- box outlines -->
+              <div style="position:absolute;left:24px;top:42px;width:252px;height:120px;border:1.5px solid oklch(0.5 0.04 215);border-radius:8px;z-index:2;"></div>
+              <div style="position:absolute;left:24px;top:296px;width:252px;height:108px;border:1.5px solid oklch(0.5 0.04 215);border-radius:8px;z-index:2;"></div>
+              <!-- TOP box handles: 4 corners + 3 edge-mids + center (bottom-mid is the connector anchor) -->
+              <div style="position:absolute;left:24px;top:42px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:150px;top:42px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:42px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:24px;top:102px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:150px;top:102px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:102px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:24px;top:162px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:162px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <!-- BOTTOM box handles -->
+              <div style="position:absolute;left:24px;top:296px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:296px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:24px;top:350px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:150px;top:350px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:350px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:24px;top:404px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:150px;top:404px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <div style="position:absolute;left:276px;top:404px;width:6px;height:6px;border-radius:50%;background:oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:3;"></div>
+              <!-- connector open-circle anchors (box edge bind points) -->
+              <div style="position:absolute;left:150px;top:162px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:4;"></div>
+              <div style="position:absolute;left:150px;top:296px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid oklch(0.5 0.04 215);transform:translate(-50%,-50%);z-index:4;"></div>
+            </div>
+          </div>
+          <div style="padding:11px 20px;border-top:1px solid var(--ln);font-size:11px;color:var(--inks);line-height:1.5;">Selected shapes show 8 handles (4 corners + 4 edge mid-points) plus a center move dot. Connector ends are open-circle anchors snapped to a box edge — <code style="font-family:'JetBrains Mono',monospace;font-size:10px;">box · bottom</code> → <code style="font-family:'JetBrains Mono',monospace;font-size:10px;">box · top</code>.</div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /section 05 -->
+
+  <!-- ════════════════════════════════════════════════
+       06 — WATERMARK
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">06 — Watermark</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">settings + render</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+
+      <!-- Frame 5a: Watermark settings -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Watermark controls (left-pane section)</div>
+        <div style="width:360px;background:#fff;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;border-bottom:1px solid var(--ln);">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Watermark</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="transform:rotate(180deg);"><path d="M3 4.5l3 3 3-3" stroke="oklch(0.48 0.04 200)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px;">
+            <!-- Enable -->
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:12.5px;color:var(--ink);">Enable watermark</span>
+              <div style="width:32px;height:18px;border-radius:9px;background:var(--ink);position:relative;cursor:pointer;"><div style="position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff;"></div></div>
+            </div>
+            <!-- Text -->
+            <label style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:11px;color:var(--inks);">Text</span><input style="height:32px;border:1px solid var(--ln2);border-radius:7px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;" value="CONFIDENTIAL — DRAFT" readonly /></label>
+            <!-- Position picker -->
+            <div>
+              <span style="font-size:11px;color:var(--inks);display:block;margin-bottom:6px;">Position</span>
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div style="position:relative;width:64px;height:84px;border:1px solid var(--ln2);border-radius:5px;background:var(--sur2);flex-shrink:0;">
+                  <div style="position:absolute;top:5px;left:5px;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ln2);background:#fff;"></div>
+                  <div style="position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ln2);background:#fff;"></div>
+                  <div style="position:absolute;bottom:5px;left:5px;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ln2);background:#fff;"></div>
+                  <div style="position:absolute;bottom:5px;right:5px;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ln2);background:#fff;"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 2px #fff,0 0 0 3.5px oklch(0.62 0.17 250);"></div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--inks);line-height:1.7;">center<br /><span style="color:oklch(0.65 0.015 200);">· top-left · top-right<br />· bottom-left · bottom-right</span></div>
+              </div>
+            </div>
+            <!-- Opacity -->
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--inks);">Opacity</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);">0.08</span></div>
+              <div style="height:4px;background:var(--ln2);border-radius:2px;position:relative;"><div style="position:absolute;left:0;top:0;width:14px;height:4px;background:var(--ink);border-radius:2px;"></div><div style="position:absolute;top:-5px;left:7px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div></div>
+            </div>
+            <!-- Size -->
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--inks);">Size</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);">1.00×</span></div>
+              <div style="height:4px;background:var(--ln2);border-radius:2px;position:relative;"><div style="position:absolute;left:0;top:0;width:42px;height:4px;background:var(--ink);border-radius:2px;"></div><div style="position:absolute;top:-5px;left:34px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div></div>
+            </div>
+            <!-- Logo upload -->
+            <div>
+              <span style="font-size:11px;color:var(--inks);display:block;margin-bottom:4px;">Logo (optional — shown above the text)</span>
+              <button style="width:100%;height:32px;border:1px dashed var(--ln2);border-radius:7px;background:transparent;color:var(--ink);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;">Upload logo…</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5b: Watermark render -->
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Rendered on the page — center · rotated −30° · ink at low opacity</div>
+        <div style="width:470px;background:var(--sur2);border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;padding:26px;display:flex;justify-content:center;">
+          <!-- A4 page (~52% scale = 412 × 584) -->
+          <div style="position:relative;width:412px;height:584px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 8px 40px rgba(0,0,0,0.1);overflow:hidden;">
+            <!-- faint page content behind watermark -->
+            <div style="position:absolute;top:36px;left:36px;right:36px;display:flex;flex-direction:column;gap:8px;opacity:0.5;">
+              <div style="height:8px;width:50%;background:oklch(0.34 0.045 200);border-radius:1px;"></div>
+              <div style="height:5px;width:78%;background:var(--ln2);border-radius:1px;"></div>
+              <div style="display:flex;gap:9px;margin-top:6px;"><div style="width:88px;height:140px;background:#f2f4f4;border:3px solid #d7dede;border-radius:3px;"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:32px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.14);border-radius:2px;"></div><div style="height:32px;background:#f0f5f6;border:0.8px solid rgba(2,68,80,0.14);border-radius:2px;"></div></div></div>
+            </div>
+            <!-- watermark: center, rotated -30deg -->
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:14px;transform:rotate(-30deg);">
+                <div style="width:64px;height:64px;border-radius:14px;border:3px solid oklch(0.34 0.045 200);opacity:0.1;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:34px;color:oklch(0.34 0.045 200);">G</span></div>
+                <span style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:42px;letter-spacing:2px;text-transform:uppercase;color:oklch(0.34 0.045 200);opacity:0.1;white-space:nowrap;">Confidential</span>
+              </div>
+            </div>
+            <!-- page footer -->
+            <div style="position:absolute;bottom:14px;left:36px;right:36px;display:flex;justify-content:space-between;"><span style="font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1.2px;text-transform:uppercase;color:oklch(0.48 0.04 200);">CHAPTER 01 — GETTING STARTED</span><span style="font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1.2px;text-transform:uppercase;color:oklch(0.48 0.04 200);">STEP 02 / 14</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /section 06 -->
+
+  <!-- ════════════════════════════════════════════════
+       07 — PRINT PREVIEW
+  ════════════════════════════════════════════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:500;white-space:nowrap;">07 — Print Preview</span>
+      <div style="flex:1;height:1px;background:oklch(0.73 0.013 200);"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:oklch(0.52 0.02 200);">/[slug]/print — no editor chrome</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start;">
+      <div style="flex:none;">
+        <div style="font-size:11px;font-weight:500;color:oklch(0.50 0.025 200);margin-bottom:8px;">Print route — A4 cover page at 75% · export overlay</div>
+        <div style="width:760px;height:680px;border-radius:8px;box-shadow:0 1px 3px oklch(0.4 0.03 200/.06),0 8px 32px oklch(0.4 0.03 200/.1);overflow:hidden;position:relative;background:oklch(0.92 0.006 200);">
+
+          <!-- Page column centered -->
+          <div style="display:flex;flex-direction:column;align-items:center;padding:32px 0;">
+
+            <!-- COVER PAGE at 75% = 595 × 842px -->
+            <div style="width:595px;height:842px;background:#f2f4f4;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 8px 40px rgba(0,0,0,0.1);position:relative;flex-shrink:0;">
+              <div style="padding:51px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;">
+                <div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:oklch(0.34 0.045 200);margin-bottom:22px;">A Guidebook · 3 Chapters</div>
+                  <h1 style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:26px;line-height:1.15;letter-spacing:-0.01em;color:oklch(0.34 0.045 200);margin:0 0 10px;text-wrap:balance;">iOS Onboarding Guide</h1>
+                  <p style="font-size:8.25px;line-height:1.6;color:oklch(0.48 0.04 200);margin:0 0 30px;max-width:280px;">An interactive walkthrough — step through every screen from first launch to your first success.</p>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:2px;text-transform:uppercase;color:oklch(0.34 0.045 200);margin-bottom:14px;">Contents</div>
+                  <div style="display:flex;flex-direction:column;">
+                    <div style="display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:baseline;padding:13px 0;border-top:0.7px solid oklch(0.88 0.006 200);">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.34 0.045 200);font-weight:500;">01</span>
+                      <div><div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:9px;color:oklch(0.34 0.045 200);margin-bottom:2px;">Getting Started</div><div style="font-size:7.5px;color:oklch(0.48 0.04 200);">3 steps · First launch through your initial connection.</div></div>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.48 0.04 200);">p. 03</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:baseline;padding:13px 0;border-top:0.7px solid oklch(0.88 0.006 200);">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.34 0.045 200);font-weight:500;">02</span>
+                      <div><div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:9px;color:oklch(0.34 0.045 200);margin-bottom:2px;">Core Features</div><div style="font-size:7.5px;color:oklch(0.48 0.04 200);">4 steps · The main tools and how to use them effectively.</div></div>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.48 0.04 200);">p. 07</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:baseline;padding:13px 0;border-top:0.7px solid oklch(0.88 0.006 200);border-bottom:0.7px solid oklch(0.88 0.006 200);">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.34 0.045 200);font-weight:500;">03</span>
+                      <div><div style="font-family:'Montserrat',sans-serif;font-weight:600;font-size:9px;color:oklch(0.34 0.045 200);margin-bottom:2px;">Advanced Settings</div><div style="font-size:7.5px;color:oklch(0.48 0.04 200);">2 steps · Power-user options and customisation.</div></div>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:oklch(0.48 0.04 200);">p. 12</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:oklch(0.48 0.04 200);">
+                  <span>ACME Corp.</span>
+                  <span>First Edition · 2025</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating export panel -->
+          <div style="position:absolute;top:16px;right:16px;background:#fff;border-radius:9px;box-shadow:0 2px 8px oklch(0.4 0.03 200/.14),0 12px 40px oklch(0.4 0.03 200/.16);border:1px solid var(--ln);overflow:hidden;min-width:196px;">
+            <div style="padding:11px 15px;border-bottom:1px solid var(--ln);"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);font-weight:500;">Export</span></div>
+            <div style="padding:6px 6px 6px;">
+              <button style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="10" rx="1.5" stroke="oklch(0.34 0.045 200)" stroke-width="1.2"/><rect x="5" y="10" width="6" height="4" rx="1" stroke="oklch(0.34 0.045 200)" stroke-width="1.2"/><path d="M5 6h6M5 8h4" stroke="oklch(0.48 0.04 200)" stroke-width="0.9"/></svg>
+                <span style="font-size:13px;color:var(--ink);">Print to PDF</span>
+              </button>
+              <button style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="oklch(0.34 0.045 200)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13h10" stroke="oklch(0.34 0.045 200)" stroke-width="1.3" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:var(--ink);">Download ZIP</span>
+              </button>
+              <button style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:none;background:var(--ink);border-radius:6px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="#fff" stroke-width="1.2"/><path d="M6 9h4M6 11h2" stroke="rgba(255,255,255,0.65)" stroke-width="0.9" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#fff;font-weight:500;">Export PDF</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div><!-- /section 07 -->
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1600}}">
+class Component extends DCLogic {
+  state = { tool: 'box', swatch: 0 };
+
+  renderVals() {
+    const { tool, swatch } = this.state;
+    const INK = 'oklch(0.34 0.045 200)';
+    const LN2 = 'oklch(0.88 0.008 200)';
+    const SEL = 'oklch(0.62 0.17 250)';
+
+    const sw = [
+      { n:'Ink',    f:'oklch(0.95 0.012 200)',  s:'oklch(0.34 0.045 200)',  of:'oklch(0.95 0.012 200)',  os:'oklch(0.34 0.045 200)',  hf:'#e6f1f2', hs:'#024450', cc:'0  0.04  0  0.73',       ic:'0.01  0  0.01  0.04' },
+      { n:'Red',    f:'oklch(0.955 0.035 25)',   s:'oklch(0.585 0.165 25)',  of:'oklch(0.955 0.035 25)',  os:'oklch(0.585 0.165 25)',  hf:'#ffe8e4', hs:'#cb4a47', cc:'0  0.67  0.60  0.18',    ic:'0  0.09  0.08  0.01' },
+      { n:'Orange', f:'oklch(0.96 0.04 58)',     s:'oklch(0.585 0.135 58)', of:'oklch(0.96 0.04 58)',    os:'oklch(0.585 0.135 58)', hf:'#ffecd8', hs:'#b56410', cc:'0  0.48  0.78  0.18',    ic:'0  0.12  0.19  0.01' },
+      { n:'Amber',  f:'oklch(0.965 0.045 92)',   s:'oklch(0.585 0.12 92)',  of:'oklch(0.965 0.045 92)',  os:'oklch(0.585 0.12 92)',  hf:'#fef3d2', hs:'#957800', cc:'0.05  0.10  0.88  0.18', ic:'0.01  0.02  0.22  0.01' },
+      { n:'Green',  f:'oklch(0.955 0.035 150)',  s:'oklch(0.585 0.13 150)', of:'oklch(0.955 0.035 150)', os:'oklch(0.585 0.13 150)', hf:'#e0f7e4', hs:'#369150', cc:'0.63  0  0.47  0.22',    ic:'0.16  0  0.12  0.03' },
+      { n:'Teal',   f:'oklch(0.955 0.03 195)',   s:'oklch(0.585 0.095 195)',of:'oklch(0.955 0.03 195)',  os:'oklch(0.585 0.095 195)',hf:'#daf7f6', hs:'#188d8d', cc:'0.88  0.23  0.28  0.14', ic:'0.22  0.06  0.07  0.01' },
+      { n:'Blue',   f:'oklch(0.955 0.03 250)',   s:'oklch(0.585 0.15 250)', of:'oklch(0.955 0.03 250)',  os:'oklch(0.585 0.15 250)', hf:'#e2f2ff', hs:'#217fd0', cc:'0.82  0.57  0  0.15',    ic:'0.20  0.14  0  0.02' },
+      { n:'Violet', f:'oklch(0.955 0.03 295)',   s:'oklch(0.585 0.16 295)', of:'oklch(0.955 0.03 295)',  os:'oklch(0.585 0.16 295)', hf:'#f1edff', hs:'#8464cf', cc:'0.58  0.80  0  0.15',    ic:'0.14  0.20  0  0.02' },
+    ];
+
+    const cur = sw[swatch];
+
+    const tb = (id) => ({
+      bg: tool === id ? INK : '#fff',
+      co: tool === id ? '#fff' : INK,
+      bc: tool === id ? INK : LN2,
+      fn: () => this.setState({ tool: id }),
+    });
+
+    const sd = (i) => ({
+      f:    sw[i].f,
+      s:    sw[i].s,
+      ring: swatch === i ? `0 0 0 2.5px #fff, 0 0 0 4.5px ${SEL}` : 'none',
+      fn:   () => this.setState({ swatch: i }),
+    });
+
+    return {
+      tBox: tb('box'), tCircle: tb('circle'), tLine: tb('line'),
+      tPolyLine: tb('polyline'), tPolygon: tb('polygon'), tInkPen: tb('ink'),
+      tText: tb('text'), tHighlight: tb('highlight'),
+
+      s0: sd(0), s1: sd(1), s2: sd(2), s3: sd(3),
+      s4: sd(4), s5: sd(5), s6: sd(6), s7: sd(7),
+
+      swN:  cur.n,
+      swF:  cur.f,  swS:  cur.s,
+      swOF: cur.of, swOS: cur.os,
+      swHF: cur.hf, swHS: cur.hs,
+      swCC: cur.cc, swIC: cur.ic,
+
+      showFill: tool === 'box' || tool === 'circle' || tool === 'polygon',
+      showEp:   tool === 'line' || tool === 'polyline',
+    };
+  }
+}
+</script>
+</body>
+</html>

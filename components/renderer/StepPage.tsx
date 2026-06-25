@@ -5,7 +5,9 @@ import type {
   Step,
   Watermark as WatermarkData,
 } from "@/lib/book-schema";
+import { stepLayoutMode } from "@/lib/book-schema";
 import { pad2, resolveStepRows } from "@/lib/book-render";
+import GridStep from "./GridStep";
 import AnnotationLayer from "./AnnotationLayer";
 import ImageRow from "./ImageRow";
 import PageBackground from "./PageBackground";
@@ -34,6 +36,7 @@ export default function StepPage({
   const stepNum = pad2(stepIndex + 1);
   const total = pad2(chapter.steps.length);
   const { rows, showRowHead } = resolveStepRows(step);
+  const mode = stepLayoutMode(step);
 
   return (
     <section
@@ -63,17 +66,21 @@ export default function StepPage({
             />
           </div>
         ) : null}
-        <div className="step-body">
-          {rows.map((row, i) => (
-            <ImageRow
-              key={i}
-              chapter={chapter}
-              row={row}
-              showHead={showRowHead}
-              assetBase={assetBase}
-            />
-          ))}
-        </div>
+        {mode === "grid" && step.grid && step.grid.length > 0 ? (
+          <GridStep grid={step.grid} chapter={chapter} assetBase={assetBase} />
+        ) : (
+          <div className="step-body">
+            {rows.map((row, i) => (
+              <ImageRow
+                key={i}
+                chapter={chapter}
+                row={row}
+                showHead={showRowHead}
+                assetBase={assetBase}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <PageFooter
         left={`Chapter ${chNum} — ${chapter.title}`}

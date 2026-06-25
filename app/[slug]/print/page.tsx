@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import A4Book from "@/components/renderer/A4Book";
 import { assetBaseFor } from "@/lib/project-routes";
 import { loadProjectBook, projectExists } from "@/lib/project-store";
+import { pageDimensions } from "@/lib/grid-math";
+import { DEFAULT_PAGE_CONFIG } from "@/lib/book-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -31,5 +33,11 @@ export default async function ProjectPrint({
   const { slug } = await params;
   if (!(await projectExists(slug))) notFound();
   const book = await loadProjectBook(slug);
-  return <A4Book book={book} assetBase={assetBaseFor(slug)} />;
+  const { w, h } = pageDimensions(book.pageConfig ?? DEFAULT_PAGE_CONFIG);
+  return (
+    <>
+      <style>{`@page { size: ${w}mm ${h}mm; margin: 0; }`}</style>
+      <A4Book book={book} assetBase={assetBaseFor(slug)} />
+    </>
+  );
 }

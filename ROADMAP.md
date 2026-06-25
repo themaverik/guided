@@ -298,11 +298,17 @@ rule.
 (Scope split from the old "renderer + resize + cell stacks" sketch — drag-resize and cell stacks
 are now their own plans below, keeping each slice small and zero-regression-safe.)
 
-## Plans 4–6 — roadmapped (detailed just-in-time)
+## Plan 4 — On-canvas divider resize  [written, pending execution]
 
-- **Plan 4 — On-canvas divider resize:** wire Plan-1 `resizeAdjacent`/`redistributeProportional`
-  into drag-to-resize row/column dividers (conserved-total, min-floor, live mm readout);
-  grid-visibility guides toggle (never printed).
+`PreviewGridResize` editor overlay (modelled on `PreviewAnnotations`) draws draggable row/column
+divider handles over a grid-mode step; dragging applies Plan-1 `resizeAdjacent` (conserved-total,
+mm min-floor via `bodyRegion`) live with a mm readout, writing fractions through new
+`resizeGridRow`/`resizeGridColumn` store mutations. Editor-only — the renderer/print path is
+untouched. Plan: `docs/superpowers/plans/2026-06-25-grid-resize.md`. (Scope: row + column resize +
+mm readout; the grid-guides visibility toggle moved to Plan 6 where snapping makes guides useful.)
+
+## Plans 5–7 — roadmapped (detailed just-in-time)
+
 - **Plan 5 — Cell object stacks:** move images + callouts into the cell object stack as
   primary/secondary objects; in-cell drag; migrate legacy `callouts` → `secondary` objects. This is
   where `fitSteps`→`fitGrid` becomes necessary (cells gain overflow-capable content). Cell-anchored

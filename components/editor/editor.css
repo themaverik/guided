@@ -1106,3 +1106,17 @@
   stroke-width: 3;
   pointer-events: none;
 }
+
+/* Editor-only grid guides: faint cell outlines, shown only in the preview
+   (the print/PDF render has no .preview-scaler ancestor, so they never print). */
+.preview-scaler .grid-cell {
+  outline: 1px dashed var(--color-rule-strong);
+  outline-offset: -1px;
+}
+
+.grid-guide-line {
+  stroke: #3b82f6;
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+  pointer-events: none;
+}

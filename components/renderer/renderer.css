@@ -847,6 +847,9 @@
   flex: 1 1 0;
   min-width: 0;
   display: flex;
+  flex-direction: column; /* stack the object (image + callouts) vertically */
+  gap: 4mm;
+  overflow: hidden; /* Plan 6 clip baseline; Plan 7 fitGrid replaces this */
 }
 .grid-cell .img-slot {
   width: 100%;
@@ -856,6 +859,19 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+/* Image fit modes (Plan 6). Default (no class) keeps object-fit: contain.
+   The base .img-slot img is position:absolute; inset:0 — releasing one inset
+   edge + auto-sizing that axis lets the cell's overflow:hidden crop it. */
+.grid-cell .img-slot.fit-width img {
+  inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
+  width: 100%;
+  height: auto;
+}
+.grid-cell .img-slot.fit-height img {
+  inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
+  width: auto;
+  height: 100%;
 }
 
 /* ────────────── PRINT ────────────── */

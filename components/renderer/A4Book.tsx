@@ -19,6 +19,7 @@ import {
   themeVars,
   watermarkIconSrc,
 } from "@/lib/book-render";
+import { pageVars } from "@/lib/page-vars";
 import BackCover from "./BackCover";
 import BookCanvas from "./BookCanvas";
 import ChapterIntro from "./ChapterIntro";
@@ -47,7 +48,7 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
     <BookCanvas
       fitKey={bookFitKey(book)}
       onReport={onReport}
-      rootStyle={themeVars(book.theme)}
+      rootStyle={{ ...themeVars(book.theme), ...pageVars(book.pageConfig) }}
     >
       <CoverPage book={book} paging={paging} watermark={wm} background={bg} />
       {book.chapters.map((chapter, ci) => (

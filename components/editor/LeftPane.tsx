@@ -5,6 +5,7 @@
 import BackgroundSettings from "./BackgroundSettings";
 import BookSettings from "./BookSettings";
 import ChapterList from "./ChapterList";
+import PageSettings from "./PageSettings";
 import EndingSettings from "./EndingSettings";
 import ThemeSettings from "./ThemeSettings";
 import WatermarkSettings from "./WatermarkSettings";
@@ -13,6 +14,7 @@ export default function LeftPane() {
   return (
     <aside className="editor-left">
       <BookSettings />
+      <PageSettings />
       <ThemeSettings />
       <BackgroundSettings />
       <WatermarkSettings />

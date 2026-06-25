@@ -145,7 +145,7 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
 
 /**
  * The polyline points of a connector in normalized coords. `straight` is two
- * points; `elbow` inserts a right-angle corner (rectangular route). The corner
+ * points; `square` inserts a right-angle corner (orthogonal route). The corner
  * goes horizontal-first when the run is wider than tall, else vertical-first.
  */
 export function connectorPoints(
@@ -157,7 +157,7 @@ export function connectorPoints(
   const wps = c.waypoints ?? [];
   // Manual waypoints take over the path shape (straight segments through them).
   if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
-  if (c.routing !== "elbow") return [a, b];
+  if (c.routing !== "square") return [a, b];
   const corner =
     Math.abs(b.x - a.x) >= Math.abs(b.y - a.y)
       ? { x: b.x, y: a.y }

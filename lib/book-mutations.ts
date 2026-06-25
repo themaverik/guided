@@ -20,10 +20,35 @@ import {
   type RowLayout,
   type Step,
   type Surface,
+  DEFAULT_PAGE_CONFIG,
 } from "./book-schema";
 import { annotationId } from "./annotations";
+import { resizeAdjacent, bodyRegion, MIN_CELL_MM, normalizeFractions } from "./grid-math";
+import { legacyStepToGrid } from "./book-migrate";
 
 const clone = <T>(v: T): T => structuredClone(v);
+
+/**
+ * Set a step's layout mode. Switching to "grid" when the step has no grid yet
+ * seeds one from the step's current content (`legacyStepToGrid`) — so the grid
+ * renderer, guides, and structure controls have data to show. Without this,
+ * toggling a fresh (un-migrated) step to grid is a silent no-op.
+ */
+export function setStepLayoutMode(
+  book: Book,
+  ci: number,
+  si: number,
+  mode: "legacy" | "grid",
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step) return book;
+  step.layoutMode = mode;
+  if (mode === "grid" && (!step.grid || step.grid.length === 0)) {
+    step.grid = legacyStepToGrid(step);
+  }
+  return next;
+}
 
 /*
  * Fields that belong to a ROW (not the page), used to split a legacy step into
@@ -167,7 +192,7 @@ export function updateStep(
   book: Book,
   ci: number,
   si: number,
-  patch: Partial<Pick<Step, "title" | "instruction">>,
+  patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
 ): Book {
   const next = clone(book);
   Object.assign(next.chapters[ci].steps[si], patch);
@@ -386,6 +411,96 @@ export function removeAnnotation(
   if (!step.annotations) return book;
   step.annotations = step.annotations.filter((a) => a.id !== id);
   if (step.annotations.length === 0) delete step.annotations;
+  return next;
+}
+
+// ── Grid resize ────────────────────────────────────────────
+
+/** Resize the divider between rows `dividerIndex` and `dividerIndex+1` of a
+ *  step's grid by `deltaFr`. Conserved-total, floored at MIN_CELL_MM. */
+export function resizeGridRow(
+  book: Book,
+  ci: number,
+  si: number,
+  dividerIndex: number,
+  deltaFr: number,
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid) return book;
+  const minFr = MIN_CELL_MM / bodyRegion(next.pageConfig ?? DEFAULT_PAGE_CONFIG).h;
+  const sizes = step.grid.map((r) => r.heightFr);
+  const out = resizeAdjacent(sizes, dividerIndex, deltaFr, minFr);
+  step.grid = step.grid.map((r, i) => ({ ...r, heightFr: out[i] }));
+  return next;
+}
+
+/** Resize the divider between cells `dividerIndex` and `dividerIndex+1` within
+ *  row `ri` of a step's grid by `deltaFr`. Conserved-total, floored. */
+export function resizeGridColumn(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  dividerIndex: number,
+  deltaFr: number,
+): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row) return book;
+  const minFr = MIN_CELL_MM / bodyRegion(next.pageConfig ?? DEFAULT_PAGE_CONFIG).w;
+  const sizes = row.cells.map((c) => c.widthFr);
+  const out = resizeAdjacent(sizes, dividerIndex, deltaFr, minFr);
+  row.cells = row.cells.map((c, i) => ({ ...c, widthFr: out[i] }));
+  return next;
+}
+
+// ── Grid structure ─────────────────────────────────────────
+
+/** Append a row (one empty cell) and renormalize row heights to Σ = 1. */
+export function addGridRow(book: Book, ci: number, si: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid) return book;
+  const oldN = step.grid.length;
+  const heights = normalizeFractions([...step.grid.map((r) => r.heightFr), 1 / oldN]);
+  step.grid = [...step.grid, { heightFr: 0, cells: [{ widthFr: 1, objects: [] }] }]
+    .map((r, i) => ({ ...r, heightFr: heights[i] }));
+  return next;
+}
+
+/** Remove row `ri` and renormalize; keeps at least one row. */
+export function removeGridRow(book: Book, ci: number, si: number, ri: number): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid || step.grid.length <= 1) return book;
+  const kept = step.grid.filter((_, i) => i !== ri);
+  const heights = normalizeFractions(kept.map((r) => r.heightFr));
+  step.grid = kept.map((r, i) => ({ ...r, heightFr: heights[i] }));
+  return next;
+}
+
+/** Append a cell to row `ri` and renormalize cell widths to Σ = 1. */
+export function addGridColumn(book: Book, ci: number, si: number, ri: number): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row) return book;
+  const oldN = row.cells.length;
+  const widths = normalizeFractions([...row.cells.map((c) => c.widthFr), 1 / oldN]);
+  row.cells = [...row.cells, { widthFr: 0, objects: [] }].map((c, i) => ({ ...c, widthFr: widths[i] }));
+  return next;
+}
+
+/** Remove cell `cellIndex` from row `ri` and renormalize; keeps at least one cell. */
+export function removeGridColumn(
+  book: Book, ci: number, si: number, ri: number, cellIndex: number,
+): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row || row.cells.length <= 1) return book;
+  const kept = row.cells.filter((_, i) => i !== cellIndex);
+  const widths = normalizeFractions(kept.map((c) => c.widthFr));
+  row.cells = kept.map((c, i) => ({ ...c, widthFr: widths[i] }));
   return next;
 }
 

@@ -94,6 +94,19 @@ export interface EditorState {
     ri: number,
     patch: Partial<ImageRow>,
   ) => void;
+  resizeGridRow: (
+    ci: number,
+    si: number,
+    dividerIndex: number,
+    deltaFr: number,
+  ) => void;
+  resizeGridColumn: (
+    ci: number,
+    si: number,
+    ri: number,
+    dividerIndex: number,
+    deltaFr: number,
+  ) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -303,6 +316,10 @@ export function createEditorStore(
       set((s) => ({ book: M.moveRow(s.book, ci, si, ri, dir) })),
     updateRow: (ci, si, ri, patch) =>
       set((s) => ({ book: M.updateRow(s.book, ci, si, ri, patch) })),
+    resizeGridRow: (ci, si, dividerIndex, deltaFr) =>
+      set((s) => ({ book: M.resizeGridRow(s.book, ci, si, dividerIndex, deltaFr) })),
+    resizeGridColumn: (ci, si, ri, dividerIndex, deltaFr) =>
+      set((s) => ({ book: M.resizeGridColumn(s.book, ci, si, ri, dividerIndex, deltaFr) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

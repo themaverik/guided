@@ -1,12 +1,12 @@
 /*
- * Read-only renderer for a step's flexible grid (Plan 3): rows distribute by
- * heightFr, cells by widthFr (flex-grow), each cell's primary image fills the
- * cell (object-fit: contain). Image cells are overflow-free by construction.
- * Resize, callouts-in-cells, and the fitGrid backstop are later plans.
+ * Renderer for a step's flexible grid (Plan 3 + Plan 6): rows distribute by
+ * heightFr, cells by widthFr (flex-grow). Each cell renders its object stack —
+ * images via ImageSlot (with fit mode), callouts via Callout — top to bottom.
+ * Editor-free + print-safe; auto-shrink (fitGrid) is a later plan.
  */
 import type { Chapter, GridRow } from "@/lib/book-schema";
 import { displayPath, imageSrc } from "@/lib/book-render";
-import { cellPrimaryImage } from "@/lib/grid-render";
+import Callout from "./Callout";
 import ImageSlot from "./ImageSlot";
 
 export default function GridStep({
@@ -22,25 +22,27 @@ export default function GridStep({
     <div className="grid-step">
       {grid.map((row, ri) => (
         <div className="grid-row" key={ri} style={{ flexGrow: row.heightFr }}>
-          {row.cells.map((cell, ci) => {
-            const primary = cellPrimaryImage(cell);
-            return (
-              <div
-                className="grid-cell"
-                key={ci}
-                style={{ flexGrow: cell.widthFr }}
-              >
-                {primary ? (
-                  <ImageSlot
-                    key={`${ri}-${ci}-${primary.ref ?? ""}`}
-                    src={imageSrc(assetBase, chapter.id, primary.ref)}
-                    label="Screen"
-                    path={displayPath(chapter.id, primary.ref)}
-                  />
-                ) : null}
-              </div>
-            );
-          })}
+          {row.cells.map((cell, ci) => (
+            <div className="grid-cell" key={ci} style={{ flexGrow: cell.widthFr }}>
+              {cell.objects.map((obj) => {
+                if (obj.kind === "image") {
+                  return (
+                    <ImageSlot
+                      key={obj.id}
+                      src={imageSrc(assetBase, chapter.id, obj.ref)}
+                      label="Screen"
+                      path={displayPath(chapter.id, obj.ref)}
+                      fit={obj.fit}
+                    />
+                  );
+                }
+                if (obj.kind === "callout" && obj.callout) {
+                  return <Callout key={obj.id} data={obj.callout} />;
+                }
+                return null; // text objects: Plan 8
+              })}
+            </div>
+          ))}
         </div>
       ))}
     </div>

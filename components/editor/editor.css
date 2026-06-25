@@ -1120,3 +1120,14 @@
   stroke-width: 1;
   pointer-events: none;
 }
+
+.grid-struct-row-head,
+.grid-struct-cell-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-ink-text);
+  padding: 4px 0;
+}

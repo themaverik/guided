@@ -260,9 +260,15 @@ Third wave (`PRD.md` + design system `DESIGN.md` + `ADR-006`): replace fixed row
 flexible, user-resizable grid; standardize annotations on ISO 32000 names; unify color on OKLCH
 paired tokens — zero regression to existing features. Executed as sequenced plans under
 `docs/superpowers/plans/`, each via subagent-driven development (fresh subagent per task + per-task
-review + final whole-branch review). Branch: `feature/improvement-rev2`. CLAUDE.md was corrected (it
-had described a non-existent TipTap stack). Decisions of record live in `PRD.md` (Decisions 1–14)
-and `ADR-006`.
+review + final whole-branch review). CLAUDE.md was corrected (it had described a non-existent TipTap
+stack). Decisions of record live in `PRD.md` (Decisions 1–14) and `ADR-006`.
+
+**Status:** Plans 1–5 are **done and merged to `main`** (merge commit `2fbbbc8`; former branch
+`feature/improvement-rev2`, now deleted). The flexible grid is operable end-to-end: page
+configuration, opt-in grid renderer, on-canvas divider resize, and grid structure editing with
+visible guides — 48 unit tests, renderer/print zero-regression, editor-only affordances. Remaining
+work (Plans 6–8: cell object stacks, annotation standardization, color system) continues on
+`feature/improvement-rev3`.
 
 ## Plan 1 — Foundations  [done]
 

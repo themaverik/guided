@@ -283,15 +283,28 @@ build OK; final whole-branch review: ready-to-merge, zero-regression holds). Def
 before/after PDF smoke check on a real legacy project, and `Custom`-size width/height inputs (the size
 is selectable but currently falls back to A4).
 
-## Plans 3–5 — roadmapped (detailed just-in-time)
+## Plan 3 — Grid renderer (read-only, opt-in)  [written, pending execution]
 
-- **Plan 3 — Cell stacks + grid renderer:** move images + callouts into the cell object stack;
-  `GridStep` renderer consuming `step.grid`; `fitSteps`→`fitGrid`; then on-canvas divider resize +
-  grid-visibility toggle. (Resequenced — the grid renderer + drag-resize ship here with the content
-  model; Decision 12.)
-- **Plan 4 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
-  cell-anchored coords + free layer; 8-handle selection; segment-drag connector reshape; snapping
-  defaults; connector arrow-snap-on-by-default.
-- **Plan 5 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
+`GridStep` renderer consuming `step.grid` (rows × cells × primary image), gated on a new opt-in
+per-step `layoutMode` so migrated books render pixel-identically through the proven path; a
+step-editor Layout toggle makes it visible in the live preview. Image cells are overflow-free by
+construction, so the `fitSteps`→`fitGrid` backstop is deferred (not needed until cells hold
+overflow-capable content). Plan: `docs/superpowers/plans/2026-06-25-grid-renderer.md`.
+(Scope split from the old "renderer + resize + cell stacks" sketch — drag-resize and cell stacks
+are now their own plans below, keeping each slice small and zero-regression-safe.)
+
+## Plans 4–6 — roadmapped (detailed just-in-time)
+
+- **Plan 4 — On-canvas divider resize:** wire Plan-1 `resizeAdjacent`/`redistributeProportional`
+  into drag-to-resize row/column dividers (conserved-total, min-floor, live mm readout);
+  grid-visibility guides toggle (never printed).
+- **Plan 5 — Cell object stacks:** move images + callouts into the cell object stack as
+  primary/secondary objects; in-cell drag; migrate legacy `callouts` → `secondary` objects. This is
+  where `fitSteps`→`fitGrid` becomes necessary (cells gain overflow-capable content). Cell-anchored
+  annotation coords + the free annotation layer (`step.freeAnnotations`).
+- **Plan 6 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
+  8-handle selection; segment-drag connector reshape; snapping defaults; connector
+  arrow-snap-on-by-default.
+- **Plan 7 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
   (OKLCH + PDF /C·/IC via `swatchId`); editor-only fill tint, full opacity in export; unify
   callouts.

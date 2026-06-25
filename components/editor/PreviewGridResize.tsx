@@ -136,12 +136,14 @@ export default function PreviewGridResize({
       {rows.slice(0, -1).map((r, i) => {
         const y = r.t - box.t + r.h + (rows[i + 1].t - (r.t + r.h)) / 2;
         return (
-          <line
-            key={`row-${i}`}
-            x1={0} y1={y} x2={box.w} y2={y}
-            className="grid-divider grid-divider-row"
-            onPointerDown={startRow(i)}
-          />
+          <g key={`row-${i}`}>
+            <line x1={0} y1={y} x2={box.w} y2={y} className="grid-guide-line" />
+            <line
+              x1={0} y1={y} x2={box.w} y2={y}
+              className="grid-divider grid-divider-row"
+              onPointerDown={startRow(i)}
+            />
+          </g>
         );
       })}
       {/* Column dividers: within each row, between cell j and j+1. */}
@@ -150,12 +152,14 @@ export default function PreviewGridResize({
           const x = c.l - box.l + c.w + (rowCells[j + 1].l - (c.l + c.w)) / 2;
           const yTop = rows[ri].t - box.t;
           return (
-            <line
-              key={`col-${ri}-${j}`}
-              x1={x} y1={yTop} x2={x} y2={yTop + rows[ri].h}
-              className="grid-divider grid-divider-col"
-              onPointerDown={startCol(ri, j)}
-            />
+            <g key={`col-${ri}-${j}`}>
+              <line x1={x} y1={yTop} x2={x} y2={yTop + rows[ri].h} className="grid-guide-line" />
+              <line
+                x1={x} y1={yTop} x2={x} y2={yTop + rows[ri].h}
+                className="grid-divider grid-divider-col"
+                onPointerDown={startCol(ri, j)}
+              />
+            </g>
           );
         }),
       )}

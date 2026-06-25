@@ -199,6 +199,10 @@ export interface PageConfig {
   footerH: number;
 }
 
+/** How an image object fills its cell. `fit-width`/`fit-height` crop the overflow
+ *  axis (bottom / right respectively); `contain` letterboxes (never crops). */
+export type ImageFit = "contain" | "fit-width" | "fit-height";
+
 /** One stacked object inside a cell: a primary anchor or a companion. */
 export interface StackedObject {
   id: string;
@@ -211,6 +215,10 @@ export interface StackedObject {
   h: number;
   /** image filename / callout payload ref. */
   ref?: string;
+  /** Callout payload when kind === "callout". */
+  callout?: Callout;
+  /** Image fit mode (kind === "image"); default "contain". */
+  fit?: ImageFit;
   /** Cell-anchored annotations (0–1 of the cell). */
   annotations?: Annotation[];
 }
@@ -422,6 +430,7 @@ export const DEFAULT_ROW_LAYOUT: RowLayout = "single";
 export const DEFAULT_CALLOUT_LAYOUT: CalloutLayout = "side";
 export const DEFAULT_CALLOUT_COLS: CalloutCols = 2;
 export const DEFAULT_BORDER = true;
+export const DEFAULT_IMAGE_FIT: ImageFit = "contain";
 export const DEFAULT_WATERMARK_OPACITY = 0.06;
 export const DEFAULT_WATERMARK_SCALE = 1;
 

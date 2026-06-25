@@ -91,6 +91,13 @@
 .editor-field textarea:focus {
   border-color: var(--color-ink);
 }
+/* Subdued helper line under a field control (e.g. the Layout toggle). */
+.editor-help {
+  margin: 2px 0 0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
 
 /* Chapter / step navigation list */
 .editor-nav-item {

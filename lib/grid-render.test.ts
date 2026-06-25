@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cellPrimaryImage } from "@/lib/grid-render";
+import { cellPrimaryImage, imageFitClass } from "@/lib/grid-render";
 import type { GridCell } from "@/lib/book-schema";
 
 const imageObj = (ref?: string) => ({
@@ -22,5 +22,16 @@ describe("cellPrimaryImage", () => {
       objects: [{ id: "c", role: "secondary", kind: "callout", x: 0, y: 0, w: 1, h: 1 }],
     };
     expect(cellPrimaryImage(cell)).toBeUndefined();
+  });
+});
+
+describe("imageFitClass", () => {
+  it("returns '' for contain / undefined (markup unchanged)", () => {
+    expect(imageFitClass()).toBe("");
+    expect(imageFitClass("contain")).toBe("");
+  });
+  it("maps the crop modes to their class", () => {
+    expect(imageFitClass("fit-width")).toBe("fit-width");
+    expect(imageFitClass("fit-height")).toBe("fit-height");
   });
 });

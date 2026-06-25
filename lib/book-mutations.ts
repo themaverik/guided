@@ -20,8 +20,10 @@ import {
   type RowLayout,
   type Step,
   type Surface,
+  DEFAULT_PAGE_CONFIG,
 } from "./book-schema";
 import { annotationId } from "./annotations";
+import { resizeAdjacent, bodyRegion, MIN_CELL_MM } from "./grid-math";
 
 const clone = <T>(v: T): T => structuredClone(v);
 
@@ -386,6 +388,47 @@ export function removeAnnotation(
   if (!step.annotations) return book;
   step.annotations = step.annotations.filter((a) => a.id !== id);
   if (step.annotations.length === 0) delete step.annotations;
+  return next;
+}
+
+// ── Grid resize ────────────────────────────────────────────
+
+/** Resize the divider between rows `dividerIndex` and `dividerIndex+1` of a
+ *  step's grid by `deltaFr`. Conserved-total, floored at MIN_CELL_MM. */
+export function resizeGridRow(
+  book: Book,
+  ci: number,
+  si: number,
+  dividerIndex: number,
+  deltaFr: number,
+): Book {
+  const next = clone(book);
+  const step = next.chapters[ci]?.steps[si];
+  if (!step?.grid) return book;
+  const minFr = MIN_CELL_MM / bodyRegion(next.pageConfig ?? DEFAULT_PAGE_CONFIG).h;
+  const sizes = step.grid.map((r) => r.heightFr);
+  const out = resizeAdjacent(sizes, dividerIndex, deltaFr, minFr);
+  step.grid = step.grid.map((r, i) => ({ ...r, heightFr: out[i] }));
+  return next;
+}
+
+/** Resize the divider between cells `dividerIndex` and `dividerIndex+1` within
+ *  row `ri` of a step's grid by `deltaFr`. Conserved-total, floored. */
+export function resizeGridColumn(
+  book: Book,
+  ci: number,
+  si: number,
+  ri: number,
+  dividerIndex: number,
+  deltaFr: number,
+): Book {
+  const next = clone(book);
+  const row = next.chapters[ci]?.steps[si]?.grid?.[ri];
+  if (!row) return book;
+  const minFr = MIN_CELL_MM / bodyRegion(next.pageConfig ?? DEFAULT_PAGE_CONFIG).w;
+  const sizes = row.cells.map((c) => c.widthFr);
+  const out = resizeAdjacent(sizes, dividerIndex, deltaFr, minFr);
+  row.cells = row.cells.map((c, i) => ({ ...c, widthFr: out[i] }));
   return next;
 }
 

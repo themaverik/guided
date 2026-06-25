@@ -295,10 +295,15 @@ export interface Step {
   // form (B) multi-row — when present, overrides the single-image fields:
   images?: ImageRow[];
 
-  /** Flexible grid. When present, overrides images[] / legacy single-image fields. */
+  /** Flexible grid (rows × cells). Rendered only when layoutMode === "grid"
+   *  (see stepLayoutMode); presence alone does not switch rendering. */
   grid?: GridRow[];
   /** Free annotation layer (0–1 of the body region), constrained to grid bounds. */
   freeAnnotations?: Annotation[];
+  /** Which renderer lays out this step. Unset → "legacy" (the proven ImageRow
+   *  path). "grid" renders `grid` via <GridStep>. Gated explicitly so migrated
+   *  books (which all carry a grid skeleton) stay pixel-identical. */
+  layoutMode?: "legacy" | "grid";
 }
 
 export interface Chapter {
@@ -435,6 +440,12 @@ export function resolveLayout(
     if (/-single(\.|$)/.test(image)) return "single";
   }
   return DEFAULT_ROW_LAYOUT;
+}
+
+/** Effective layout mode for a step. Unset/any non-"grid" → "legacy"
+ *  (the zero-regression default). */
+export function stepLayoutMode(step: Step): "legacy" | "grid" {
+  return step.layoutMode === "grid" ? "grid" : "legacy";
 }
 
 /** Map the deprecated `warn` alias to `warning`; pass other types through. */

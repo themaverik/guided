@@ -114,6 +114,36 @@ describe("legacyStepToGrid — callouts", () => {
     expect(grid[1].cells[0].objects[0].callout).toMatchObject({ body: "b" });
   });
 
+  it("single-wide side callouts → [wide image | callouts], image wide", () => {
+    const grid = legacyStepToGrid({
+      image: "w.jpg", layout: "single-wide",
+      callouts: [info("one")], calloutLayout: "side",
+    });
+    expect(grid).toHaveLength(1);
+    expect(grid[0].cells).toHaveLength(2);
+    expect(grid[0].cells[0].objects[0]).toMatchObject({ kind: "image", ref: "w.jpg" });
+    expect(grid[0].cells[0].widthFr).toBeCloseTo(110 / 170, 6);
+    expect(grid[0].cells[1].widthFr).toBeCloseTo(60 / 170, 6);
+    expect(grid[0].cells[1].objects[0].callout).toMatchObject({ body: "one" });
+  });
+
+  it("double side callouts → [imgL | imgR | callouts] cells 55:55:60", () => {
+    const grid = legacyStepToGrid({
+      images: [{
+        image: "l.jpg", image2: "r.jpg", layout: "double",
+        callouts: [info("one")], calloutLayout: "side",
+      }],
+    });
+    expect(grid).toHaveLength(1);
+    expect(grid[0].cells).toHaveLength(3);
+    expect(grid[0].cells[0].objects[0]).toMatchObject({ kind: "image", ref: "l.jpg" });
+    expect(grid[0].cells[1].objects[0]).toMatchObject({ kind: "image", ref: "r.jpg" });
+    expect(grid[0].cells[2].objects[0].callout).toMatchObject({ body: "one" });
+    expect(grid[0].cells[0].widthFr).toBeCloseTo(55 / 170, 6);
+    expect(grid[0].cells[1].widthFr).toBeCloseTo(55 / 170, 6);
+    expect(grid[0].cells[2].widthFr).toBeCloseTo(60 / 170, 6);
+  });
+
   it("heightFr and widthFr each sum to 1", () => {
     const grid = legacyStepToGrid({
       image: "a.jpg",

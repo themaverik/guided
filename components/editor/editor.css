@@ -1080,3 +1080,29 @@
 .skel-callouts.below .skel-cell {
   width: auto;
 }
+
+/* Grid divider-resize overlay (editor-only; never printed). */
+.preview-grid-resize {
+  pointer-events: none; /* only the dividers below are interactive */
+  overflow: visible;
+}
+.grid-divider {
+  stroke: transparent;
+  stroke-width: 10;
+  pointer-events: stroke;
+}
+.grid-divider-row { cursor: row-resize; }
+.grid-divider-col { cursor: col-resize; }
+.grid-divider:hover {
+  stroke: #3b82f6; /* DESIGN selection blue */
+  stroke-width: 2;
+}
+.grid-readout {
+  fill: var(--color-ink);
+  font-size: 11px;
+  font-family: var(--font-body, sans-serif);
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3;
+  pointer-events: none;
+}

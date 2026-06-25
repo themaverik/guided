@@ -310,7 +310,7 @@ build OK; final whole-branch review: ready-to-merge, editor-only/print-clean hol
 changes). Deferred: mm-readout gap accuracy, in-browser drag manual check. (Scope: row + column resize +
 mm readout; the grid-guides visibility toggle moved to Plan 6 where snapping makes guides useful.)
 
-## Plan 5 — Grid structure editing + visible guides  [written, pending execution]
+## Plan 5 — Grid structure editing + visible guides  [done]
 
 Makes a grid-mode step operable: editor-only **guides** (dashed cell outlines scoped to
 `.preview-scaler` + faint resting divider lines) so the grid is visible, plus **add/remove rows &
@@ -319,6 +319,9 @@ by new `addGridRow`/`removeGridRow`/`addGridColumn`/`removeGridColumn` mutations
 fractions (Σ = 1; min 1 row / 1 cell). Editor-only; renderer/print untouched. Closes the usability gap
 from Plans 3–4 (you couldn't see the grid or set row/column counts).
 Plan: `docs/superpowers/plans/2026-06-25-grid-structure-editing.md`.
+Shipped on `feature/improvement-rev2` (commits `3145cef..86c25e0`, 5 commits; suite 45/45, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, editor-only/print-clean holds). Deferred: on-canvas
+button fire-on-pointerdown UX polish; out-of-bounds index guards.
 
 ## Plans 6–8 — roadmapped (detailed just-in-time)
 

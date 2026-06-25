@@ -310,15 +310,25 @@ build OK; final whole-branch review: ready-to-merge, editor-only/print-clean hol
 changes). Deferred: mm-readout gap accuracy, in-browser drag manual check. (Scope: row + column resize +
 mm readout; the grid-guides visibility toggle moved to Plan 6 where snapping makes guides useful.)
 
-## Plans 5–7 — roadmapped (detailed just-in-time)
+## Plan 5 — Grid structure editing + visible guides  [written, pending execution]
 
-- **Plan 5 — Cell object stacks:** move images + callouts into the cell object stack as
+Makes a grid-mode step operable: editor-only **guides** (dashed cell outlines scoped to
+`.preview-scaler` + faint resting divider lines) so the grid is visible, plus **add/remove rows &
+columns** from **both** a left-panel Grid section (steppers) and on-canvas +/× affordances — backed
+by new `addGridRow`/`removeGridRow`/`addGridColumn`/`removeGridColumn` mutations that renormalize
+fractions (Σ = 1; min 1 row / 1 cell). Editor-only; renderer/print untouched. Closes the usability gap
+from Plans 3–4 (you couldn't see the grid or set row/column counts).
+Plan: `docs/superpowers/plans/2026-06-25-grid-structure-editing.md`.
+
+## Plans 6–8 — roadmapped (detailed just-in-time)
+
+- **Plan 6 — Cell object stacks:** move images + callouts into the cell object stack as
   primary/secondary objects; in-cell drag; migrate legacy `callouts` → `secondary` objects. This is
   where `fitSteps`→`fitGrid` becomes necessary (cells gain overflow-capable content). Cell-anchored
   annotation coords + the free annotation layer (`step.freeAnnotations`).
-- **Plan 6 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
+- **Plan 7 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
   8-handle selection; segment-drag connector reshape; snapping defaults; connector
-  arrow-snap-on-by-default.
-- **Plan 7 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
+  arrow-snap-on-by-default; grid-guides on/off toggle.
+- **Plan 8 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
   (OKLCH + PDF /C·/IC via `swatchId`); editor-only fill tint, full opacity in export; unify
   callouts.

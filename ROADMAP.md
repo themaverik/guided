@@ -283,13 +283,18 @@ build OK; final whole-branch review: ready-to-merge, zero-regression holds). Def
 before/after PDF smoke check on a real legacy project, and `Custom`-size width/height inputs (the size
 is selectable but currently falls back to A4).
 
-## Plan 3 — Grid renderer (read-only, opt-in)  [written, pending execution]
+## Plan 3 — Grid renderer (read-only, opt-in)  [done]
 
 `GridStep` renderer consuming `step.grid` (rows × cells × primary image), gated on a new opt-in
 per-step `layoutMode` so migrated books render pixel-identically through the proven path; a
 step-editor Layout toggle makes it visible in the live preview. Image cells are overflow-free by
 construction, so the `fitSteps`→`fitGrid` backstop is deferred (not needed until cells hold
 overflow-capable content). Plan: `docs/superpowers/plans/2026-06-25-grid-renderer.md`.
+Shipped on `feature/improvement-rev2` (commits `2e4610f..608384f`, 5 commits; suite 35/35, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, zero-regression holds — migration never sets
+`layoutMode`, legacy JSX byte-identical, `fitSteps` skips grid pages). Deferred follow-up: style or drop
+the `.editor-help` class; manual preview/PDF check of a grid-mode step. ADR-006 amended with the opt-in
+rule.
 (Scope split from the old "renderer + resize + cell stacks" sketch — drag-resize and cell stacks
 are now their own plans below, keeping each slice small and zero-regression-safe.)
 

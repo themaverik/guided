@@ -5,9 +5,10 @@
  * legacy fields are preserved; new fields are filled. Pure — returns a new
  * object and never mutates the input.
  *
- * Scope (Plan 1 / Phase A foundations): page config default, grid SKELETON
- * (rows×cells + primary image), connector routing rename. Moving callouts into
- * the object stack and the diamond→polygon data conversion are later phases.
+ * Scope: page config default, grid skeleton (rows×cells + primary image),
+ * connector routing rename (Plan 1), and legacy-callout migration into cell
+ * object stacks — side callouts become [image│callouts] column splits, below
+ * callouts become a Rule-1 row beneath the image row (Plan 6).
  */
 import {
   CURRENT_SCHEMA_VERSION,

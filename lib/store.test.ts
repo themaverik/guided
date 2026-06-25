@@ -19,3 +19,19 @@ describe("updatePageConfig", () => {
     expect(book.pageConfig).toBe(DEFAULT_PAGE_CONFIG);
   });
 });
+
+const bookWithStep: Book = {
+  schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
+  title: "T", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "c", title: "C", description: "", steps: [{ title: "S" }] }],
+};
+
+describe("updateStep layoutMode", () => {
+  it("sets layoutMode on the step immutably", () => {
+    const store = createEditorStore(bookWithStep, "slug");
+    store.getState().updateStep(0, 0, { layoutMode: "grid" });
+    expect(store.getState().book.chapters[0].steps[0].layoutMode).toBe("grid");
+    // input book not mutated
+    expect(bookWithStep.chapters[0].steps[0].layoutMode).toBeUndefined();
+  });
+});

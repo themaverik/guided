@@ -167,7 +167,7 @@ export function updateStep(
   book: Book,
   ci: number,
   si: number,
-  patch: Partial<Pick<Step, "title" | "instruction">>,
+  patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
 ): Book {
   const next = clone(book);
   Object.assign(next.chapters[ci].steps[si], patch);

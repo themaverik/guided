@@ -21,6 +21,7 @@ import {
   type Step,
   type Surface,
   DEFAULT_PAGE_CONFIG,
+  stepLayoutMode,
 } from "./book-schema";
 import { annotationId } from "./annotations";
 import { resizeAdjacent, bodyRegion, MIN_CELL_MM, normalizeFractions } from "./grid-math";
@@ -29,10 +30,10 @@ import { legacyStepToGrid } from "./book-migrate";
 const clone = <T>(v: T): T => structuredClone(v);
 
 /**
- * Set a step's layout mode. Switching to "grid" when the step has no grid yet
- * seeds one from the step's current content (`legacyStepToGrid`) — so the grid
- * renderer, guides, and structure controls have data to show. Without this,
- * toggling a fresh (un-migrated) step to grid is a silent no-op.
+ * Set a step's layout mode. Switching INTO "grid" from a non-grid step rebuilds
+ * `step.grid` from the step's legacy fields (via `legacyStepToGrid`), so callouts
+ * carry over correctly. A step already in grid mode is NOT rebuilt — this preserves
+ * any author edits to the grid structure.
  */
 export function setStepLayoutMode(
   book: Book,
@@ -43,8 +44,11 @@ export function setStepLayoutMode(
   const next = clone(book);
   const step = next.chapters[ci]?.steps[si];
   if (!step) return book;
+  const wasGrid = stepLayoutMode(step) === "grid";
   step.layoutMode = mode;
-  if (mode === "grid" && (!step.grid || step.grid.length === 0)) {
+  // Switching INTO grid from a legacy step: (re)build the grid from the legacy
+  // fields so callouts carry over. A step already in grid mode keeps its edits.
+  if (mode === "grid" && !wasGrid) {
     step.grid = legacyStepToGrid(step);
   }
   return next;

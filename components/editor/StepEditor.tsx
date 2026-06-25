@@ -17,6 +17,7 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
   const step = useEditor((s) => s.book.chapters[ci]?.steps[si]);
   const selectedRow = useEditor((s) => s.selection.rowIndex);
   const updateStep = useEditor((s) => s.updateStep);
+  const setStepLayoutMode = useEditor((s) => s.setStepLayoutMode);
   const addRow = useEditor((s) => s.addRow);
 
   if (!step) return null;
@@ -49,7 +50,7 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
         <select
           value={stepLayoutMode(step)}
           onChange={(e) =>
-            updateStep(ci, si, { layoutMode: e.target.value as "legacy" | "grid" })
+            setStepLayoutMode(ci, si, e.target.value as "legacy" | "grid")
           }
         >
           <option value="legacy">Legacy (rows)</option>

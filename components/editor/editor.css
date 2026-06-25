@@ -1107,17 +1107,19 @@
   pointer-events: none;
 }
 
-/* Editor-only grid guides: faint cell outlines, shown only in the preview
-   (the print/PDF render has no .preview-scaler ancestor, so they never print). */
+/* Editor-only grid guides: cell outlines + a faint tint so empty cells read as
+   blocks, shown only in the preview (the print/PDF render has no .preview-scaler
+   ancestor, so they never print). Sized to stay visible at the ~0.5 preview scale. */
 .preview-scaler .grid-cell {
-  outline: 1px dashed var(--color-rule-strong);
-  outline-offset: -1px;
+  outline: 1.5px dashed rgba(59, 130, 246, 0.6);
+  outline-offset: -2px;
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .grid-guide-line {
   stroke: #3b82f6;
-  stroke-opacity: 0.35;
-  stroke-width: 1;
+  stroke-opacity: 0.6;
+  stroke-width: 2;
   pointer-events: none;
 }
 

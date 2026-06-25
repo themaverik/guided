@@ -35,3 +35,25 @@ describe("updateStep layoutMode", () => {
     expect(bookWithStep.chapters[0].steps[0].layoutMode).toBeUndefined();
   });
 });
+
+describe("grid resize actions", () => {
+  const gridBook = (): Book => ({
+    schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
+    title: "T", subtitle: "", author: "", edition: "", cover: "",
+    chapters: [{ id: "c", title: "C", description: "", steps: [{
+      layoutMode: "grid",
+      grid: [
+        { heightFr: 0.5, cells: [{ widthFr: 1, objects: [] }] },
+        { heightFr: 0.5, cells: [{ widthFr: 1, objects: [] }] },
+      ],
+    }] }],
+  });
+
+  it("resizeGridRow updates row fractions on the store", () => {
+    const store = createEditorStore(gridBook(), "slug");
+    store.getState().resizeGridRow(0, 0, 0, 0.1);
+    const h = store.getState().book.chapters[0].steps[0].grid!.map((r) => r.heightFr);
+    expect(h[0]).toBeCloseTo(0.6, 6);
+    expect(h[0] + h[1]).toBeCloseTo(1, 6);
+  });
+});

@@ -148,3 +148,25 @@ callout layout. Grid rendering is therefore **gated on an explicit per-step
 
 This supersedes the original `grid?` field note "When present, overrides
 images[]": presence alone no longer switches rendering; `layoutMode` does.
+
+## Amendment (2026-06-25) — Plan 6: cell callout objects + image fit mode
+
+Plan 6 implements §3 (cell object stack) for callouts and adds a per-image fit mode.
+
+- **Schema:** `StackedObject` gains `callout?: Callout` (payload when `kind:"callout"`) and
+  `fit?: "contain" | "fit-width" | "fit-height"` (default `"contain"`). `fit-width` spans the
+  cell width and crops overflow height (bottom); `fit-height` spans the height and crops overflow
+  width (right).
+- **never-clip is refined:** text/callout content is never *accidentally* clipped — the page-scoped
+  auto-shrink backstop (`fitSteps` → `fitGrid`, DOM-only, Plan 7) guarantees it. Images may be
+  *deliberately* cropped via `fit`. This narrows §8 / PRD Decision 1: clipping is an intentional
+  image affordance, not an overflow outcome.
+- **Migration mapping (normative):** legacy callouts move into cells by placement —
+  **side** → the source row becomes `[image cell(s) │ side-callouts cell]`, `widthFr` from the
+  legacy slot mm (single 60:110, single-wide 110:60, double 55:55:60).
+  **below** → the source row becomes an image row **plus** a callout row of `calloutCols`
+  equal-width cells; callouts are assigned round-robin (`k mod calloutCols`), per-callout `span`
+  is dropped, image-row:callout-row height = 2:1 (Rule 1). **mixed** combines both.
+  Below-callout numbered markers are not rendered in cells (no grid pin equivalent yet).
+- **Scope:** Plan 6 renders objects + migrates. The `fitGrid` auto-shrink engine, the crop
+  confirmation UI, in-cell drag, and rich-text (`kind:"text"`) are Plans 7–8.

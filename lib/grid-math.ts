@@ -8,6 +8,9 @@ const PAGE_MM: Record<Exclude<PageConfig["size"], "Custom">, { w: number; h: num
   Legal: { w: 215.9, h: 355.6 },
 };
 
+/** Minimum on-page size (mm) for a grid row or column; the resize floor. */
+export const MIN_CELL_MM = 15;
+
 /** Page dimensions in mm, with landscape orientation applied. */
 export function pageDimensions(cfg: PageConfig): { w: number; h: number } {
   const base =

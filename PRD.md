@@ -81,7 +81,7 @@ Authors need precise, predictable control over how screenshots and callouts sit 
 - **Conserved-total resize:** dragging a row divider redistributes height between adjacent rows (Σ = bodyH); dragging a column border redistributes width within the row (Σ = row width). Redistribution is **proportional** — affected neighbors shrink in proportion to their current size (flexbox `fr` behavior), not by an equal split. A **minimum size floor** blocks further shrink.
 - **Cell = object stack:** a cell contains an ordered stack of objects — an optional **primary** anchor plus zero or more **secondary** companions (e.g. image + callouts). **A cell may be empty** (no primary object) — empty cells still hold grid space and are resizable. Objects are bounded by the cell.
 - **Content-driven height:** a row's height tracks the max content height across its cells; rows redistribute to conserve bodyH.
-- **Shrink-to-fit backstop:** when redistribution + floor cannot fit content, **scale the whole page down** so the page never overflows and cross-cell alignment/relative scale is preserved; surface the existing non-blocking overflow warning. **Protocol:** conserved-total redistribution runs first (store/React, before paint); the DOM backstop (the existing `fitSteps`, renamed **`fitGrid`** and re-targeted at the grid cell DOM) runs after paint in `useLayoutEffect` and **only scales the DOM — it never writes fractional heights back to the store**. See Appendix A.
+- **Shrink-to-fit backstop:** when redistribution + floor cannot fit content, **scale the whole page down** so the page never overflows and cross-cell alignment/relative scale is preserved; surface the existing non-blocking overflow warning. Text/callout content is never accidentally clipped (auto shrink-to-fit); images may be deliberately cropped via an author-set `fit`. **Protocol:** conserved-total redistribution runs first (store/React, before paint); the DOM backstop (the existing `fitSteps`, renamed **`fitGrid`** and re-targeted at the grid cell DOM) runs after paint in `useLayoutEffect` and **only scales the DOM — it never writes fractional heights back to the store**. See Appendix A.
 - **In-cell object drag:** an object can be repositioned anywhere inside its cell without crossing the cell border.
 
 **Annotation**
@@ -131,7 +131,7 @@ Authors need precise, predictable control over how screenshots and callouts sit 
 - [ ] Given a row at the minimum floor, when dragged to shrink further, then the drag is blocked at the floor.
 
 **Backstop**
-- [ ] Given content that cannot fit after redistribution, when the page renders, then content scales down to fit and the overflow warning appears; the page is never clipped.
+- [ ] Given content that cannot fit after redistribution, when the page renders, then content scales down to fit and the overflow warning appears; the page is never clipped. Text/callout content is never accidentally clipped (auto shrink-to-fit); images may be deliberately cropped via an author-set `fit`.
 
 **Annotation anchor**
 - [ ] Given an annotation on an image, when that image's row resizes or the page auto-fits, then the annotation stays aligned to the same image region.
@@ -256,6 +256,8 @@ interface StackedObject {
   x: number; y: number; w: number; h: number;   // 0–1 within the cell; in-cell drag clamps here
   ref?: string;                              // image filename / callout payload ref
   annotations?: Annotation[];                // CELL-anchored (0–1 of the cell)
+  callout?: Callout;                          // payload when kind === "callout"
+  fit?: "contain" | "fit-width" | "fit-height"; // image fit; default "contain"
 }
 // Step gains:  grid?: GridRow[]   // when present, overrides images[] / legacy single-image fields
 // Step also gains:  freeAnnotations?: Annotation[]  // the top free layer, 0–1 of the body region
@@ -284,7 +286,7 @@ interface Connector {
 - Add **`schemaVersion: number`** to `Book`. Migrate-on-load at the server load points (`loadProjectBook`, `loadExampleBook`) **before** the book reaches the store; re-save at the current version. **Lossless, read-old/write-new.**
 - **Two page-config presets:** new projects are created with `DEFAULT_PAGE_CONFIG` (A4 / portrait / margins 15 mm / header 15 mm / footer 10 mm); **migration of pre-grid books uses `LEGACY_PAGE_CONFIG`** (A4 / portrait / margins 18 mm / header 0 / footer 0) = today's exact rendered geometry, so existing books are pixel-identical. Both are author-editable afterward.
 - **Legacy single-image step** → one `GridRow` (heightFr 1) × one `GridCell` (widthFr 1) with the image as the `primary` object.
-- **`images: ImageRow[]`** → N rows; each row's `RowLayout` preset maps to columns (`single`→1, `double`→2, `single-wide`→1 full-bleed). Callouts become `secondary` objects in the cell.
+- **`images: ImageRow[]`** → N rows; each row's `RowLayout` preset maps to columns (`single`→1, `double`→2, `single-wide`→1 full-bleed). Legacy callouts move into cells by placement — **side** → the source row becomes `[image cell(s) │ side-callouts cell]`, `widthFr` from the legacy slot mm (single 60:110, single-wide 110:60, double 55:55:60). **below** → the source row becomes an image row **plus** a callout row of `calloutCols` equal-width cells; callouts are assigned round-robin (`k mod calloutCols`), per-callout `span` is dropped, image-row:callout-row height = 2:1 (Rule 1). **mixed** combines both. Below-callout numbered markers are not rendered in cells (no grid pin equivalent yet).
 - **Page-anchored annotations** (today on `step.annotations`, normalized to the whole page) → re-normalized to their cell on migration; where the image fills the cell (every legacy case) this is an **identity transform**. Genuinely free marks move to `step.freeAnnotations`.
 - **`diamond` Surface** → `polygon` with `preset:"diamond"` (rhombus vertices, vertex+center anchors, rounded corners preserved).
 

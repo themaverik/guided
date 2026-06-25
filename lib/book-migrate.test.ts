@@ -1,7 +1,7 @@
 // lib/book-migrate.test.ts
 import { describe, it, expect } from "vitest";
 import { migrateBook, legacyStepToGrid } from "@/lib/book-migrate";
-import { CURRENT_SCHEMA_VERSION, LEGACY_PAGE_CONFIG, type Book } from "@/lib/book-schema";
+import { CURRENT_SCHEMA_VERSION, LEGACY_PAGE_CONFIG, DEFAULT_CALLOUT_COLS, type Book } from "@/lib/book-schema";
 
 const baseBook = (steps: Book["chapters"][0]["steps"]): Book => ({
   title: "T", subtitle: "", author: "", edition: "", cover: "",
@@ -57,5 +57,73 @@ describe("migrateBook", () => {
     const out = migrateBook(book);
     const conn = out.chapters[0].steps[0].annotations![0] as { routing: string };
     expect(conn.routing).toBe("square");
+  });
+});
+
+describe("legacyStepToGrid — callouts", () => {
+  const info = (body: string) => ({ type: "info" as const, body });
+
+  it("side callouts → [image | callouts] cells, image narrow", () => {
+    const grid = legacyStepToGrid({
+      image: "a.jpg", layout: "single",
+      callouts: [info("one"), info("two")], calloutLayout: "side",
+    });
+    expect(grid).toHaveLength(1);
+    expect(grid[0].cells).toHaveLength(2);
+    expect(grid[0].cells[0].objects[0]).toMatchObject({ kind: "image", ref: "a.jpg" });
+    expect(grid[0].cells[0].widthFr).toBeCloseTo(60 / 170, 6);
+    expect(grid[0].cells[1].widthFr).toBeCloseTo(110 / 170, 6);
+    expect(grid[0].cells[1].objects).toHaveLength(2);
+    expect(grid[0].cells[1].objects[0]).toMatchObject({
+      role: "secondary", kind: "callout",
+    });
+    expect(grid[0].cells[1].objects[0].callout).toMatchObject({ body: "one" });
+  });
+
+  it("below callouts → image row + Rule-1 callout row, round-robin", () => {
+    const grid = legacyStepToGrid({
+      image: "a.jpg", layout: "single",
+      callouts: [info("c0"), info("c1"), info("c2")],
+      calloutLayout: "below", calloutCols: 2,
+    });
+    expect(grid).toHaveLength(2);
+    // image row
+    expect(grid[0].cells).toHaveLength(1);
+    expect(grid[0].cells[0].objects[0]).toMatchObject({ kind: "image", ref: "a.jpg" });
+    // callout row: 2 cells, round-robin c0->cell0, c1->cell1, c2->cell0
+    expect(grid[1].cells).toHaveLength(2);
+    expect(grid[1].cells[0].objects.map((o) => o.callout?.body)).toEqual(["c0", "c2"]);
+    expect(grid[1].cells[1].objects.map((o) => o.callout?.body)).toEqual(["c1"]);
+    // height 2:1
+    expect(grid[0].heightFr).toBeCloseTo(2 / 3, 6);
+    expect(grid[1].heightFr).toBeCloseTo(1 / 3, 6);
+  });
+
+  it("mixed side+below → image+side row, then below row", () => {
+    const grid = legacyStepToGrid({
+      image: "a.jpg", layout: "single",
+      callouts: [
+        { type: "info", body: "s", placement: "side" },
+        { type: "note", body: "b", placement: "below" },
+      ],
+      calloutCols: 2,
+    });
+    expect(grid).toHaveLength(2);
+    expect(grid[0].cells).toHaveLength(2); // image + side-callouts
+    expect(grid[0].cells[1].objects[0].callout).toMatchObject({ body: "s" });
+    expect(grid[1].cells[0].objects[0].callout).toMatchObject({ body: "b" });
+  });
+
+  it("heightFr and widthFr each sum to 1", () => {
+    const grid = legacyStepToGrid({
+      image: "a.jpg",
+      callouts: [{ type: "info", body: "x", placement: "below" }],
+      calloutCols: DEFAULT_CALLOUT_COLS,
+    });
+    const hSum = grid.reduce((a, r) => a + r.heightFr, 0);
+    expect(hSum).toBeCloseTo(1, 6);
+    grid.forEach((r) =>
+      expect(r.cells.reduce((a, c) => a + c.widthFr, 0)).toBeCloseTo(1, 6),
+    );
   });
 });

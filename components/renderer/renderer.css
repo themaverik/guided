@@ -867,11 +867,13 @@
   inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
   width: 100%;
   height: auto;
+  object-fit: fill; /* box already matches intrinsic ratio (height:auto) → no distortion; overrides inherited contain so the crop intent is explicit */
 }
 .grid-cell .img-slot.fit-height img {
   inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
   width: auto;
   height: 100%;
+  object-fit: fill; /* box already matches intrinsic ratio (width:auto) → no distortion; overrides inherited contain */
 }
 
 /* ────────────── PRINT ────────────── */

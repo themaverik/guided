@@ -13,7 +13,9 @@ import { bookFitKey, selectionPageIndex, totalPages } from "@/lib/book-render";
 import { assetBaseFor } from "@/lib/project-routes";
 import { useEditor } from "@/lib/store";
 import { useAutosave } from "@/lib/use-autosave";
+import { DEFAULT_PAGE_CONFIG, stepLayoutMode } from "@/lib/book-schema";
 import PreviewAnnotations from "./PreviewAnnotations";
+import PreviewGridResize from "./PreviewGridResize";
 
 const SAVE_LABEL: Record<string, string> = {
   idle: "",
@@ -171,6 +173,24 @@ export default function PreviewPane() {
                 selectedId={selectedAnnotation}
               />
             ) : null}
+            {(() => {
+              const sel =
+                selection.stepIndex != null
+                  ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
+                  : null;
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+                <PreviewGridResize
+                  scalerRef={scalerRef}
+                  pageIndex={currentPage}
+                  ci={selection.chapterIndex}
+                  si={selection.stepIndex!}
+                  grid={sel.grid}
+                  pageConfig={book.pageConfig ?? DEFAULT_PAGE_CONFIG}
+                  fitKey={bookFitKey(book)}
+                  scale={scale}
+                />
+              ) : null;
+            })()}
           </div>
         </div>
       </div>

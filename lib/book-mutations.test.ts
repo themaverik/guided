@@ -219,10 +219,18 @@ describe("cell mutations", () => {
   it("moveCellObject reorders within the cell", () => {
     let b = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
     b = addCellCallout(b, 0, 0, 0, 0);
-    cellObjs(b)[0].callout!.body = "first";
-    cellObjs(b)[1].callout!.body = "second";
+    b = updateCellCallout(b, 0, 0, 0, 0, 0, { body: "first" });
+    b = updateCellCallout(b, 0, 0, 0, 0, 1, { body: "second" });
     const out = moveCellObject(b, 0, 0, 0, 0, 0, 1);
     expect(cellObjs(out).map((o) => o.callout?.body)).toEqual(["second", "first"]);
+  });
+  it("updateCellCallout no-ops on a bad objIndex (same reference)", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(updateCellCallout(start, 0, 0, 0, 0, 9, { body: "x" })).toBe(start);
+  });
+  it("moveCellObject no-ops at the boundary (same reference)", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(moveCellObject(start, 0, 0, 0, 0, 0, -1)).toBe(start);
   });
   it("does not mutate input and no-ops on a bad cell index", () => {
     const start = gridBookCell([]);

@@ -572,6 +572,7 @@ export function moveCellObject(book: Book, ci: number, si: number, ri: number, c
   const next = clone(book);
   const cell = cellOf(next, ci, si, ri, cellIndex);
   if (!cell) return book;
+  if (objIndex < 0 || objIndex >= cell.objects.length) return book;
   const j = objIndex + dir;
   if (j < 0 || j >= cell.objects.length) return book;
   swap(cell.objects, objIndex, j);

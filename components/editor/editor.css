@@ -1163,3 +1163,10 @@
   outline-offset: -2px;
   background: rgba(37, 99, 235, 0.06);
 }
+
+/* Cell editor panel (Plan 7) */
+.cell-editor .cell-crop-hint {
+  margin: 4px 0 6px;
+  font-size: 12px;
+  color: #b45309;
+}

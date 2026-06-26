@@ -173,8 +173,8 @@ export default function PreviewPane() {
                   fitKey={bookFitKey(book)}
                   scale={scale}
                   selected={
-                    selection.cellIndex != null
-                      ? { ri: selection.rowIndex ?? 0, cellIndex: selection.cellIndex }
+                    selection.cellIndex != null && selection.rowIndex != null
+                      ? { ri: selection.rowIndex, cellIndex: selection.cellIndex }
                       : null
                   }
                 />

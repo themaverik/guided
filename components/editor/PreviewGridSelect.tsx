@@ -57,6 +57,7 @@ export default function PreviewGridSelect({
           <button
             key={`${ri}-${cidx}`}
             type="button"
+            tabIndex={-1}
             className={`grid-cell-select${isSel ? " selected" : ""}`}
             style={{ position: "absolute", left: box.l, top: box.t, width: box.w, height: box.h, pointerEvents: "all" }}
             onClick={(e) => { e.stopPropagation(); selectCell(ci, si, ri, cidx); }}

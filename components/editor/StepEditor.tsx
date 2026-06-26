@@ -67,8 +67,8 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
       {mode === "grid" && step.grid ? (
         <>
           <GridStructure ci={ci} si={si} grid={step.grid} />
-          {selectedCell != null ? (
-            <CellEditor ci={ci} si={si} ri={selectedRow ?? 0} cellIndex={selectedCell} />
+          {selectedCell != null && selectedRow != null ? (
+            <CellEditor ci={ci} si={si} ri={selectedRow} cellIndex={selectedCell} />
           ) : (
             <p className="editor-help">Select a cell on the page to add an image or callouts.</p>
           )}

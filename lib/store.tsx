@@ -19,6 +19,7 @@ import type {
   Chapter,
   Connector,
   Ending,
+  ImageFit,
   ImageRow,
   PageConfig,
   SectionFont,
@@ -37,6 +38,8 @@ export interface Selection {
   stepIndex: number | null;
   rowIndex: number | null;
   slotIndex: number | null;
+  /** Selected grid cell column (within rowIndex), grid mode only. */
+  cellIndex?: number | null;
 }
 
 export interface EditorState {
@@ -53,6 +56,7 @@ export interface EditorState {
   selectChapter: (chapterIndex: number) => void;
   selectStep: (chapterIndex: number, stepIndex: number) => void;
   selectRow: (chapterIndex: number, stepIndex: number, rowIndex: number) => void;
+  selectCell: (ci: number, si: number, ri: number, cellIndex: number) => void;
 
   // book meta
   updateBookMeta: (
@@ -112,6 +116,15 @@ export interface EditorState {
   removeGridRow: (ci: number, si: number, ri: number) => void;
   addGridColumn: (ci: number, si: number, ri: number) => void;
   removeGridColumn: (ci: number, si: number, ri: number, cellIndex: number) => void;
+
+  // cell objects (grid mode)
+  setCellImage: (ci: number, si: number, ri: number, cellIndex: number, filename: string) => void;
+  removeCellImage: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  setCellImageFit: (ci: number, si: number, ri: number, cellIndex: number, fit: ImageFit) => void;
+  addCellCallout: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  updateCellCallout: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>) => void;
+  removeCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number) => void;
+  moveCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -193,6 +206,11 @@ export function createEditorStore(
           rowIndex,
           slotIndex: null,
         },
+      }),
+    selectCell: (chapterIndex, stepIndex, rowIndex, cellIndex) =>
+      set({
+        selection: { chapterIndex, stepIndex, rowIndex, slotIndex: null, cellIndex },
+        selectedAnnotation: null,
       }),
 
     // ── book meta ──
@@ -334,6 +352,22 @@ export function createEditorStore(
       set((s) => ({ book: M.addGridColumn(s.book, ci, si, ri) })),
     removeGridColumn: (ci, si, ri, cellIndex) =>
       set((s) => ({ book: M.removeGridColumn(s.book, ci, si, ri, cellIndex) })),
+
+    // ── cell objects ──
+    setCellImage: (ci, si, ri, cellIndex, filename) =>
+      set((s) => ({ book: M.setCellImage(s.book, ci, si, ri, cellIndex, filename) })),
+    removeCellImage: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.removeCellImage(s.book, ci, si, ri, cellIndex) })),
+    setCellImageFit: (ci, si, ri, cellIndex, fit) =>
+      set((s) => ({ book: M.setCellImageFit(s.book, ci, si, ri, cellIndex, fit) })),
+    addCellCallout: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.addCellCallout(s.book, ci, si, ri, cellIndex) })),
+    updateCellCallout: (ci, si, ri, cellIndex, objIndex, patch) =>
+      set((s) => ({ book: M.updateCellCallout(s.book, ci, si, ri, cellIndex, objIndex, patch) })),
+    removeCellObject: (ci, si, ri, cellIndex, objIndex) =>
+      set((s) => ({ book: M.removeCellObject(s.book, ci, si, ri, cellIndex, objIndex) })),
+    moveCellObject: (ci, si, ri, cellIndex, objIndex, dir) =>
+      set((s) => ({ book: M.moveCellObject(s.book, ci, si, ri, cellIndex, objIndex, dir) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

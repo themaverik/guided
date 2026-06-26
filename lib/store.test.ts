@@ -76,3 +76,28 @@ describe("grid resize actions", () => {
     expect(h[0] + h[1]).toBeCloseTo(1, 6);
   });
 });
+
+describe("cell selection and cell-object actions", () => {
+  it("selectCell sets cellIndex and clears the annotation selection", () => {
+    const store = createEditorStore(bookWithStep, "slug");
+    store.getState().selectCell(0, 0, 1, 2);
+    expect(store.getState().selection.cellIndex).toBe(2);
+    expect(store.getState().selection.rowIndex).toBe(1);
+    expect(store.getState().selectedAnnotation).toBeNull();
+  });
+
+  it("selecting a step clears the cell selection", () => {
+    const store = createEditorStore(bookWithStep, "slug");
+    store.getState().selectCell(0, 0, 1, 2);
+    store.getState().selectStep(0, 0);
+    expect(store.getState().selection.cellIndex ?? null).toBeNull();
+  });
+
+  it("addCellCallout action updates the book", () => {
+    const store = createEditorStore(bookWithStep, "slug");
+    store.getState().setStepLayoutMode(0, 0, "grid");
+    store.getState().addCellCallout(0, 0, 0, 0);
+    const cell = store.getState().book.chapters[0].steps[0].grid![0].cells[0];
+    expect(cell.objects.some((o) => o.kind === "callout")).toBe(true);
+  });
+});

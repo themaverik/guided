@@ -16,6 +16,7 @@ import { useAutosave } from "@/lib/use-autosave";
 import { DEFAULT_PAGE_CONFIG, stepLayoutMode } from "@/lib/book-schema";
 import PreviewAnnotations from "./PreviewAnnotations";
 import PreviewGridResize from "./PreviewGridResize";
+import PreviewGridSelect from "./PreviewGridSelect";
 
 const SAVE_LABEL: Record<string, string> = {
   idle: "",
@@ -157,6 +158,28 @@ export default function PreviewPane() {
               assetBase={assetBaseFor(projectSlug)}
               onReport={setOverflows}
             />
+            {(() => {
+              const sel =
+                selection.stepIndex != null
+                  ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
+                  : null;
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+                <PreviewGridSelect
+                  scalerRef={scalerRef}
+                  pageIndex={currentPage}
+                  ci={selection.chapterIndex}
+                  si={selection.stepIndex!}
+                  grid={sel.grid}
+                  fitKey={bookFitKey(book)}
+                  scale={scale}
+                  selected={
+                    selection.cellIndex != null
+                      ? { ri: selection.rowIndex ?? 0, cellIndex: selection.cellIndex }
+                      : null
+                  }
+                />
+              ) : null;
+            })()}
             {selection.stepIndex != null ? (
               <PreviewAnnotations
                 scalerRef={scalerRef}

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode } from "@/lib/book-mutations";
-import { DEFAULT_PAGE_CONFIG, type Book } from "@/lib/book-schema";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject } from "@/lib/book-mutations";
+import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
   title: "T", subtitle: "", author: "", edition: "", cover: "",
@@ -171,5 +171,64 @@ describe("grid structure mutations", () => {
     const book = oneByOne();
     addGridRow(book, 0, 0);
     expect(book.chapters[0].steps[0].grid).toHaveLength(1);
+  });
+});
+
+const gridBookCell = (objects: StackedObject[]): Book => ({
+  title: "T", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "ch1", title: "C", description: "", steps: [{
+    layoutMode: "grid",
+    grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects }] }],
+  }] }],
+});
+const cellObjs = (b: Book) => b.chapters[0].steps[0].grid![0].cells[0].objects;
+
+describe("cell mutations", () => {
+  it("setCellImage creates a primary image (first) on an empty cell", () => {
+    const out = setCellImage(gridBookCell([]), 0, 0, 0, 0, "a.jpg");
+    expect(cellObjs(out)[0]).toMatchObject({ role: "primary", kind: "image", ref: "a.jpg" });
+  });
+  it("setCellImage updates the existing primary ref", () => {
+    const start = gridBookCell([{ id: "i1", role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: "old.jpg" }]);
+    const out = setCellImage(start, 0, 0, 0, 0, "new.jpg");
+    expect(cellObjs(out).filter((o) => o.kind === "image")).toHaveLength(1);
+    expect(cellObjs(out)[0].ref).toBe("new.jpg");
+  });
+  it("removeCellImage drops the primary image", () => {
+    const start = gridBookCell([{ id: "i1", role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: "a.jpg" }]);
+    expect(cellObjs(removeCellImage(start, 0, 0, 0, 0))).toHaveLength(0);
+  });
+  it("setCellImageFit sets the image fit", () => {
+    const start = gridBookCell([{ id: "i1", role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: "a.jpg" }]);
+    expect(cellObjs(setCellImageFit(start, 0, 0, 0, 0, "fit-width"))[0].fit).toBe("fit-width");
+  });
+  it("addCellCallout appends a secondary callout object", () => {
+    const out = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(cellObjs(out)[0]).toMatchObject({ role: "secondary", kind: "callout" });
+    expect(cellObjs(out)[0].callout).toBeDefined();
+  });
+  it("updateCellCallout patches the callout payload", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    const out = updateCellCallout(start, 0, 0, 0, 0, 0, { body: "hello", type: "warning" });
+    expect(cellObjs(out)[0].callout).toMatchObject({ body: "hello", type: "warning" });
+  });
+  it("removeCellObject removes by index", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(cellObjs(removeCellObject(start, 0, 0, 0, 0, 0))).toHaveLength(0);
+  });
+  it("moveCellObject reorders within the cell", () => {
+    let b = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    b = addCellCallout(b, 0, 0, 0, 0);
+    cellObjs(b)[0].callout!.body = "first";
+    cellObjs(b)[1].callout!.body = "second";
+    const out = moveCellObject(b, 0, 0, 0, 0, 0, 1);
+    expect(cellObjs(out).map((o) => o.callout?.body)).toEqual(["second", "first"]);
+  });
+  it("does not mutate input and no-ops on a bad cell index", () => {
+    const start = gridBookCell([]);
+    const snap = structuredClone(start);
+    const out = setCellImage(start, 0, 0, 0, 9, "x.jpg");
+    expect(start).toEqual(snap);
+    expect(out).toBe(start); // bad index → same reference
   });
 });

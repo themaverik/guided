@@ -16,6 +16,8 @@ import {
   type CalloutType,
   type Chapter,
   type Connector,
+  type GridCell,
+  type ImageFit,
   type ImageRow,
   type RowLayout,
   type Step,
@@ -505,6 +507,74 @@ export function removeGridColumn(
   const kept = row.cells.filter((_, i) => i !== cellIndex);
   const widths = normalizeFractions(kept.map((c) => c.widthFr));
   row.cells = kept.map((c, i) => ({ ...c, widthFr: widths[i] }));
+  return next;
+}
+
+// ── Cell objects (Plan 7) ──────────────────────────────────
+
+const cellOf = (book: Book, ci: number, si: number, ri: number, cellIndex: number): GridCell | undefined =>
+  book.chapters[ci]?.steps[si]?.grid?.[ri]?.cells?.[cellIndex];
+
+/** Set (or create) the cell's primary image; a new image goes first in the stack. */
+export function setCellImage(book: Book, ci: number, si: number, ri: number, cellIndex: number, filename: string): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx >= 0) cell.objects[idx] = { ...cell.objects[idx], ref: filename };
+  else cell.objects.unshift({ id: annotationId(), role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: filename });
+  return next;
+}
+
+export function removeCellImage(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects = cell.objects.filter((o) => !(o.kind === "image" && o.role === "primary"));
+  return next;
+}
+
+export function setCellImageFit(book: Book, ci: number, si: number, ri: number, cellIndex: number, fit: ImageFit): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx < 0) return book;
+  cell.objects[idx] = { ...cell.objects[idx], fit };
+  return next;
+}
+
+export function addCellCallout(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects.push({ id: annotationId(), role: "secondary", kind: "callout", x: 0, y: 0, w: 1, h: 1, callout: blankCallout() });
+  return next;
+}
+
+export function updateCellCallout(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "callout") return book;
+  obj.callout = { ...(obj.callout ?? blankCallout()), ...patch };
+  return next;
+}
+
+export function removeCellObject(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell || objIndex < 0 || objIndex >= cell.objects.length) return book;
+  cell.objects.splice(objIndex, 1);
+  return next;
+}
+
+export function moveCellObject(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const j = objIndex + dir;
+  if (j < 0 || j >= cell.objects.length) return book;
+  swap(cell.objects, objIndex, j);
   return next;
 }
 

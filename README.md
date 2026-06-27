@@ -5,8 +5,9 @@ A simple, minimalist, image-driven, print-ready guidebook editor (**guide** + **
 Author image-driven guidebooks in a two-pane WYSIWYG editor — chapters, steps, and
 screenshot layouts with callouts, annotations, watermarks, and pixel-accurate print/PDF
 output. Pages are configurable (size / orientation / margins / header / footer), and a step
-can use the classic row layout or an opt-in **flexible grid** — drag dividers to resize rows
-and columns, add/remove cells, all within the page bounds.
+can use the classic row layout or an opt-in **flexible grid** — drag dividers to resize rows and
+columns, add/remove cells, fill each cell with an image and callouts, and content auto-shrinks to
+fit, all within the page bounds.
 
 ## Screenshots
 

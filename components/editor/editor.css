@@ -1081,6 +1081,17 @@
   width: auto;
 }
 
+/* Grid editor overlays must sit ABOVE the rendered page content. The page uses
+   z-index:1 on .page-inner / .img-slot-meta, which would otherwise bury these
+   transparent overlays and swallow every click. z:4 keeps them under the
+   annotation layer (z:5), which goes pointer-events:none over a grid step so its
+   empty area no longer intercepts grid clicks (see PreviewAnnotations gridMode). */
+.preview-grid-select,
+.preview-grid-resize,
+.preview-cell-float {
+  z-index: 4;
+}
+
 /* Grid divider-resize overlay (editor-only; never printed). */
 .preview-grid-resize {
   pointer-events: none; /* only the dividers below are interactive */

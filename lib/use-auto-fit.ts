@@ -27,6 +27,17 @@ const useIsomorphicLayoutEffect =
 /** Never shrink a slot below this width/height (px). */
 export const MIN_SLOT_PX = 60;
 
+/** Never shrink grid cell content below this scale; past it, clip + warn. */
+export const MIN_GRID_SCALE = 0.5;
+
+/** Uniform content-scale factor for a grid step, from its callout cells'
+ *  overflow ratios (content height / cell height). 1 when all fit; else the
+ *  worst cell drives `1/worst`, floored at `minScale`. */
+export function gridFitScale(ratios: number[], minScale: number): number {
+  const worst = Math.max(1, ...ratios);
+  return worst <= 1 ? 1 : Math.max(minScale, 1 / worst);
+}
+
 /** Run one fit pass over every `.page.step` inside `container`. Returns the
  *  data-screen-labels of pages that still overflow after scaling. */
 export function fitSteps(container: HTMLElement): string[] {

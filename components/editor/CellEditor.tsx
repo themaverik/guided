@@ -35,6 +35,8 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
   const updateCellCallout = useEditor((s) => s.updateCellCallout);
   const removeCellObject = useEditor((s) => s.removeCellObject);
   const moveCellObject = useEditor((s) => s.moveCellObject);
+  const updateCellObjectPlacement = useEditor((s) => s.updateCellObjectPlacement);
+  const selectedObjId = useEditor((s) => s.selection.objectId ?? null);
 
   const imageRef = cell?.objects.find((o) => o.kind === "image" && o.role === "primary")?.ref;
   const [imgAspect, setImgAspect] = useState<number | null>(null);
@@ -99,7 +101,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
 
       <div className="callout-list">
         {callouts.map(({ o, i }) => (
-          <div className="callout-item" key={o.id}>
+          <div className={`callout-item${selectedObjId === o.id ? " selected" : ""}`} key={o.id}>
             <div className="callout-item-head">
               <select
                 value={normalizeCalloutType(o.callout?.type)}
@@ -108,6 +110,16 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
                 {CALLOUT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
               <div className="mini-btns">
+                {o.positioned ? (
+                  <button
+                    className="mini-btn"
+                    onClick={() => updateCellObjectPlacement(ci, si, ri, cellIndex, o.id, { positioned: false })}
+                    aria-label="Dock to flow"
+                    title="Dock to flow"
+                  >
+                    ⤓
+                  </button>
+                ) : null}
                 <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, -1)} aria-label="Move up">↑</button>
                 <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, 1)} aria-label="Move down">↓</button>
                 <button className="mini-btn danger" onClick={() => removeCellObject(ci, si, ri, cellIndex, i)} aria-label="Remove">×</button>

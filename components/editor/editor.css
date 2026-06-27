@@ -1193,3 +1193,9 @@
   border: 2px solid #2563eb;
   cursor: ew-resize;
 }
+
+.cell-editor .callout-item.selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 6px;
+}

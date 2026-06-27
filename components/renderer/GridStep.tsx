@@ -24,23 +24,25 @@ export default function GridStep({
         <div className="grid-row" key={ri} style={{ flexGrow: row.heightFr }}>
           {row.cells.map((cell, ci) => (
             <div className="grid-cell" key={ci} style={{ flexGrow: cell.widthFr }}>
-              {cell.objects.map((obj) => {
-                if (obj.kind === "image") {
-                  return (
-                    <ImageSlot
-                      key={obj.id}
-                      src={imageSrc(assetBase, chapter.id, obj.ref)}
-                      label="Screen"
-                      path={displayPath(chapter.id, obj.ref)}
-                      fit={obj.fit}
-                    />
-                  );
-                }
-                if (obj.kind === "callout" && obj.callout) {
-                  return <Callout key={obj.id} data={obj.callout} />;
-                }
-                return null; // text objects: Plan 8
-              })}
+              <div className="grid-cell-content">
+                {cell.objects.map((obj) => {
+                  if (obj.kind === "image") {
+                    return (
+                      <ImageSlot
+                        key={obj.id}
+                        src={imageSrc(assetBase, chapter.id, obj.ref)}
+                        label="Screen"
+                        path={displayPath(chapter.id, obj.ref)}
+                        fit={obj.fit}
+                      />
+                    );
+                  }
+                  if (obj.kind === "callout" && obj.callout) {
+                    return <Callout key={obj.id} data={obj.callout} />;
+                  }
+                  return null; // text objects: Plan 10
+                })}
+              </div>
             </div>
           ))}
         </div>

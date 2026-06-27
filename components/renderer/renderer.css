@@ -847,9 +847,16 @@
   flex: 1 1 0;
   min-width: 0;
   display: flex;
-  flex-direction: column; /* stack the object (image + callouts) vertically */
+  overflow: hidden; /* clips residual after fitGrid scales content (Plan 8) */
+}
+.grid-cell-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* stack image + callouts vertically */
   gap: 4mm;
-  overflow: hidden; /* Plan 6 clip baseline; Plan 7 fitGrid replaces this */
+  transform-origin: top left; /* fitGrid scales from here (Plan 8) */
 }
 .grid-cell .img-slot {
   width: 100%;

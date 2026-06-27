@@ -1170,3 +1170,26 @@
   font-size: 12px;
   color: #b45309;
 }
+
+/* Floating callout drag overlay (Plan 9, editor-only) */
+.preview-cell-float .cell-float-hit {
+  cursor: grab;
+  border-radius: 4px;
+}
+.preview-cell-float .cell-float-hit.floating {
+  outline: 1.5px dashed rgba(37, 99, 235, 0.5);
+  outline-offset: 1px;
+}
+.preview-cell-float .cell-float-hit.selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+  background: rgba(37, 99, 235, 0.06);
+}
+.preview-cell-float .cell-float-resize {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #2563eb;
+  cursor: ew-resize;
+}

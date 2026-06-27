@@ -170,3 +170,28 @@ Plan 6 implements §3 (cell object stack) for callouts and adds a per-image fit 
   Below-callout numbered markers are not rendered in cells (no grid pin equivalent yet).
 - **Scope:** Plan 6 renders objects + migrates. The `fitGrid` auto-shrink engine, the crop
   confirmation UI, in-cell drag, and rich-text (`kind:"text"`) are Plans 7–8.
+
+## Amendment (2026-06-27) — Plan 8: grid overflow = uniform cell-content shrink
+
+Plan 8 replaces Plan 6's hard clip baseline with an auto-shrink backstop, and
+revises the overflow mechanism in §8 / PRD Decision 1.
+
+- **Why not page-scoped:** the PRD's "scale the whole page down" works for the
+  legacy flow but NOT a proportional grid — scaling the page shrinks a cell and
+  its text together, so the intra-cell overflow ratio is unchanged.
+- **Mechanism:** `fitGrid` (in `lib/use-auto-fit.ts`, run by `useAutoFit` inside
+  `BookCanvas`, so it executes in BOTH the editor preview and `/print`) measures
+  each **callout-bearing** cell's content overflow ratio, takes the worst across
+  the step, and applies ONE **grid-uniform** `transform: scale(f)` to every
+  callout cell's `.grid-cell-content` (`f = max(MIN_GRID_SCALE, 1/worst)`,
+  `MIN_GRID_SCALE = 0.5`). Image-only cells are exempt (they never overflow).
+  Past the floor, content clips and the step is reported to the existing
+  non-blocking overflow warning.
+- **Callouts/text are fluid:** a callout is full cell width and wraps (CSS flow);
+  shrink is the last resort, after reflow.
+- This **supersedes the previously-rejected "per-cell local shrink"** (ADR-006
+  Alternatives) with a uniform-across-cells *content* scale — which preserves the
+  cross-cell consistency that motivated the original page-scoped choice. Grid
+  track sizes (fractions) are author-controlled and never resized by fitGrid.
+- **Scope:** drag/absolute positioning (Plan 9) and rich-text blocks (Plan 10)
+  remain deferred; text will reflow + shrink through the same `.grid-cell-content`.

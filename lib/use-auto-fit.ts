@@ -122,6 +122,39 @@ export function fitSteps(container: HTMLElement): string[] {
   return overflows;
 }
 
+/** Grid analogue of fitSteps: for each grid step, scale every callout-bearing
+ *  cell's `.grid-cell-content` by ONE grid-uniform factor (the worst cell's,
+ *  floored at MIN_GRID_SCALE) so callouts fit; image-only cells are untouched.
+ *  Returns the labels of grid steps still overflowing at the floor. */
+export function fitGrid(container: HTMLElement): string[] {
+  const overflows: string[] = [];
+
+  container.querySelectorAll<HTMLElement>(".page.step").forEach((page) => {
+    const gridStep = page.querySelector<HTMLElement>(".grid-step");
+    if (!gridStep) return; // legacy step → handled by fitSteps
+
+    // Only cells that contain a callout can overflow; image-only cells stay 1:1.
+    const contents = [...gridStep.querySelectorAll<HTMLElement>(".grid-cell")]
+      .filter((cell) => cell.querySelector(".callout"))
+      .map((cell) => cell.querySelector<HTMLElement>(":scope > .grid-cell-content"))
+      .filter((c): c is HTMLElement => c != null);
+    if (contents.length === 0) return;
+
+    // Reset before measuring so the ratios are at natural scale.
+    contents.forEach((c) => { c.style.transform = ""; });
+    const ratios = contents.map((c) => c.scrollHeight / c.clientHeight);
+    const f = gridFitScale(ratios, MIN_GRID_SCALE);
+    contents.forEach((c) => { c.style.transform = f < 1 ? `scale(${f})` : ""; });
+
+    // Still overflows at the floor → warn (worst > 1/MIN_GRID_SCALE).
+    if (f <= MIN_GRID_SCALE && Math.max(1, ...ratios) > 1 / MIN_GRID_SCALE) {
+      overflows.push(page.getAttribute("data-screen-label") || "");
+    }
+  });
+
+  return overflows;
+}
+
 /**
  * Attach auto-fit to a container ref. Re-runs whenever `deps` change (pass a
  * content key like `bookFitKey(book)`), after `document.fonts.ready`, and on
@@ -144,7 +177,7 @@ export function useAutoFit(
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
-      const overflows = fitSteps(el);
+      const overflows = [...fitSteps(el), ...fitGrid(el)];
       reportRef.current?.(overflows);
     };
 

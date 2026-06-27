@@ -195,6 +195,11 @@ export default function PreviewPane() {
                 fitKey={bookFitKey(book)}
                 scale={scale}
                 selectedId={selectedAnnotation}
+                gridMode={(() => {
+                  const s =
+                    book.chapters[selection.chapterIndex]?.steps[selection.stepIndex];
+                  return s ? stepLayoutMode(s) === "grid" : false;
+                })()}
               />
             ) : null}
             {(() => {

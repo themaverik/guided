@@ -32,6 +32,10 @@ export default function GridStep({
                 <div className="grid-cell-content">
                   {flow.map((obj) => {
                     if (obj.kind === "image") {
+                      // An image object with no file is an empty cell — render
+                      // nothing (the editor's dashed guide already marks it)
+                      // rather than the "Screen" drop-target placeholder.
+                      if (!obj.ref) return null;
                       return (
                         <ImageSlot
                           key={obj.id}

@@ -56,6 +56,7 @@ export default function PreviewAnnotations({
   fitKey,
   scale,
   selectedId,
+  gridMode = false,
 }: {
   scalerRef: React.RefObject<HTMLDivElement | null>;
   pageIndex: number;
@@ -65,6 +66,10 @@ export default function PreviewAnnotations({
   fitKey: string;
   scale: number;
   selectedId: string | null;
+  /** In grid mode the SVG goes pointer-events:none on its EMPTY area so clicks
+   *  fall through to the grid overlays beneath; annotation shapes/handles keep
+   *  their own pointer-events and stay interactive. */
+  gridMode?: boolean;
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
   const selectAnnotation = useEditor((s) => s.selectAnnotation);
@@ -222,7 +227,12 @@ export default function PreviewAnnotations({
     <svg
       ref={svgRef}
       className="preview-anno"
-      style={{ position: "absolute", left: rect.l, top: rect.t }}
+      style={{
+        position: "absolute",
+        left: rect.l,
+        top: rect.t,
+        pointerEvents: gridMode ? "none" : undefined,
+      }}
       width={W}
       height={H}
       onPointerMove={onMove}

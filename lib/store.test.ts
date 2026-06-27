@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createEditorStore } from "@/lib/store";
-import { DEFAULT_PAGE_CONFIG, type Book } from "@/lib/book-schema";
+import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const book: Book = {
   schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
@@ -142,5 +142,34 @@ describe("grid row/column removal selection reconciliation", () => {
     store.getState().selectCell(0, 0, 0, 0);
     store.getState().removeGridColumn(0, 0, 0, 1); // remove a later column
     expect(store.getState().selection.cellIndex).toBe(0);
+  });
+});
+
+const co = (id: string): StackedObject => ({ id, role: "secondary", kind: "callout", x: 0, y: 0, w: 1, h: 1, callout: { type: "info" } });
+const gridBook = (objects: StackedObject[]): Book => ({
+  title: "", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "c1", title: "", description: "", steps: [{
+    layoutMode: "grid",
+    grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects }] }],
+  }] }],
+});
+
+describe("store: floating cell callouts", () => {
+  it("selectCellObject sets cellIndex + objectId and clears selectedAnnotation", () => {
+    const store = createEditorStore(gridBook([co("a")]), "demo");
+    store.getState().selectAnnotation("x");
+    store.getState().selectCellObject(0, 0, 0, 0, "a");
+    const sel = store.getState().selection;
+    expect(sel.cellIndex).toBe(0);
+    expect(sel.objectId).toBe("a");
+    expect(store.getState().selectedAnnotation).toBe(null);
+  });
+
+  it("updateCellObjectPlacement action floats the callout in the book", () => {
+    const store = createEditorStore(gridBook([co("a")]), "demo");
+    store.getState().updateCellObjectPlacement(0, 0, 0, 0, "a", { positioned: true, x: 0.25, y: 0.5, w: 0.4 });
+    const o = store.getState().book.chapters[0].steps[0].grid![0].cells[0].objects[0];
+    expect(o.positioned).toBe(true);
+    expect([o.x, o.y, o.w]).toEqual([0.25, 0.5, 0.4]);
   });
 });

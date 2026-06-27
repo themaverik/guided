@@ -23,6 +23,7 @@ import type {
   ImageRow,
   PageConfig,
   SectionFont,
+  StackedObject,
   Step,
   Surface,
   Theme,
@@ -40,6 +41,8 @@ export interface Selection {
   slotIndex: number | null;
   /** Selected grid cell column (within rowIndex), grid mode only. */
   cellIndex?: number | null;
+  /** Selected cell object id (a floating callout), grid mode only. */
+  objectId?: string | null;
 }
 
 export interface EditorState {
@@ -57,6 +60,7 @@ export interface EditorState {
   selectStep: (chapterIndex: number, stepIndex: number) => void;
   selectRow: (chapterIndex: number, stepIndex: number, rowIndex: number) => void;
   selectCell: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  selectCellObject: (ci: number, si: number, ri: number, cellIndex: number, objectId: string) => void;
 
   // book meta
   updateBookMeta: (
@@ -125,6 +129,7 @@ export interface EditorState {
   updateCellCallout: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>) => void;
   removeCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number) => void;
   moveCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1) => void;
+  updateCellObjectPlacement: (ci: number, si: number, ri: number, cellIndex: number, objectId: string, patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -235,6 +240,11 @@ export function createEditorStore(
     selectCell: (chapterIndex, stepIndex, rowIndex, cellIndex) =>
       set({
         selection: { chapterIndex, stepIndex, rowIndex, slotIndex: null, cellIndex },
+        selectedAnnotation: null,
+      }),
+    selectCellObject: (chapterIndex, stepIndex, rowIndex, cellIndex, objectId) =>
+      set({
+        selection: { chapterIndex, stepIndex, rowIndex, slotIndex: null, cellIndex, objectId },
         selectedAnnotation: null,
       }),
 
@@ -401,6 +411,8 @@ export function createEditorStore(
       set((s) => ({ book: M.removeCellObject(s.book, ci, si, ri, cellIndex, objIndex) })),
     moveCellObject: (ci, si, ri, cellIndex, objIndex, dir) =>
       set((s) => ({ book: M.moveCellObject(s.book, ci, si, ri, cellIndex, objIndex, dir) })),
+    updateCellObjectPlacement: (ci, si, ri, cellIndex, objectId, patch) =>
+      set((s) => ({ book: M.updateCellObjectPlacement(s.book, ci, si, ri, cellIndex, objectId, patch) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

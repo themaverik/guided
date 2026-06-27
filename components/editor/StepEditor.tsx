@@ -59,8 +59,9 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
           <option value="grid">Grid (preview)</option>
         </select>
         <p className="editor-help">
-          Grid renders image cells from the flexible grid. Callouts and
-          drag-resize are coming in a later update.
+          Grid lays out image and callout content in resizable cells. Drag the
+          dividers on the page to resize; select a cell to add an image or
+          callouts, then drag a callout to float it anywhere in the cell.
         </p>
       </div>
 

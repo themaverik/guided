@@ -36,15 +36,16 @@ describe("updateStep layoutMode", () => {
   });
 });
 
+const oneByOne = (): Book => ({
+  schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
+  title: "T", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "c", title: "C", description: "", steps: [{
+    layoutMode: "grid",
+    grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
+  }] }],
+});
+
 describe("grid structure actions", () => {
-  const oneByOne = (): Book => ({
-    schemaVersion: 2, pageConfig: DEFAULT_PAGE_CONFIG,
-    title: "T", subtitle: "", author: "", edition: "", cover: "",
-    chapters: [{ id: "c", title: "C", description: "", steps: [{
-      layoutMode: "grid",
-      grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
-    }] }],
-  });
 
   it("addGridRow then addGridColumn update the store grid", () => {
     const store = createEditorStore(oneByOne(), "slug");
@@ -99,5 +100,39 @@ describe("cell selection and cell-object actions", () => {
     store.getState().addCellCallout(0, 0, 0, 0);
     const cell = store.getState().book.chapters[0].steps[0].grid![0].cells[0];
     expect(cell.objects.some((o) => o.kind === "callout")).toBe(true);
+  });
+});
+
+describe("grid row/column removal selection reconciliation", () => {
+  it("removeGridColumn clears the selection when the selected column is removed", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridColumn(0, 0, 0); // row 0 now has 2 cells
+    store.getState().selectCell(0, 0, 0, 1);
+    store.getState().removeGridColumn(0, 0, 0, 1);
+    expect(store.getState().selection.cellIndex ?? null).toBeNull();
+  });
+
+  it("removeGridColumn decrements cellIndex when an earlier column is removed", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridColumn(0, 0, 0); // 2 cells
+    store.getState().selectCell(0, 0, 0, 1);
+    store.getState().removeGridColumn(0, 0, 0, 0); // remove cell before the selected
+    expect(store.getState().selection.cellIndex).toBe(0);
+  });
+
+  it("removeGridRow clears the cell selection when the selected row is removed", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridRow(0, 0); // 2 rows
+    store.getState().selectCell(0, 0, 1, 0);
+    store.getState().removeGridRow(0, 0, 1);
+    expect(store.getState().selection.cellIndex ?? null).toBeNull();
+  });
+
+  it("removeGridColumn leaves an unrelated selection untouched", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridColumn(0, 0, 0);
+    store.getState().selectCell(0, 0, 0, 0);
+    store.getState().removeGridColumn(0, 0, 0, 1); // remove a later column
+    expect(store.getState().selection.cellIndex).toBe(0);
   });
 });

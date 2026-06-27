@@ -161,6 +161,31 @@ export type EditorStore = StoreApi<EditorState>;
 const clamp = (n: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, n));
 
+function reconcileColumnRemoval(
+  sel: Selection,
+  ci: number,
+  si: number,
+  ri: number,
+  cellIndex: number,
+): Selection {
+  if (sel.chapterIndex !== ci || sel.stepIndex !== si || sel.rowIndex !== ri || sel.cellIndex == null) return sel;
+  if (sel.cellIndex === cellIndex) return { ...sel, cellIndex: null };
+  if (sel.cellIndex > cellIndex) return { ...sel, cellIndex: sel.cellIndex - 1 };
+  return sel;
+}
+
+function reconcileRowRemoval(
+  sel: Selection,
+  ci: number,
+  si: number,
+  ri: number,
+): Selection {
+  if (sel.chapterIndex !== ci || sel.stepIndex !== si || sel.rowIndex == null) return sel;
+  if (sel.rowIndex === ri) return { ...sel, cellIndex: null };
+  if (sel.rowIndex > ri) return { ...sel, rowIndex: sel.rowIndex - 1 };
+  return sel;
+}
+
 export function createEditorStore(
   initialBook: Book,
   projectSlug: string,
@@ -347,11 +372,19 @@ export function createEditorStore(
       set((s) => ({ book: M.resizeGridColumn(s.book, ci, si, ri, dividerIndex, deltaFr) })),
     addGridRow: (ci, si) => set((s) => ({ book: M.addGridRow(s.book, ci, si) })),
     removeGridRow: (ci, si, ri) =>
-      set((s) => ({ book: M.removeGridRow(s.book, ci, si, ri) })),
+      set((s) => {
+        const book = M.removeGridRow(s.book, ci, si, ri);
+        if (book === s.book) return { book };
+        return { book, selection: reconcileRowRemoval(s.selection, ci, si, ri) };
+      }),
     addGridColumn: (ci, si, ri) =>
       set((s) => ({ book: M.addGridColumn(s.book, ci, si, ri) })),
     removeGridColumn: (ci, si, ri, cellIndex) =>
-      set((s) => ({ book: M.removeGridColumn(s.book, ci, si, ri, cellIndex) })),
+      set((s) => {
+        const book = M.removeGridColumn(s.book, ci, si, ri, cellIndex);
+        if (book === s.book) return { book };
+        return { book, selection: reconcileColumnRemoval(s.selection, ci, si, ri, cellIndex) };
+      }),
 
     // ── cell objects ──
     setCellImage: (ci, si, ri, cellIndex, filename) =>

@@ -264,13 +264,14 @@ review + final whole-branch review). CLAUDE.md was corrected (it had described a
 stack). Decisions of record live in `PRD.md` (Decisions 1–14) and `ADR-006`.
 
 **Status:** Plans 1–5 are **done and merged to `main`** (merge commit `2fbbbc8`; former branch
-`feature/improvement-rev2`, now deleted). **Plans 6–8 are done on `feature/improvement-rev3`** (not
-yet merged): grid cells now render and author image + callout content, and overflow auto-shrinks to
-fit in both preview and print. 83 unit tests, renderer/print zero-regression, editor-only affordances.
-Remaining work — Plan 9 (on-canvas drag + absolute callout positioning), Plan 10 (rich-text blocks),
-then annotation standardization (ISO 32000 vocabulary) and the OKLCH color system — continues on
-`feature/improvement-rev3`. (Note: the plan numbering was re-sequenced during just-in-time
-brainstorming; annotation standardization and color moved later than the original 6–8 sketch.)
+`feature/improvement-rev2`, now deleted). **Plans 6–9 are done on `feature/improvement-rev3`** (not
+yet merged): grid cells render and author image + callout content, overflow auto-shrinks to fit in
+both preview and print, and callouts can be dragged off the flow stack to float at absolute positions
+within a cell. 98 unit tests, renderer/print zero-regression, editor-only affordances.
+Remaining work — Plan 10 (rich-text blocks), then annotation standardization (ISO 32000 vocabulary)
+and the OKLCH color system — continues on `feature/improvement-rev3`. (Note: the plan numbering was
+re-sequenced during just-in-time brainstorming; annotation standardization and color moved later than
+the original 6–8 sketch.)
 
 ## Plan 1 — Foundations  [done]
 
@@ -364,10 +365,22 @@ Shipped on `feature/improvement-rev3` (commits `d2520c1..ebc9a5e`, 7 commits; su
 build OK; final whole-branch review: ready-to-merge). No `Book` schema change; ADR-006 amended (uniform
 cell-content scale supersedes the page-scoped idea). Deferred: a `clientHeight > 0` guard.
 
-## Plans 9–10 and beyond — roadmapped (detailed just-in-time)
+## Plan 9 — On-canvas drag + absolute callout positioning  [done]
 
-- **Plan 9 — On-canvas drag + absolute positioning:** drag callouts to reposition within a cell
-  (absolute `x/y`), the floating model layered on Plan 7's panel authoring.
+A grid-cell callout can be **dragged off the flow stack** to float at an absolute position within its
+cell (over the screenshot or beside a letterboxed image). Opt-in per callout via a new
+`StackedObject.positioned?` flag: the renderer splits each cell into a flow layer (`.grid-cell-content`,
+the only layer `fitGrid` scales) and an absolute `.grid-cell-floats` layer, in **both** preview and
+print. A new editor-only `PreviewCellFloat` overlay drags to detach / move, resizes width (height stays
+content-driven), and click-selects; a left-panel **Dock to flow** button re-flows it. `fitGrid` is scoped
+to flow callouts so floating ones are exempt (they clip past the cell edge). Spec/plan under `docs/superpowers/`.
+Shipped on `feature/improvement-rev3` (commits `898a1fa..ba9c32e`, 6 commits; suite 98/98, typecheck 0,
+build OK; final whole-branch review: ready-to-merge — pixel-parity + editor-only/print-accurate holds).
+ADR-006 amended (the `positioned` flag + floating-layer mechanism). Deferred to human: in-browser/PDF
+manual checks (drag/detach, print shows positions without handles, fitGrid exemption).
+
+## Plan 10 and beyond — roadmapped (detailed just-in-time)
+
 - **Plan 10 — Rich-text block objects:** `kind:"text"` paragraphs with headings (h1–h4), underline,
   strikethrough, and numbered lists — extending the `lib/markdown.ts` subset.
 - **Later:** annotation standardization (ISO 32000 vocabulary; Circle + Polygon / Diamond preset;

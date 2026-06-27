@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
@@ -238,5 +238,68 @@ describe("cell mutations", () => {
     const out = setCellImage(start, 0, 0, 0, 9, "x.jpg");
     expect(start).toEqual(snap);
     expect(out).toBe(start); // bad index → same reference
+  });
+});
+
+const co = (id: string): StackedObject => ({ id, role: "secondary", kind: "callout", x: 0, y: 0, w: 1, h: 1, callout: { type: "info" } });
+const im = (id: string): StackedObject => ({ id, role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: "a.png" });
+const bookWith2 = (objects: StackedObject[]): Book => ({
+  title: "", subtitle: "", author: "", edition: "", cover: "",
+  chapters: [{ id: "c1", title: "", description: "", steps: [{
+    layoutMode: "grid",
+    grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects }] }],
+  }] }],
+});
+const objOf = (b: Book, id: string) =>
+  b.chapters[0].steps[0].grid![0].cells[0].objects.find((o) => o.id === id)!;
+
+describe("updateCellObjectPlacement", () => {
+  it("float: sets positioned + x/y/w", () => {
+    const book = bookWith2([co("a")]);
+    const out = updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { positioned: true, x: 0.2, y: 0.3, w: 0.4 });
+    const o = objOf(out, "a");
+    expect(o.positioned).toBe(true);
+    expect([o.x, o.y, o.w]).toEqual([0.2, 0.3, 0.4]);
+  });
+
+  it("move: patches x/y only, leaves positioned", () => {
+    const book = bookWith2([{ ...co("a"), positioned: true, x: 0.1, y: 0.1, w: 0.5 }]);
+    const out = updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { x: 0.6, y: 0.7 });
+    const o = objOf(out, "a");
+    expect([o.x, o.y, o.w, o.positioned]).toEqual([0.6, 0.7, 0.5, true]);
+  });
+
+  it("resize: patches w only", () => {
+    const book = bookWith2([{ ...co("a"), positioned: true, w: 0.5 }]);
+    const out = updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { w: 0.3 });
+    expect(objOf(out, "a").w).toBe(0.3);
+  });
+
+  it("dock: clears positioned", () => {
+    const book = bookWith2([{ ...co("a"), positioned: true }]);
+    const out = updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { positioned: false });
+    expect(objOf(out, "a").positioned).toBe(false);
+  });
+
+  it("kind-guard: non-callout object returns the same book ref", () => {
+    const book = bookWith2([im("img")]);
+    expect(updateCellObjectPlacement(book, 0, 0, 0, 0, "img", { positioned: true })).toBe(book);
+  });
+
+  it("bad cell index returns the same book ref", () => {
+    const book = bookWith2([co("a")]);
+    expect(updateCellObjectPlacement(book, 0, 0, 0, 9, "a", { x: 0.5 })).toBe(book);
+  });
+
+  it("unknown objectId returns the same book ref", () => {
+    const book = bookWith2([co("a")]);
+    expect(updateCellObjectPlacement(book, 0, 0, 0, 0, "nope", { x: 0.5 })).toBe(book);
+  });
+
+  it("immutable: input book is unchanged", () => {
+    const book = bookWith2([co("a")]);
+    updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { positioned: true, x: 0.9 });
+    expect(objOf(book, "a").positioned).toBeUndefined();
+    expect(objOf(book, "a").x).toBe(0);
   });
 });

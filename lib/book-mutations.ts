@@ -20,6 +20,7 @@ import {
   type ImageFit,
   type ImageRow,
   type RowLayout,
+  type StackedObject,
   type Step,
   type Surface,
   DEFAULT_PAGE_CONFIG,
@@ -576,6 +577,20 @@ export function moveCellObject(book: Book, ci: number, si: number, ri: number, c
   const j = objIndex + dir;
   if (j < 0 || j >= cell.objects.length) return book;
   swap(cell.objects, objIndex, j);
+  return next;
+}
+
+/** Patch a cell callout's placement (float / move / resize / dock). Immutable;
+ *  kind-guarded to callouts; bad index or non-callout returns the same book ref. */
+export function updateCellObjectPlacement(
+  book: Book, ci: number, si: number, ri: number, cellIndex: number,
+  objectId: string,
+  patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>,
+): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects.find((o) => o.id === objectId);
+  if (!obj || obj.kind !== "callout") return book;
+  Object.assign(obj, patch);
   return next;
 }
 

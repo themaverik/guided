@@ -14,14 +14,16 @@ export interface CalloutProps {
   marker?: number;
   /** Width styling (grid-column span in below mode, max-width in side mode). */
   style?: React.CSSProperties;
+  /** Emitted as `data-obj-id` on the root element for editor overlay targeting. Omitting leaves the attribute off. */
+  domId?: string;
 }
 
-export default function Callout({ data, marker, style }: CalloutProps) {
+export default function Callout({ data, marker, style, domId }: CalloutProps) {
   const type = normalizeCalloutType(data.type);
   const hasTitle = Boolean(data.title);
 
   return (
-    <div className={`callout callout--${type}`} style={style}>
+    <div className={`callout callout--${type}`} style={style} data-obj-id={domId}>
       {hasTitle || marker != null ? (
         <span className="callout-title">
           {marker != null ? (

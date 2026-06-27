@@ -844,6 +844,7 @@
   gap: 4mm;
 }
 .grid-cell {
+  position: relative; /* anchor for the absolute .grid-cell-floats layer (Plan 9) */
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -859,6 +860,14 @@
   flex-direction: column; /* stack image + callouts vertically */
   gap: 4mm;
   transform-origin: top left; /* fitGrid scales from here (Plan 8) */
+}
+.grid-cell-floats {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* renderer layer is display-only; editor overlay drives interaction */
+}
+.grid-cell-float {
+  position: absolute; /* left/top/width set inline from x/y/w; height auto from content */
 }
 .grid-cell .img-slot {
   width: 100%;

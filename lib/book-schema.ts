@@ -219,6 +219,9 @@ export interface StackedObject {
   callout?: Callout;
   /** Image fit mode (kind === "image"); default "contain". */
   fit?: ImageFit;
+  /** Callout only: true = floats at absolute x/y/w within the cell (out of the
+   *  flow stack). Absent/false = flowed (x/y/w ignored). Height is content-driven. */
+  positioned?: boolean;
   /** Cell-anchored annotations (0–1 of the cell). */
   annotations?: Annotation[];
 }

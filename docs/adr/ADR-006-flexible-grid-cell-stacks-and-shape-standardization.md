@@ -195,3 +195,20 @@ revises the overflow mechanism in §8 / PRD Decision 1.
   track sizes (fractions) are author-controlled and never resized by fitGrid.
 - **Scope:** drag/absolute positioning (Plan 9) and rich-text blocks (Plan 10)
   remain deferred; text will reflow + shrink through the same `.grid-cell-content`.
+
+## Amendment (Plan 9, 2026-06-27): absolute callout positioning
+
+`StackedObject` gains `positioned?: boolean`. A callout with `positioned === true`
+leaves the cell flow stack and renders absolutely within its cell at `x`, `y`
+(top-left, cell-relative 0–1) and width `w` (cell-relative); height is
+content-driven. Absent/false keeps the Plan 6 flow rendering (x/y/w ignored), so
+existing/migrated books are pixel-identical — no migration.
+
+`GridStep` renders two sibling layers per cell: the existing flow layer
+`.grid-cell-content` (the only layer `fitGrid` scales) and a new absolute overlay
+`.grid-cell-floats` (a sibling under `.grid-cell`, which gains `position:relative`).
+Floating callouts are author-placed and EXEMPT from `fitGrid`: its callout-overflow
+filter is scoped to `.grid-cell-content .callout` so a cell whose only callout is
+floated is not shrunk; anything past the cell edge clips via `.grid-cell{overflow:hidden}`.
+Drag/resize handles are editor-only (`components/editor/PreviewCellFloat.tsx`); the
+position itself is document data and renders in print.

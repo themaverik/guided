@@ -128,6 +128,14 @@ describe("grid row/column removal selection reconciliation", () => {
     expect(store.getState().selection.cellIndex ?? null).toBeNull();
   });
 
+  it("removeGridRow decrements rowIndex when an earlier row is removed", () => {
+    const store = createEditorStore(oneByOne(), "slug");
+    store.getState().addGridRow(0, 0); // 2 rows
+    store.getState().selectCell(0, 0, 1, 0);
+    store.getState().removeGridRow(0, 0, 0); // remove the row before the selected one
+    expect(store.getState().selection.rowIndex).toBe(0);
+  });
+
   it("removeGridColumn leaves an unrelated selection untouched", () => {
     const store = createEditorStore(oneByOne(), "slug");
     store.getState().addGridColumn(0, 0, 0);

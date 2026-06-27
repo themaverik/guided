@@ -15,6 +15,7 @@ import { useEditor } from "@/lib/store";
 import { useAutosave } from "@/lib/use-autosave";
 import { DEFAULT_PAGE_CONFIG, stepLayoutMode } from "@/lib/book-schema";
 import PreviewAnnotations from "./PreviewAnnotations";
+import PreviewCellFloat from "./PreviewCellFloat";
 import PreviewGridResize from "./PreviewGridResize";
 import PreviewGridSelect from "./PreviewGridSelect";
 
@@ -211,6 +212,24 @@ export default function PreviewPane() {
                   pageConfig={book.pageConfig ?? DEFAULT_PAGE_CONFIG}
                   fitKey={bookFitKey(book)}
                   scale={scale}
+                />
+              ) : null;
+            })()}
+            {(() => {
+              const sel =
+                selection.stepIndex != null
+                  ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
+                  : null;
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+                <PreviewCellFloat
+                  scalerRef={scalerRef}
+                  pageIndex={currentPage}
+                  ci={selection.chapterIndex}
+                  si={selection.stepIndex!}
+                  grid={sel.grid}
+                  fitKey={bookFitKey(book)}
+                  scale={scale}
+                  selectedObjId={selection.objectId ?? null}
                 />
               ) : null;
             })()}

@@ -1127,6 +1127,14 @@
   background: rgba(59, 130, 246, 0.05);
 }
 
+/* Hide-grid preview (Plan 11): suppress the editor-only cell guides. The
+   add/resize/select/float overlays are unmounted by PreviewPane, so this only
+   needs to clear the dashed outline + tint. */
+.preview-scaler.chrome-hidden .grid-cell {
+  outline: none;
+  background: none;
+}
+
 .grid-guide-line {
   stroke: #3b82f6;
   stroke-opacity: 0.6;

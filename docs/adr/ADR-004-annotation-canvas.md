@@ -140,3 +140,16 @@ heuristic is unchanged. Pure-geometry change, so it renders identically in the
 editor overlay and the print path. Tests: `lib/annotations.test.ts`. **Deferred:**
 when both endpoints are anchored to *conflicting* axes (e.g. right→right) a single
 elbow cannot satisfy both; a two-corner (Z) route is a later enhancement.
+
+## Amendment (2026-06-28): angle-based axis snapping while dragging
+
+Dragging a connector endpoint (or resizing a line) snaps the run to horizontal/
+vertical. The snap originally used a fixed *normalized distance* (`AXIS = 0.04`)
+between the dragged point and the reference, so the snap's *angular* width grew as
+the run got shorter — a short connector snapped flat over a ~±20° band and could
+not be held at a shallow angle ("jumpy / hard to control"). Replaced with a pure
+`snapAxisVector` helper (`lib/annotations.ts`, `AXIS_SNAP_DEG = 6`) that snaps
+based on **angle**, so the zone is the same width at any length; Shift still
+hard-locks the dominant axis and signs are preserved (lines keep 360° freedom).
+Shared by the connector-endpoint and line-resize paths in `PreviewAnnotations`.
+Editor-interaction only — no schema or render change.

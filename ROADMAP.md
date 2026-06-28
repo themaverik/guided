@@ -430,8 +430,15 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   the old dominant-axis fallback — pure geometry, so the editor overlay and print render identically. 7 new
   unit tests (`lib/annotations.test.ts`, first geometry tests for this module); suite 128/128; typecheck 0.
   ADR-004 amended. Deferred: two-corner (Z) route when both endpoints anchor to conflicting axes.
-- **Bug — connector angle handling is not smooth:** adjusting a connector's angle is jumpy and hard to
-  control; smooth the interaction and review the waypoint / segment-drag math.
+- **Bug — connector angle handling is not smooth** — [done] (`fix/connector-angle-smoothing`). Symptom
+  (confirmed with the user): you couldn't hold a *shallow* angle while dragging an endpoint — the line kept
+  snapping flat, worse on shorter connectors. Root cause: the horizontal/vertical axis-snap used a fixed
+  *normalized distance* (`AXIS = 0.04`), so its angular width grows as the run shortens (a 0.1-long run snaps
+  flat over ~±22°). Fix: new pure `snapAxisVector` helper in `lib/annotations.ts` snaps **angle-based**
+  (`AXIS_SNAP_DEG = 6`, length-independent; Shift still hard-locks the dominant axis; signs preserved). Wired
+  into `PreviewAnnotations` for *both* connector-endpoint and line-resize drags (same duplicated defect, now
+  shared/DRY). 7 new unit tests; suite 135/135; typecheck 0; lint clean. ADR-004 amended. Note: the pure
+  helper is fully unit-tested but the drag *feel* was not re-verified in-browser (extension not connected).
 
 ## Later (v3 remainder)
 

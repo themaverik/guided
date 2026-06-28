@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { connectorPoints } from "@/lib/annotations";
+import { connectorPoints, snapAxisVector } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
+
+const deg = (d: number) => (d * Math.PI) / 180;
 
 const box = (id: string, x: number, y: number, w: number, h: number): Surface => ({
   id,
@@ -114,5 +116,43 @@ describe("connectorPoints — square routing respects anchored edges", () => {
       "square",
     );
     expectVerticalFirst(connectorPoints(surfaces, c));
+  });
+});
+
+describe("snapAxisVector — angle-based axis snapping", () => {
+  it("snaps a near-horizontal vector flat regardless of length", () => {
+    const slope = Math.tan(deg(3)); // 3° off horizontal
+    expect(snapAxisVector(0.05, 0.05 * slope, false).dy).toBe(0); // short
+    expect(snapAxisVector(0.6, 0.6 * slope, false).dy).toBe(0); // long
+  });
+
+  it("does NOT snap a clearly diagonal short vector (the reported bug)", () => {
+    // 30° on a short connector: |dy| ≈ 0.0289 < the old 0.04 distance rule, which
+    // wrongly snapped it flat. Angle-based snapping keeps the diagonal.
+    const dy = 0.05 * Math.tan(deg(30));
+    expect(dy).toBeLessThan(0.04); // would have tripped the old distance snap
+    expect(snapAxisVector(0.05, dy, false)).toEqual({ dx: 0.05, dy });
+  });
+
+  it("snaps a near-vertical vector to vertical", () => {
+    const dx = 0.4 * Math.tan(deg(3));
+    expect(snapAxisVector(dx, 0.4, false)).toEqual({ dx: 0, dy: 0.4 });
+  });
+
+  it("leaves a 45° vector unsnapped", () => {
+    expect(snapAxisVector(0.3, 0.3, false)).toEqual({ dx: 0.3, dy: 0.3 });
+  });
+
+  it("shift hard-locks to the dominant axis even off-axis", () => {
+    expect(snapAxisVector(0.3, 0.29, true)).toEqual({ dx: 0.3, dy: 0 });
+    expect(snapAxisVector(0.29, 0.3, true)).toEqual({ dx: 0, dy: 0.3 });
+  });
+
+  it("preserves sign when snapping (lines allow negative extent)", () => {
+    expect(snapAxisVector(-0.5, 0.01, false)).toEqual({ dx: -0.5, dy: 0 });
+  });
+
+  it("returns a zero vector unchanged", () => {
+    expect(snapAxisVector(0, 0, false)).toEqual({ dx: 0, dy: 0 });
   });
 });

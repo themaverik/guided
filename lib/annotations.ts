@@ -277,6 +277,35 @@ export function snapPoint(
   return best ?? { x: p.x, y: p.y };
 }
 
+/** Angular tolerance (degrees) for snapping a dragged vector to an axis. */
+export const AXIS_SNAP_DEG = 6;
+
+/**
+ * Snap a dragged vector (dx, dy) to the nearest axis when it lies within
+ * `AXIS_SNAP_DEG` of horizontal or vertical. The test is **angle-based**, so the
+ * snap zone has the same width at any length — short connectors/lines can hold a
+ * shallow angle instead of jumping flat (the old fixed-distance rule made the
+ * angular zone balloon as the run got shorter). `shift` hard-locks to the
+ * dominant axis (full axis lock). Signs are preserved (lines allow negative
+ * extent for 360° rotation).
+ */
+export function snapAxisVector(
+  dx: number,
+  dy: number,
+  shift: boolean,
+): { dx: number; dy: number } {
+  if (shift) {
+    return Math.abs(dx) >= Math.abs(dy) ? { dx, dy: 0 } : { dx: 0, dy };
+  }
+  const ax = Math.abs(dx);
+  const ay = Math.abs(dy);
+  if (ax === 0 && ay === 0) return { dx, dy };
+  const t = Math.tan((AXIS_SNAP_DEG * Math.PI) / 180);
+  if (ay <= ax * t) return { dx, dy: 0 }; // within tolerance of horizontal
+  if (ax <= ay * t) return { dx: 0, dy }; // within tolerance of vertical
+  return { dx, dy };
+}
+
 /** Normalized value → CSS/SVG percentage string. */
 export const pct = (n: number): string => `${n * 100}%`;
 

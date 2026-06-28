@@ -45,3 +45,26 @@ describe("existing marks still work", () => {
     );
   });
 });
+
+describe("lists", () => {
+  it("renders a numbered list as <ol>", () => {
+    expect(renderMarkdownBlocks("1. a\n2. b")).toBe(
+      "<ol><li>a</li><li>b</li></ol>",
+    );
+  });
+  it("uses source markers loosely — any 'n.' continues the same <ol>", () => {
+    expect(renderMarkdownBlocks("1. a\n1. b")).toBe(
+      "<ol><li>a</li><li>b</li></ol>",
+    );
+  });
+  it("runs inline marks inside list items", () => {
+    expect(renderMarkdownBlocks("1. **a**\n2. *b*")).toBe(
+      "<ol><li><strong>a</strong></li><li><em>b</em></li></ol>",
+    );
+  });
+  it("starts a new list when the marker type changes (no mixing in one list)", () => {
+    expect(renderMarkdownBlocks("- a\n1. b")).toBe(
+      "<ul><li>a</li></ul><ol><li>b</li></ol>",
+    );
+  });
+});

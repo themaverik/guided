@@ -42,11 +42,15 @@ export default function RichTextArea({
   onChange,
   rows = 3,
   placeholder,
+  showHeadings = false,
+  showStrike = false,
 }: {
   value: string;
   onChange: (next: string) => void;
   rows?: number;
   placeholder?: string;
+  showHeadings?: boolean;
+  showStrike?: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const pendingSel = useRef<[number, number] | null>(null);
@@ -77,6 +81,21 @@ export default function RichTextArea({
         <button type="button" onClick={() => apply(wrap("*"))} title="Italic">
           <i>I</i>
         </button>
+        {showStrike ? (
+          <button type="button" onClick={() => apply(wrap("~~"))} title="Strikethrough">
+            <s>S</s>
+          </button>
+        ) : null}
+        {showHeadings ? (
+          <>
+            <button type="button" onClick={() => apply(prefixLines(() => "## "))} title="Heading">
+              H2
+            </button>
+            <button type="button" onClick={() => apply(prefixLines(() => "### "))} title="Subheading">
+              H3
+            </button>
+          </>
+        ) : null}
         <button
           type="button"
           onClick={() => apply(prefixLines(() => "- "))}

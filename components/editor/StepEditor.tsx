@@ -9,6 +9,7 @@ import { rowsOf } from "@/lib/book-mutations";
 import { stepLayoutMode } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
 import AnnotationEditor from "./AnnotationEditor";
+import CellEditor from "./CellEditor";
 import GridStructure from "./GridStructure";
 import RichTextArea from "./RichTextArea";
 import RowCard from "./RowCard";
@@ -16,6 +17,7 @@ import RowCard from "./RowCard";
 export default function StepEditor({ ci, si }: { ci: number; si: number }) {
   const step = useEditor((s) => s.book.chapters[ci]?.steps[si]);
   const selectedRow = useEditor((s) => s.selection.rowIndex);
+  const selectedCell = useEditor((s) => s.selection.cellIndex);
   const updateStep = useEditor((s) => s.updateStep);
   const setStepLayoutMode = useEditor((s) => s.setStepLayoutMode);
   const addRow = useEditor((s) => s.addRow);
@@ -57,13 +59,21 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
           <option value="grid">Grid (preview)</option>
         </select>
         <p className="editor-help">
-          Grid renders image cells from the flexible grid. Callouts and
-          drag-resize are coming in a later update.
+          Grid lays out image and callout content in resizable cells. Drag the
+          dividers on the page to resize; select a cell to add an image or
+          callouts, then drag a callout to float it anywhere in the cell.
         </p>
       </div>
 
       {mode === "grid" && step.grid ? (
-        <GridStructure ci={ci} si={si} grid={step.grid} />
+        <>
+          <GridStructure ci={ci} si={si} grid={step.grid} />
+          {selectedCell != null && selectedRow != null ? (
+            <CellEditor ci={ci} si={si} ri={selectedRow} cellIndex={selectedCell} />
+          ) : (
+            <p className="editor-help">Select a cell on the page to add an image or callouts.</p>
+          )}
+        </>
       ) : (
         <>
           <h3 className="editor-subtitle">Rows</h3>

@@ -12,15 +12,20 @@
 import {
   type Annotation,
   type Book,
+  type Border,
   type Callout,
   type CalloutType,
   type Chapter,
   type Connector,
+  type GridCell,
+  type ImageFit,
   type ImageRow,
   type RowLayout,
+  type StackedObject,
   type Step,
   type Surface,
   DEFAULT_PAGE_CONFIG,
+  stepLayoutMode,
 } from "./book-schema";
 import { annotationId } from "./annotations";
 import { resizeAdjacent, bodyRegion, MIN_CELL_MM, normalizeFractions } from "./grid-math";
@@ -29,10 +34,10 @@ import { legacyStepToGrid } from "./book-migrate";
 const clone = <T>(v: T): T => structuredClone(v);
 
 /**
- * Set a step's layout mode. Switching to "grid" when the step has no grid yet
- * seeds one from the step's current content (`legacyStepToGrid`) — so the grid
- * renderer, guides, and structure controls have data to show. Without this,
- * toggling a fresh (un-migrated) step to grid is a silent no-op.
+ * Set a step's layout mode. Switching INTO "grid" from a non-grid step rebuilds
+ * `step.grid` from the step's legacy fields (via `legacyStepToGrid`), so callouts
+ * carry over correctly. A step already in grid mode is NOT rebuilt — this preserves
+ * any author edits to the grid structure.
  */
 export function setStepLayoutMode(
   book: Book,
@@ -43,8 +48,11 @@ export function setStepLayoutMode(
   const next = clone(book);
   const step = next.chapters[ci]?.steps[si];
   if (!step) return book;
+  const wasGrid = stepLayoutMode(step) === "grid";
   step.layoutMode = mode;
-  if (mode === "grid" && (!step.grid || step.grid.length === 0)) {
+  // Switching INTO grid from a legacy step: (re)build the grid from the legacy
+  // fields so callouts carry over. A step already in grid mode keeps its edits.
+  if (mode === "grid" && !wasGrid) {
     step.grid = legacyStepToGrid(step);
   }
   return next;
@@ -501,6 +509,127 @@ export function removeGridColumn(
   const kept = row.cells.filter((_, i) => i !== cellIndex);
   const widths = normalizeFractions(kept.map((c) => c.widthFr));
   row.cells = kept.map((c, i) => ({ ...c, widthFr: widths[i] }));
+  return next;
+}
+
+// ── Cell objects (Plan 7) ──────────────────────────────────
+
+const cellOf = (book: Book, ci: number, si: number, ri: number, cellIndex: number): GridCell | undefined =>
+  book.chapters[ci]?.steps[si]?.grid?.[ri]?.cells?.[cellIndex];
+
+/** Set (or create) the cell's primary image; a new image goes first in the stack. */
+export function setCellImage(book: Book, ci: number, si: number, ri: number, cellIndex: number, filename: string): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx >= 0) cell.objects[idx] = { ...cell.objects[idx], ref: filename };
+  else cell.objects.unshift({ id: annotationId(), role: "primary", kind: "image", x: 0, y: 0, w: 1, h: 1, ref: filename });
+  return next;
+}
+
+export function removeCellImage(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects = cell.objects.filter((o) => !(o.kind === "image" && o.role === "primary"));
+  return next;
+}
+
+export function setCellImageFit(book: Book, ci: number, si: number, ri: number, cellIndex: number, fit: ImageFit): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx < 0) return book;
+  cell.objects[idx] = { ...cell.objects[idx], fit };
+  return next;
+}
+
+export function addCellCallout(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects.push({ id: annotationId(), role: "secondary", kind: "callout", x: 0, y: 0, w: 1, h: 1, callout: blankCallout() });
+  return next;
+}
+
+export function updateCellCallout(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "callout") return book;
+  obj.callout = { ...(obj.callout ?? blankCallout()), ...patch };
+  return next;
+}
+
+export function removeCellObject(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell || objIndex < 0 || objIndex >= cell.objects.length) return book;
+  cell.objects.splice(objIndex, 1);
+  return next;
+}
+
+export function moveCellObject(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  if (objIndex < 0 || objIndex >= cell.objects.length) return book;
+  const j = objIndex + dir;
+  if (j < 0 || j >= cell.objects.length) return book;
+  swap(cell.objects, objIndex, j);
+  return next;
+}
+
+/** Patch a cell callout's placement (float / move / resize / dock). Immutable;
+ *  kind-guarded to callouts; bad index or non-callout returns the same book ref. */
+export function updateCellObjectPlacement(
+  book: Book, ci: number, si: number, ri: number, cellIndex: number,
+  objectId: string,
+  patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>,
+): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects.find((o) => o.id === objectId);
+  if (!obj || obj.kind !== "callout") return book;
+  Object.assign(obj, patch);
+  return next;
+}
+
+/** Append an empty text block to a cell's object stack (flow-stacked). */
+export function addCellText(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects.push({ id: annotationId(), role: "secondary", kind: "text", x: 0, y: 0, w: 1, h: 1, text: "" });
+  return next;
+}
+
+/** Set a text block's content. Kind-guarded; bad index or non-text returns the same book ref. */
+export function updateCellText(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, text: string): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "text") return book;
+  obj.text = text;
+  return next;
+}
+
+/** Set a text block's alignment. Kind-guarded to "text"; bad index / non-text → same book ref. */
+export function setCellTextAlign(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, align: "left" | "center" | "right"): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "text") return book;
+  obj.align = align;
+  return next;
+}
+
+/** Set the cell's primary image border. No image in the cell → same book ref. */
+export function setCellImageBorder(book: Book, ci: number, si: number, ri: number, cellIndex: number, border: Border): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx < 0) return book;
+  cell.objects[idx] = { ...cell.objects[idx], border };
   return next;
 }
 

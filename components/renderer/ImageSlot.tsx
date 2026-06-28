@@ -9,7 +9,8 @@
  * optional `width`/`height` props are CSS length overrides for one slot.
  */
 import { useEffect, useState } from "react";
-import { type Annotation, type Border, resolveBorder } from "@/lib/book-schema";
+import { type Annotation, type Border, type ImageFit, resolveBorder } from "@/lib/book-schema";
+import { imageFitClass } from "@/lib/grid-render";
 import AnnotationLayer from "./AnnotationLayer";
 import { PhotoIcon } from "./icons";
 
@@ -27,6 +28,8 @@ export interface ImageSlotProps {
   border?: Border;
   /** Canvas annotations drawn over this slot. */
   annotations?: Annotation[];
+  /** Grid-only image fit mode; default contain (no class → unchanged markup). */
+  fit?: ImageFit;
 }
 
 export default function ImageSlot({
@@ -38,6 +41,7 @@ export default function ImageSlot({
   height,
   border = true,
   annotations,
+  fit,
 }: ImageSlotProps) {
   const [loaded, setLoaded] = useState(false);
   const frame = resolveBorder(border);
@@ -80,7 +84,10 @@ export default function ImageSlot({
     style.backgroundColor = "#ffffff";
   }
 
-  const cls = `img-slot${frame.show ? "" : " no-border"}${loaded ? " has-img" : ""}`;
+  const fitCls = imageFitClass(fit);
+  const cls =
+    `img-slot${frame.show ? "" : " no-border"}${loaded ? " has-img" : ""}` +
+    `${fitCls ? ` ${fitCls}` : ""}`;
   const hasOverride = Boolean(width || height);
 
   return (

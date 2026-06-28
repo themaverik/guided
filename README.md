@@ -2,9 +2,12 @@
 
 A simple, minimalist, image-driven, print-ready guidebook editor (**guide** + **ed**itor).
 
-Author image-driven A4 guidebooks in a two-pane WYSIWYG editor — chapters, steps, and
-row-based screenshot grids with callouts, annotations, watermarks, and pixel-accurate
-print/PDF output.
+Author image-driven guidebooks in a two-pane WYSIWYG editor — chapters, steps, and
+screenshot layouts with callouts, annotations, watermarks, and pixel-accurate print/PDF
+output. Pages are configurable (size / orientation / margins / header / footer), and a step
+can use the classic row layout or an opt-in **flexible grid** — drag dividers to resize rows and
+columns, add/remove cells, fill each cell with an image and callouts (drag a callout off the stack to
+float it anywhere in the cell), and content auto-shrinks to fit, all within the page bounds.
 
 ## Screenshots
 

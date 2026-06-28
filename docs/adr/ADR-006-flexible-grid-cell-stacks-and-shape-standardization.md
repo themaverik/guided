@@ -148,3 +148,92 @@ callout layout. Grid rendering is therefore **gated on an explicit per-step
 
 This supersedes the original `grid?` field note "When present, overrides
 images[]": presence alone no longer switches rendering; `layoutMode` does.
+
+## Amendment (2026-06-25) — Plan 6: cell callout objects + image fit mode
+
+Plan 6 implements §3 (cell object stack) for callouts and adds a per-image fit mode.
+
+- **Schema:** `StackedObject` gains `callout?: Callout` (payload when `kind:"callout"`) and
+  `fit?: "contain" | "fit-width" | "fit-height"` (default `"contain"`). `fit-width` spans the
+  cell width and crops overflow height (bottom); `fit-height` spans the height and crops overflow
+  width (right).
+- **never-clip is refined:** text/callout content is never *accidentally* clipped — the page-scoped
+  auto-shrink backstop (`fitSteps` → `fitGrid`, DOM-only, Plan 7) guarantees it. Images may be
+  *deliberately* cropped via `fit`. This narrows §8 / PRD Decision 1: clipping is an intentional
+  image affordance, not an overflow outcome.
+- **Migration mapping (normative):** legacy callouts move into cells by placement —
+  **side** → the source row becomes `[image cell(s) │ side-callouts cell]`, `widthFr` from the
+  legacy slot mm (single 60:110, single-wide 110:60, double 55:55:60).
+  **below** → the source row becomes an image row **plus** a callout row of `calloutCols`
+  equal-width cells; callouts are assigned round-robin (`k mod calloutCols`), per-callout `span`
+  is dropped, image-row:callout-row height = 2:1 (Rule 1). **mixed** combines both.
+  Below-callout numbered markers are not rendered in cells (no grid pin equivalent yet).
+- **Scope:** Plan 6 renders objects + migrates. The `fitGrid` auto-shrink engine, the crop
+  confirmation UI, in-cell drag, and rich-text (`kind:"text"`) are Plans 7–8.
+
+## Amendment (2026-06-27) — Plan 8: grid overflow = uniform cell-content shrink
+
+Plan 8 replaces Plan 6's hard clip baseline with an auto-shrink backstop, and
+revises the overflow mechanism in §8 / PRD Decision 1.
+
+- **Why not page-scoped:** the PRD's "scale the whole page down" works for the
+  legacy flow but NOT a proportional grid — scaling the page shrinks a cell and
+  its text together, so the intra-cell overflow ratio is unchanged.
+- **Mechanism:** `fitGrid` (in `lib/use-auto-fit.ts`, run by `useAutoFit` inside
+  `BookCanvas`, so it executes in BOTH the editor preview and `/print`) measures
+  each **callout-bearing** cell's content overflow ratio, takes the worst across
+  the step, and applies ONE **grid-uniform** `transform: scale(f)` to every
+  callout cell's `.grid-cell-content` (`f = max(MIN_GRID_SCALE, 1/worst)`,
+  `MIN_GRID_SCALE = 0.5`). Image-only cells are exempt (they never overflow).
+  Past the floor, content clips and the step is reported to the existing
+  non-blocking overflow warning.
+- **Callouts/text are fluid:** a callout is full cell width and wraps (CSS flow);
+  shrink is the last resort, after reflow.
+- This **supersedes the previously-rejected "per-cell local shrink"** (ADR-006
+  Alternatives) with a uniform-across-cells *content* scale — which preserves the
+  cross-cell consistency that motivated the original page-scoped choice. Grid
+  track sizes (fractions) are author-controlled and never resized by fitGrid.
+- **Scope:** drag/absolute positioning (Plan 9) and rich-text blocks (Plan 10)
+  remain deferred; text will reflow + shrink through the same `.grid-cell-content`.
+
+## Amendment (Plan 9, 2026-06-27): absolute callout positioning
+
+`StackedObject` gains `positioned?: boolean`. A callout with `positioned === true`
+leaves the cell flow stack and renders absolutely within its cell at `x`, `y`
+(top-left, cell-relative 0–1) and width `w` (cell-relative); height is
+content-driven. Absent/false keeps the Plan 6 flow rendering (x/y/w ignored), so
+existing/migrated books are pixel-identical — no migration.
+
+`GridStep` renders two sibling layers per cell: the existing flow layer
+`.grid-cell-content` (the only layer `fitGrid` scales) and a new absolute overlay
+`.grid-cell-floats` (a sibling under `.grid-cell`, which gains `position:relative`).
+Floating callouts are author-placed and EXEMPT from `fitGrid`: its callout-overflow
+filter is scoped to `.grid-cell-content .callout` so a cell whose only callout is
+floated is not shrunk; anything past the cell edge clips via `.grid-cell{overflow:hidden}`.
+Drag/resize handles are editor-only (`components/editor/PreviewCellFloat.tsx`); the
+position itself is document data and renders in print.
+
+## Amendment (Plan 10, 2026-06-28): rich-text blocks in cells
+
+`StackedObject` gains `text?: string`, used when `kind === "text"` (the kind was
+already reserved in the union). A text block is a flow-stacked content object —
+rich text only (markdown subset: bold/italic/lists + new `## `/`### ` headings and
+`~~strike~~`), distinct from a callout (no type, no icon). It is NOT floatable: the
+Plan 9 `positioned` path stays callout-guarded.
+
+`GridStep` renders a text block in the flow layer (`.grid-cell-content`) via
+`<RichText block>`, so it prints and participates in stack order. It is fit-aware:
+`fitGrid`'s overflow filter widens from `.grid-cell-content .callout` to also match
+`.grid-cell-content .grid-text`, so a text-bearing cell shrinks under the same
+grid-uniform factor (floor 0.5); image-only cells stay exempt.
+
+The field is additive and optional — existing books carry no text objects, so there
+is **no `schemaVersion` bump and no migration** (absence of `text` is valid).
+
+## Amendment (Plan 11, 2026-06-28): text alignment + per-image border
+
+`StackedObject` gains two optional fields:
+- `align?: "left" | "center" | "right"` — text-block (`kind:"text"`) alignment; absent = left. Applies to the whole block: paragraphs via `text-align`, lists via a shrink-wrapped block (`width: fit-content` + auto margins) so a centred list centres as a unit and a right-aligned list aligns to its longest item. Renders (prints) via a `.grid-text.align-*` modifier class.
+- `border?: Border` — per-image (`kind:"image"`) frame, reusing the existing `Border`/`BorderStyle` model (colour/width/radius/shadow). Absent = `ImageSlot`'s default frame, so existing grid images are unchanged. In `contain` mode the framed slot shrink-wraps the displayed image so border + shadow hug the screenshot, not the cell; crop modes fill the cell.
+
+Both are additive/optional — no `schemaVersion` bump, no migration. Mutations `setCellTextAlign` / `setCellImageBorder` (immutable; kind/none-guarded; same-`book` ref on no-op).

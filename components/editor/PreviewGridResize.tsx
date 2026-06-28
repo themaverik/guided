@@ -17,8 +17,8 @@ interface Box { l: number; t: number; w: number; h: number }
 interface Geom { box: Box; rows: Box[]; cells: Box[][] }
 
 type Drag =
-  | { kind: "row"; index: number; startClient: number; spanFr: number; spanPx: number }
-  | { kind: "col"; ri: number; index: number; startClient: number; spanFr: number; spanPx: number };
+  | { kind: "row"; index: number; startClient: number; spanFr: number; spanPx: number; startFrI: number; lastFr: number }
+  | { kind: "col"; ri: number; index: number; startClient: number; spanFr: number; spanPx: number; startFrI: number; lastFr: number };
 
 export default function PreviewGridResize({
   scalerRef, pageIndex, ci, si, grid, pageConfig, fitKey, scale,
@@ -76,25 +76,30 @@ export default function PreviewGridResize({
     e.preventDefault(); e.stopPropagation();
     const spanPx = rows[index].h + rows[index + 1].h;
     const spanFr = grid[index].heightFr + grid[index + 1].heightFr;
-    drag.current = { kind: "row", index, startClient: e.clientY, spanFr, spanPx };
+    drag.current = { kind: "row", index, startClient: e.clientY, spanFr, spanPx, startFrI: grid[index].heightFr, lastFr: 0 };
     svgRef.current?.setPointerCapture(e.pointerId);
   };
   const startCol = (ri: number, index: number) => (e: React.PointerEvent) => {
     e.preventDefault(); e.stopPropagation();
     const spanPx = cells[ri][index].w + cells[ri][index + 1].w;
     const spanFr = grid[ri].cells[index].widthFr + grid[ri].cells[index + 1].widthFr;
-    drag.current = { kind: "col", ri, index, startClient: e.clientX, spanFr, spanPx };
+    drag.current = { kind: "col", ri, index, startClient: e.clientX, spanFr, spanPx, startFrI: grid[ri].cells[index].widthFr, lastFr: 0 };
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
   const apply = (clientPos: number) => {
     const d = drag.current;
     if (!d) return;
-    // unscaled px moved → fraction of the pair → fr delta
+    // unscaled px moved → fraction of the pair → fr delta (total from drag start).
+    // Apply it INCREMENTALLY (delta since the last applied frame): resizeAdjacent
+    // adds the delta to the CURRENT track size, so re-sending the running total
+    // each frame would compound it against the already-moved divider (exponential).
     const movedPx = (clientPos - d.startClient) / scale;
     const deltaFr = (movedPx / d.spanPx) * d.spanFr;
-    if (d.kind === "row") resizeRow(ci, si, d.index, deltaFr);
-    else resizeCol(ci, si, d.ri, d.index, deltaFr);
+    const inc = deltaFr - d.lastFr;
+    d.lastFr = deltaFr;
+    if (d.kind === "row") resizeRow(ci, si, d.index, inc);
+    else resizeCol(ci, si, d.ri, d.index, inc);
   };
 
   const onMove = (e: React.PointerEvent) => {
@@ -107,8 +112,9 @@ export default function PreviewGridResize({
       const mmTotal = d.kind === "row" ? body.h : body.w;
       const movedPx = (pos - d.startClient) / scale;
       const deltaFr = (movedPx / d.spanPx) * d.spanFr;
-      const curFr = d.kind === "row" ? grid[d.index].heightFr : grid[d.ri].cells[d.index].widthFr;
-      const aFr = Math.max(0, Math.min(d.spanFr, curFr + deltaFr));
+      // Absolute split from the divider's START fraction (not the live, moving
+      // one) so the readout tracks the pointer instead of double-counting.
+      const aFr = Math.max(0, Math.min(d.spanFr, d.startFrI + deltaFr));
       const bFr = d.spanFr - aFr;
       setReadout({
         x: (e.clientX - baseRect.left) / scale + 8,

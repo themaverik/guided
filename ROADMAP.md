@@ -260,9 +260,18 @@ Third wave (`PRD.md` + design system `DESIGN.md` + `ADR-006`): replace fixed row
 flexible, user-resizable grid; standardize annotations on ISO 32000 names; unify color on OKLCH
 paired tokens — zero regression to existing features. Executed as sequenced plans under
 `docs/superpowers/plans/`, each via subagent-driven development (fresh subagent per task + per-task
-review + final whole-branch review). Branch: `feature/improvement-rev2`. CLAUDE.md was corrected (it
-had described a non-existent TipTap stack). Decisions of record live in `PRD.md` (Decisions 1–14)
-and `ADR-006`.
+review + final whole-branch review). CLAUDE.md was corrected (it had described a non-existent TipTap
+stack). Decisions of record live in `PRD.md` (Decisions 1–14) and `ADR-006`.
+
+**Status:** Plans 1–5 are **done and merged to `main`** (merge commit `2fbbbc8`; former branch
+`feature/improvement-rev2`, now deleted). **Plans 6–9 are done on `feature/improvement-rev3`** (not
+yet merged): grid cells render and author image + callout content, overflow auto-shrinks to fit in
+both preview and print, and callouts can be dragged off the flow stack to float at absolute positions
+within a cell. 98 unit tests, renderer/print zero-regression, editor-only affordances.
+Remaining work — Plan 10 (rich-text blocks), then annotation standardization (ISO 32000 vocabulary)
+and the OKLCH color system — continues on `feature/improvement-rev3`. (Note: the plan numbering was
+re-sequenced during just-in-time brainstorming; annotation standardization and color moved later than
+the original 6–8 sketch.)
 
 ## Plan 1 — Foundations  [done]
 
@@ -323,15 +332,59 @@ Shipped on `feature/improvement-rev2` (commits `3145cef..86c25e0`, 5 commits; su
 build OK; final whole-branch review: ready-to-merge, editor-only/print-clean holds). Deferred: on-canvas
 button fire-on-pointerdown UX polish; out-of-bounds index guards.
 
-## Plans 6–8 — roadmapped (detailed just-in-time)
+## Plan 6 — Cell object stacks (callouts in cells)  [done]
 
-- **Plan 6 — Cell object stacks:** move images + callouts into the cell object stack as
-  primary/secondary objects; in-cell drag; migrate legacy `callouts` → `secondary` objects. This is
-  where `fitSteps`→`fitGrid` becomes necessary (cells gain overflow-capable content). Cell-anchored
-  annotation coords + the free annotation layer (`step.freeAnnotations`).
-- **Plan 7 — Annotation standardization:** ISO vocabulary; Circle + Polygon (Diamond preset);
-  8-handle selection; segment-drag connector reshape; snapping defaults; connector
-  arrow-snap-on-by-default; grid-guides on/off toggle.
-- **Plan 8 — Color system:** OKLCH paired tokens in `@theme`; swatch palette + hybrid inspector
-  (OKLCH + PDF /C·/IC via `swatchId`); editor-only fill tint, full opacity in export; unify
-  callouts.
+Grid cells render **callout** objects alongside the primary image, plus a per-image **fit** mode
+(`contain` / crop-width / crop-height). `legacyStepToGrid` migrates legacy callouts into cells (side →
+`[image│callouts]`; below → Rule-1 callout row); `setStepLayoutMode` rebuilds the grid from legacy
+fields on toggle so callouts carry. Schema gains `StackedObject.callout`/`fit`. Overflow keeps a clip
+baseline (auto-shrink is Plan 8). Spec/plan under `docs/superpowers/`.
+Shipped on `feature/improvement-rev3` (commits `a87a5b7..cc84299`, 8 commits; suite 60/60, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, zero-regression — migrated steps stay legacy,
+single-image grid pixel-identical). ADR-006 + PRD amended (never-clip → text-only; images deliberately
+croppable). Deferred: below-callout markers; cell-anchored annotation coords.
+
+## Plan 7 — Grid cell authoring  [done]
+
+Click a cell to select it (`PreviewGridSelect` editor overlay, `Selection.cellIndex`), then add / edit /
+remove its image (reusing `ImagePicker`) and callouts from a left-panel `CellEditor`, with the image fit
+control + an inline crop-confirm. Seven immutable cell-object mutations. Editor-only; renderer/print
+untouched; callouts stay flow-stacked. Spec/plan under `docs/superpowers/`.
+Shipped on `feature/improvement-rev3` (commits `b7e15be..81c4720`, 7 commits; suite 74/74, typecheck 0,
+build OK; final whole-branch review: ready-to-merge, print-clean). No `Book` schema change. Deferred: the
+stale-selection-on-removal fix (folded into Plan 8).
+
+## Plan 8 — Grid overflow auto-shrink (`fitGrid`)  [done]
+
+When a grid cell's callouts overflow, every callout-bearing cell on the step scales its content by one
+**grid-uniform** factor (worst cell, floored at `MIN_GRID_SCALE = 0.5`, then clip + warn); image-only
+cells are exempt. DOM-only `fitGrid` merged into `useAutoFit`, so it runs in **both** preview and
+`/print`. A `.grid-cell-content` wrapper is the scale target; pure `gridFitScale` math is unit-tested.
+Also folds in the Plan-7 stale-selection-on-row/column-removal fix. Spec/plan under `docs/superpowers/`.
+Shipped on `feature/improvement-rev3` (commits `d2520c1..ebc9a5e`, 7 commits; suite 83/83, typecheck 0,
+build OK; final whole-branch review: ready-to-merge). No `Book` schema change; ADR-006 amended (uniform
+cell-content scale supersedes the page-scoped idea). Deferred: a `clientHeight > 0` guard.
+
+## Plan 9 — On-canvas drag + absolute callout positioning  [done]
+
+A grid-cell callout can be **dragged off the flow stack** to float at an absolute position within its
+cell (over the screenshot or beside a letterboxed image). Opt-in per callout via a new
+`StackedObject.positioned?` flag: the renderer splits each cell into a flow layer (`.grid-cell-content`,
+the only layer `fitGrid` scales) and an absolute `.grid-cell-floats` layer, in **both** preview and
+print. A new editor-only `PreviewCellFloat` overlay drags to detach / move, resizes width (height stays
+content-driven), and click-selects; a left-panel **Dock to flow** button re-flows it. `fitGrid` is scoped
+to flow callouts so floating ones are exempt (they clip past the cell edge). Spec/plan under `docs/superpowers/`.
+Shipped on `feature/improvement-rev3` (commits `898a1fa..ba9c32e`, 6 commits; suite 98/98, typecheck 0,
+build OK; final whole-branch review: ready-to-merge — pixel-parity + editor-only/print-accurate holds).
+ADR-006 amended (the `positioned` flag + floating-layer mechanism). Deferred to human: in-browser/PDF
+manual checks (drag/detach, print shows positions without handles, fitGrid exemption).
+
+## Plan 10 and beyond — roadmapped (detailed just-in-time)
+
+- **Plan 10 — Rich-text block objects:** `kind:"text"` paragraphs with headings (h1–h4), underline,
+  strikethrough, and numbered lists — extending the `lib/markdown.ts` subset.
+- **Later:** annotation standardization (ISO 32000 vocabulary; Circle + Polygon / Diamond preset;
+  8-handle selection; segment-drag connector reshape; arrow-snap defaults; grid-guides on/off toggle);
+  the OKLCH color system (paired tokens in `@theme`; swatch palette + hybrid inspector; editor-only fill
+  tint, full opacity in export; unify callouts); plus file-drop-onto-cell image upload and `Custom`
+  page-size width/height inputs.

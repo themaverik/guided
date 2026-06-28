@@ -144,9 +144,51 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
 }
 
 /**
+ * The segment axis a square route must use at an anchored endpoint, or null for
+ * free points and non-edge anchors (corners/center). A left/right edge needs a
+ * horizontal segment leaving or entering it; a top/bottom edge needs a vertical
+ * one — so the elbow exits/enters perpendicular to the bound edge.
+ */
+function anchorAxis(ep: Endpoint): "h" | "v" | null {
+  if (!ep.ref) return null;
+  switch (ep.anchor) {
+    case "left":
+    case "right":
+      return "h";
+    case "top":
+    case "bottom":
+      return "v";
+    default:
+      return null;
+  }
+}
+
+/**
+ * Whether a square route's first segment runs horizontally. An anchored endpoint
+ * wins over the dominant-axis heuristic: the source's edge sets the first
+ * segment; failing that, the target's edge sets the last segment (a horizontal
+ * target edge needs a vertical last segment, i.e. vertical-first); failing both,
+ * fall back to the wider-than-tall run.
+ */
+function squareHorizontalFirst(
+  a: Point,
+  b: Point,
+  from: Endpoint,
+  to: Endpoint,
+): boolean {
+  const fromAxis = anchorAxis(from);
+  if (fromAxis !== null) return fromAxis === "h";
+  const toAxis = anchorAxis(to);
+  if (toAxis !== null) return toAxis === "v";
+  return Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
+}
+
+/**
  * The polyline points of a connector in normalized coords. `straight` is two
- * points; `square` inserts a right-angle corner (orthogonal route). The corner
- * goes horizontal-first when the run is wider than tall, else vertical-first.
+ * points; `square` inserts a right-angle corner (orthogonal route). The elbow
+ * leaves/enters an anchored endpoint perpendicular to its edge (see
+ * `squareHorizontalFirst`); for free points it goes horizontal-first when the
+ * run is wider than tall, else vertical-first.
  */
 export function connectorPoints(
   annotations: Annotation[],
@@ -158,10 +200,9 @@ export function connectorPoints(
   // Manual waypoints take over the path shape (straight segments through them).
   if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
   if (c.routing !== "square") return [a, b];
-  const corner =
-    Math.abs(b.x - a.x) >= Math.abs(b.y - a.y)
-      ? { x: b.x, y: a.y }
-      : { x: a.x, y: b.y };
+  const corner = squareHorizontalFirst(a, b, c.from, c.to)
+    ? { x: b.x, y: a.y }
+    : { x: a.x, y: b.y };
   return [a, corner, b];
 }
 

@@ -420,8 +420,16 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
 - **Annotation snapping — more options:** extend snapping beyond image edges / center / manual anchors
   (e.g. snap to the grid, to other objects' edges/centers, and equal-spacing / alignment guides). Builds
   on the Phase-11 "snapping needs design" note.
-- **Bug — square (orthogonal) connector routing:** the square / elbow routing on connectors does not
-  route correctly; fix the orthogonal path geometry (and its print render).
+- **Bug — square (orthogonal) connector routing** — [done] (`fix/connector-orthogonal-routing`). Root
+  cause: `connectorPoints` picked the elbow orientation purely from the normalized run (`|Δx|≥|Δy|`) and
+  ignored the side an *anchored* endpoint attaches to, so a connector bound to e.g. a box's **right** edge
+  ran straight down the box edge instead of exiting rightward (verified against the live `/print` SVG; the
+  free-point case was already correct, which is why it slipped through). Fix: a new pure
+  `squareHorizontalFirst` helper in `lib/annotations.ts` forces the segment touching an anchored edge to be
+  perpendicular to it (left/right→horizontal, top/bottom→vertical), source anchor first, then target, then
+  the old dominant-axis fallback — pure geometry, so the editor overlay and print render identically. 7 new
+  unit tests (`lib/annotations.test.ts`, first geometry tests for this module); suite 128/128; typecheck 0.
+  ADR-004 amended. Deferred: two-corner (Z) route when both endpoints anchor to conflicting axes.
 - **Bug — connector angle handling is not smooth:** adjusting a connector's angle is jumpy and hard to
   control; smooth the interaction and review the waypoint / segment-drag math.
 

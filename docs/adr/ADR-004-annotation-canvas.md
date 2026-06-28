@@ -124,3 +124,19 @@ point, bar, none).
 
 - ROADMAP "v2 — Feature expansion", Phase 11.
 - Feature request item #4.
+
+## Amendment (2026-06-28): anchor-aware square routing
+
+`square` (orthogonal) routing previously chose its single elbow purely from the
+normalized run (`|Δx| ≥ |Δy|` → horizontal-first, else vertical-first). For a
+connector bound to a surface that produced a route that left/entered the edge
+along the *wrong* axis — e.g. a connector on a box's **right** anchor ran straight
+down the box edge instead of exiting rightward. Fix (`connectorPoints` /
+`squareHorizontalFirst` in `lib/annotations.ts`): an anchored endpoint now forces
+the touching segment perpendicular to its edge — left/right → horizontal, top/bottom
+→ vertical. The **source** anchor wins; failing that the **target** anchor sets the
+last segment; failing both (free points, corner/center anchors) the dominant-axis
+heuristic is unchanged. Pure-geometry change, so it renders identically in the
+editor overlay and the print path. Tests: `lib/annotations.test.ts`. **Deferred:**
+when both endpoints are anchored to *conflicting* axes (e.g. right→right) a single
+elbow cannot satisfy both; a two-corner (Z) route is a later enhancement.

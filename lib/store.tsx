@@ -15,13 +15,16 @@ import type {
   Annotation,
   Background,
   Book,
+  Border,
   Callout,
   Chapter,
   Connector,
   Ending,
+  ImageFit,
   ImageRow,
   PageConfig,
   SectionFont,
+  StackedObject,
   Step,
   Surface,
   Theme,
@@ -37,6 +40,10 @@ export interface Selection {
   stepIndex: number | null;
   rowIndex: number | null;
   slotIndex: number | null;
+  /** Selected grid cell column (within rowIndex), grid mode only. */
+  cellIndex?: number | null;
+  /** Selected cell object id (a floating callout), grid mode only. */
+  objectId?: string | null;
 }
 
 export interface EditorState {
@@ -48,11 +55,16 @@ export interface EditorState {
   selectedAnnotation: string | null;
   /** data-screen-labels of pages that still overflow after the last fit pass. */
   overflows: string[];
+  /** Transient: hide grid editor chrome (guides + handles) for a clean preview. */
+  hideGridChrome: boolean;
 
   // selection
   selectChapter: (chapterIndex: number) => void;
   selectStep: (chapterIndex: number, stepIndex: number) => void;
   selectRow: (chapterIndex: number, stepIndex: number, rowIndex: number) => void;
+  selectCell: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  selectCellObject: (ci: number, si: number, ri: number, cellIndex: number, objectId: string) => void;
+  toggleGridChrome: () => void;
 
   // book meta
   updateBookMeta: (
@@ -113,6 +125,20 @@ export interface EditorState {
   addGridColumn: (ci: number, si: number, ri: number) => void;
   removeGridColumn: (ci: number, si: number, ri: number, cellIndex: number) => void;
 
+  // cell objects (grid mode)
+  setCellImage: (ci: number, si: number, ri: number, cellIndex: number, filename: string) => void;
+  removeCellImage: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  setCellImageFit: (ci: number, si: number, ri: number, cellIndex: number, fit: ImageFit) => void;
+  addCellCallout: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  updateCellCallout: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>) => void;
+  removeCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number) => void;
+  moveCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1) => void;
+  addCellText: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  updateCellText: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, text: string) => void;
+  updateCellObjectPlacement: (ci: number, si: number, ri: number, cellIndex: number, objectId: string, patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>) => void;
+  setCellTextAlign: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, align: "left" | "center" | "right") => void;
+  setCellImageBorder: (ci: number, si: number, ri: number, cellIndex: number, border: Border) => void;
+
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
   updateCallout: (
@@ -148,6 +174,31 @@ export type EditorStore = StoreApi<EditorState>;
 const clamp = (n: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, n));
 
+function reconcileColumnRemoval(
+  sel: Selection,
+  ci: number,
+  si: number,
+  ri: number,
+  cellIndex: number,
+): Selection {
+  if (sel.chapterIndex !== ci || sel.stepIndex !== si || sel.rowIndex !== ri || sel.cellIndex == null) return sel;
+  if (sel.cellIndex === cellIndex) return { ...sel, cellIndex: null };
+  if (sel.cellIndex > cellIndex) return { ...sel, cellIndex: sel.cellIndex - 1 };
+  return sel;
+}
+
+function reconcileRowRemoval(
+  sel: Selection,
+  ci: number,
+  si: number,
+  ri: number,
+): Selection {
+  if (sel.chapterIndex !== ci || sel.stepIndex !== si || sel.rowIndex == null) return sel;
+  if (sel.rowIndex === ri) return { ...sel, cellIndex: null };
+  if (sel.rowIndex > ri) return { ...sel, rowIndex: sel.rowIndex - 1 };
+  return sel;
+}
+
 export function createEditorStore(
   initialBook: Book,
   projectSlug: string,
@@ -163,6 +214,7 @@ export function createEditorStore(
     },
     selectedAnnotation: null,
     overflows: [],
+    hideGridChrome: false,
 
     // ── selection ──
     selectChapter: (chapterIndex) =>
@@ -193,6 +245,16 @@ export function createEditorStore(
           rowIndex,
           slotIndex: null,
         },
+      }),
+    selectCell: (chapterIndex, stepIndex, rowIndex, cellIndex) =>
+      set({
+        selection: { chapterIndex, stepIndex, rowIndex, slotIndex: null, cellIndex },
+        selectedAnnotation: null,
+      }),
+    selectCellObject: (chapterIndex, stepIndex, rowIndex, cellIndex, objectId) =>
+      set({
+        selection: { chapterIndex, stepIndex, rowIndex, slotIndex: null, cellIndex, objectId },
+        selectedAnnotation: null,
       }),
 
     // ── book meta ──
@@ -236,6 +298,7 @@ export function createEditorStore(
         return { book: { ...s.book, ending: { ...current, ...patch } } };
       }),
     setOverflows: (overflows) => set({ overflows }),
+    toggleGridChrome: () => set((s) => ({ hideGridChrome: !s.hideGridChrome })),
 
     // ── chapters ──
     addChapter: () =>
@@ -329,11 +392,45 @@ export function createEditorStore(
       set((s) => ({ book: M.resizeGridColumn(s.book, ci, si, ri, dividerIndex, deltaFr) })),
     addGridRow: (ci, si) => set((s) => ({ book: M.addGridRow(s.book, ci, si) })),
     removeGridRow: (ci, si, ri) =>
-      set((s) => ({ book: M.removeGridRow(s.book, ci, si, ri) })),
+      set((s) => {
+        const book = M.removeGridRow(s.book, ci, si, ri);
+        if (book === s.book) return { book };
+        return { book, selection: reconcileRowRemoval(s.selection, ci, si, ri) };
+      }),
     addGridColumn: (ci, si, ri) =>
       set((s) => ({ book: M.addGridColumn(s.book, ci, si, ri) })),
     removeGridColumn: (ci, si, ri, cellIndex) =>
-      set((s) => ({ book: M.removeGridColumn(s.book, ci, si, ri, cellIndex) })),
+      set((s) => {
+        const book = M.removeGridColumn(s.book, ci, si, ri, cellIndex);
+        if (book === s.book) return { book };
+        return { book, selection: reconcileColumnRemoval(s.selection, ci, si, ri, cellIndex) };
+      }),
+
+    // ── cell objects ──
+    setCellImage: (ci, si, ri, cellIndex, filename) =>
+      set((s) => ({ book: M.setCellImage(s.book, ci, si, ri, cellIndex, filename) })),
+    removeCellImage: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.removeCellImage(s.book, ci, si, ri, cellIndex) })),
+    setCellImageFit: (ci, si, ri, cellIndex, fit) =>
+      set((s) => ({ book: M.setCellImageFit(s.book, ci, si, ri, cellIndex, fit) })),
+    addCellCallout: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.addCellCallout(s.book, ci, si, ri, cellIndex) })),
+    updateCellCallout: (ci, si, ri, cellIndex, objIndex, patch) =>
+      set((s) => ({ book: M.updateCellCallout(s.book, ci, si, ri, cellIndex, objIndex, patch) })),
+    removeCellObject: (ci, si, ri, cellIndex, objIndex) =>
+      set((s) => ({ book: M.removeCellObject(s.book, ci, si, ri, cellIndex, objIndex) })),
+    moveCellObject: (ci, si, ri, cellIndex, objIndex, dir) =>
+      set((s) => ({ book: M.moveCellObject(s.book, ci, si, ri, cellIndex, objIndex, dir) })),
+    addCellText: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.addCellText(s.book, ci, si, ri, cellIndex) })),
+    updateCellText: (ci, si, ri, cellIndex, objIndex, text) =>
+      set((s) => ({ book: M.updateCellText(s.book, ci, si, ri, cellIndex, objIndex, text) })),
+    updateCellObjectPlacement: (ci, si, ri, cellIndex, objectId, patch) =>
+      set((s) => ({ book: M.updateCellObjectPlacement(s.book, ci, si, ri, cellIndex, objectId, patch) })),
+    setCellTextAlign: (ci, si, ri, cellIndex, objIndex, align) =>
+      set((s) => ({ book: M.setCellTextAlign(s.book, ci, si, ri, cellIndex, objIndex, align) })),
+    setCellImageBorder: (ci, si, ri, cellIndex, border) =>
+      set((s) => ({ book: M.setCellImageBorder(s.book, ci, si, ri, cellIndex, border) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

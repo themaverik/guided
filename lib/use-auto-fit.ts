@@ -27,6 +27,17 @@ const useIsomorphicLayoutEffect =
 /** Never shrink a slot below this width/height (px). */
 export const MIN_SLOT_PX = 60;
 
+/** Never shrink grid cell content below this scale; past it, clip + warn. */
+export const MIN_GRID_SCALE = 0.5;
+
+/** Uniform content-scale factor for a grid step, from its callout cells'
+ *  overflow ratios (content height / cell height). 1 when all fit; else the
+ *  worst cell drives `1/worst`, floored at `minScale`. */
+export function gridFitScale(ratios: number[], minScale: number): number {
+  const worst = Math.max(1, ...ratios);
+  return worst <= 1 ? 1 : Math.max(minScale, 1 / worst);
+}
+
 /** Run one fit pass over every `.page.step` inside `container`. Returns the
  *  data-screen-labels of pages that still overflow after scaling. */
 export function fitSteps(container: HTMLElement): string[] {
@@ -111,6 +122,39 @@ export function fitSteps(container: HTMLElement): string[] {
   return overflows;
 }
 
+/** Grid analogue of fitSteps: for each grid step, scale every callout-bearing
+ *  cell's `.grid-cell-content` by ONE grid-uniform factor (the worst cell's,
+ *  floored at MIN_GRID_SCALE) so callouts fit; image-only cells are untouched.
+ *  Returns the labels of grid steps still overflowing at the floor. */
+export function fitGrid(container: HTMLElement): string[] {
+  const overflows: string[] = [];
+
+  container.querySelectorAll<HTMLElement>(".page.step").forEach((page) => {
+    const gridStep = page.querySelector<HTMLElement>(".grid-step");
+    if (!gridStep) return; // legacy step → handled by fitSteps
+
+    // Only cells that contain a callout or a text block can overflow; image-only cells stay 1:1.
+    const contents = [...gridStep.querySelectorAll<HTMLElement>(".grid-cell")]
+      .filter((cell) => cell.querySelector(":scope > .grid-cell-content .callout, :scope > .grid-cell-content .grid-text"))
+      .map((cell) => cell.querySelector<HTMLElement>(":scope > .grid-cell-content"))
+      .filter((c): c is HTMLElement => c != null);
+    if (contents.length === 0) return;
+
+    // Reset before measuring so the ratios are at natural scale.
+    contents.forEach((c) => { c.style.transform = ""; });
+    const ratios = contents.map((c) => c.scrollHeight / c.clientHeight);
+    const f = gridFitScale(ratios, MIN_GRID_SCALE);
+    contents.forEach((c) => { c.style.transform = f < 1 ? `scale(${f})` : ""; });
+
+    // Still overflows at the floor → warn (worst > 1/MIN_GRID_SCALE).
+    if (f <= MIN_GRID_SCALE && Math.max(1, ...ratios) > 1 / MIN_GRID_SCALE) {
+      overflows.push(page.getAttribute("data-screen-label") || "");
+    }
+  });
+
+  return overflows;
+}
+
 /**
  * Attach auto-fit to a container ref. Re-runs whenever `deps` change (pass a
  * content key like `bookFitKey(book)`), after `document.fonts.ready`, and on
@@ -133,7 +177,7 @@ export function useAutoFit(
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
-      const overflows = fitSteps(el);
+      const overflows = [...fitSteps(el), ...fitGrid(el)];
       reportRef.current?.(overflows);
     };
 

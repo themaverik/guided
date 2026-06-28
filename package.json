@@ -20,7 +20,9 @@
   },
   "pnpm": {
     "overrides": {
-      "postcss": ">=8.5.15"
+      "postcss": ">=8.5.15",
+      "esbuild": ">=0.28.1",
+      "js-yaml": ">=4.2.0"
     }
   },
   "devDependencies": {

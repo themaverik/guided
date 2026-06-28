@@ -844,18 +844,136 @@
   gap: 4mm;
 }
 .grid-cell {
+  position: relative; /* anchor for the absolute .grid-cell-floats layer (Plan 9) */
   flex: 1 1 0;
   min-width: 0;
   display: flex;
+  overflow: hidden; /* clips residual after fitGrid scales content (Plan 8) */
 }
-.grid-cell .img-slot {
+.grid-cell-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column; /* stack image + callouts vertically */
+  gap: 4mm;
+  transform-origin: top left; /* fitGrid scales from here (Plan 8) */
+}
+.grid-cell-floats {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* renderer layer is display-only; editor overlay drives interaction */
+}
+.grid-cell-float {
+  position: absolute; /* left/top/width set inline from x/y/w; height auto from content */
+}
+/* Rich-text block in a grid cell (Plan 10). Flow-stacked; reuses the body type
+   scale. Lists keep indentation; headings + strike are sized for in-cell use. */
+.grid-text {
+  font-family: var(--font-body);
+  font-size: 10.5pt;
+  line-height: 1.6;
+  color: var(--ink-text);
+  text-wrap: pretty;
+}
+.grid-text h2 {
+  font-family: var(--font-heading);
+  font-size: 13pt;
+  font-weight: 600;
+  margin: 0 0 1.5mm;
+  color: var(--ink);
+}
+.grid-text h3 {
+  font-family: var(--font-heading);
+  font-size: 11pt;
+  font-weight: 600;
+  margin: 0 0 1mm;
+  color: var(--ink);
+}
+.grid-text p {
+  margin: 0 0 1.5mm;
+}
+.grid-text p:last-child {
+  margin-bottom: 0;
+}
+.grid-text ul,
+.grid-text ol {
+  margin: 1mm 0;
+  padding-left: 5mm;
+}
+.grid-text ul {
+  list-style: disc outside;
+}
+.grid-text ol {
+  list-style: decimal outside;
+}
+.grid-text li {
+  margin: 0.5mm 0;
+}
+.grid-text del {
+  text-decoration: line-through;
+}
+/* Text-block alignment (Plan 11). Paragraphs follow text-align; lists become a
+   shrink-wrapped block so a centred list centres as a unit and a right-aligned
+   list aligns to its longest item. */
+.grid-text.align-center { text-align: center; }
+.grid-text.align-right { text-align: right; }
+.grid-text.align-center ul,
+.grid-text.align-center ol {
+  width: fit-content;
+  margin: 1mm auto;
+}
+.grid-text.align-right ul,
+.grid-text.align-right ol {
+  width: fit-content;
+  margin: 1mm 0 1mm auto;
+}
+/* Contain (default, no fit class): the framed slot shrink-wraps its displayed
+   image so border + shadow hug the screenshot, not the cell. The img is laid
+   out statically (overriding the base absolute fill) and constrained to the
+   cell minus a small gutter so .grid-cell{overflow:hidden} (fitGrid) doesn't
+   clip the shadow. */
+.grid-cell .img-slot {
+  width: auto;
+  height: auto;
+  max-width: calc(100% - 12px);
+  max-height: calc(100% - 12px);
+  align-self: center;  /* centre the shrink-wrapped slot on the cross axis;
+                          stays in vertical flow so a sibling callout/text below
+                          is not pushed (no main-axis margin:auto) */
 }
 .grid-cell .img-slot img {
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+/* Crop modes fill the cell (frame hugs the cell, which is correct when cropping). */
+.grid-cell .img-slot.fit-width,
+.grid-cell .img-slot.fit-height {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  max-width: none;
+  max-height: none;
+}
+.grid-cell .img-slot.fit-width img {
+  position: absolute;
+  inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
+  width: 100%;
+  height: auto;
+  object-fit: fill;
+}
+.grid-cell .img-slot.fit-height img {
+  position: absolute;
+  inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
+  width: auto;
+  height: 100%;
+  object-fit: fill;
 }
 
 /* ────────────── PRINT ────────────── */

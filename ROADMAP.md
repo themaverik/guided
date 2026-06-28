@@ -263,15 +263,15 @@ paired tokens — zero regression to existing features. Executed as sequenced pl
 review + final whole-branch review). CLAUDE.md was corrected (it had described a non-existent TipTap
 stack). Decisions of record live in `PRD.md` (Decisions 1–14) and `ADR-006`.
 
-**Status:** Plans 1–5 are **done and merged to `main`** (merge commit `2fbbbc8`; former branch
-`feature/improvement-rev2`, now deleted). **Plans 6–9 are done on `feature/improvement-rev3`** (not
-yet merged): grid cells render and author image + callout content, overflow auto-shrinks to fit in
-both preview and print, and callouts can be dragged off the flow stack to float at absolute positions
-within a cell. 98 unit tests, renderer/print zero-regression, editor-only affordances.
-Remaining work — Plan 10 (rich-text blocks), then annotation standardization (ISO 32000 vocabulary)
-and the OKLCH color system — continues on `feature/improvement-rev3`. (Note: the plan numbering was
-re-sequenced during just-in-time brainstorming; annotation standardization and color moved later than
-the original 6–8 sketch.)
+**Status:** Plans 1–5 merged to `main` (merge commit `2fbbbc8`). **Plans 6–11 are done and merged to
+`main`** (merge commit `ecc19bf`, via `feature/improvement-rev3`): grid cells render and author image +
+callout + rich-text content; overflow auto-shrinks to fit in both preview and print; callouts drag off
+the flow stack to float at absolute positions; text blocks carry headings/strike and per-block
+alignment; images take a per-cell border/shadow that hugs the screenshot; and a hide-grid toggle gives
+a clean preview. 117 unit tests, renderer/print zero-regression, editor-only affordances, additive
+schema (no migration). Remaining v3 work — annotation standardization (ISO 32000 vocabulary) and the
+OKLCH color system — plus the backlog below. (Note: plan numbering was re-sequenced during just-in-time
+brainstorming; annotation standardization and color moved later than the original 6–8 sketch.)
 
 ## Plan 1 — Foundations  [done]
 
@@ -379,12 +379,49 @@ build OK; final whole-branch review: ready-to-merge — pixel-parity + editor-on
 ADR-006 amended (the `positioned` flag + floating-layer mechanism). Deferred to human: in-browser/PDF
 manual checks (drag/detach, print shows positions without handles, fitGrid exemption).
 
-## Plan 10 and beyond — roadmapped (detailed just-in-time)
+## Plan 10 — Rich-text block objects  [done]
 
-- **Plan 10 — Rich-text block objects:** `kind:"text"` paragraphs with headings (h1–h4), underline,
-  strikethrough, and numbered lists — extending the `lib/markdown.ts` subset.
-- **Later:** annotation standardization (ISO 32000 vocabulary; Circle + Polygon / Diamond preset;
-  8-handle selection; segment-drag connector reshape; arrow-snap defaults; grid-guides on/off toggle);
-  the OKLCH color system (paired tokens in `@theme`; swatch palette + hybrid inspector; editor-only fill
-  tint, full opacity in export; unify callouts); plus file-drop-onto-cell image upload and `Custom`
-  page-size width/height inputs.
+`kind:"text"` cell blocks authored like callouts and rendered in the flow layer (preview + print),
+fit-aware under `fitGrid`. Extends `lib/markdown.ts` with `## `/`### ` headings and `~~strikethrough~~`
+(bold/italic/bullet/numbered already existed; underline and floating text were deliberately dropped).
+New `StackedObject.text?`; `addCellText`/`updateCellText`; `RichTextArea` opt-in heading/strike toolbar;
+`CellEditor` unified content-blocks list (callouts + text). Shipped on `feature/improvement-rev3` (impl
+`d7eeb5b..4626bbe` + fix `c5ce00b`; suite 113/113, typecheck 0, build OK; final whole-branch review:
+ready-to-merge). Additive schema, no migration. ADR-006 amended.
+
+## Plan 11 — Grid-view polish  [done]
+
+Three improvements from the Plan 10 smoke test. (1) **Text-block alignment** — per-block left / center /
+right (`StackedObject.align?`); lists shrink-wrap so a centred list centres as a unit and a right one
+aligns to its longest item. (2) **Per-image border / shadow that hugs the screenshot** —
+`StackedObject.border?` (reuses the `Border` model); in contain mode the framed slot shrink-wraps the
+image so the frame + shadow wrap the screenshot, crop modes still fill; full controls (on/off, colour,
+width, radius, shadow). (3) **Hide-grid toggle** — a transient preview toggle that drops the editor
+chrome (guides + handles) while keeping content and interactive annotations. Shipped on
+`feature/improvement-rev3` (impl `e3e3f82..f445802` + fix `7cead99`; suite 117/117, typecheck 0, build OK;
+final whole-branch review: ready-to-merge). Additive schema, no migration; ADR-006 amended. Also pinned
+dev-only dependency advisories (esbuild / js-yaml) via `pnpm.overrides`.
+
+## Backlog / next up
+
+Captured from review + smoke testing; sequenced just-in-time into plans (brainstorm → spec → plan →
+subagent-driven execution), each with its own ADR if it touches the schema or annotation model.
+
+- **Callout lists (numbered + bullet):** expose bullet / numbered-list authoring for callout bodies.
+  The markdown subset (`lib/markdown.ts`) and `RichTextArea` already support `- ` / `1. ` lists — verify
+  the option is available and rendering correctly in every callout editor (legacy + grid cell).
+- **Annotation snapping — more options:** extend snapping beyond image edges / center / manual anchors
+  (e.g. snap to the grid, to other objects' edges/centers, and equal-spacing / alignment guides). Builds
+  on the Phase-11 "snapping needs design" note.
+- **Bug — square (orthogonal) connector routing:** the square / elbow routing on connectors does not
+  route correctly; fix the orthogonal path geometry (and its print render).
+- **Bug — connector angle handling is not smooth:** adjusting a connector's angle is jumpy and hard to
+  control; smooth the interaction and review the waypoint / segment-drag math.
+
+## Later (v3 remainder)
+
+- **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle
+  selection; segment-drag connector reshape; arrow-snap defaults; grid-guides on/off toggle).
+- **OKLCH color system** (paired tokens in `@theme`; swatch palette + hybrid inspector; editor-only fill
+  tint, full opacity in export; unify callouts).
+- **Misc:** file-drop-onto-cell image upload; `Custom` page-size width/height inputs.

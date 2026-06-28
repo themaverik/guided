@@ -129,6 +129,8 @@ export interface EditorState {
   updateCellCallout: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, patch: Partial<Callout>) => void;
   removeCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number) => void;
   moveCellObject: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, dir: -1 | 1) => void;
+  addCellText: (ci: number, si: number, ri: number, cellIndex: number) => void;
+  updateCellText: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, text: string) => void;
   updateCellObjectPlacement: (ci: number, si: number, ri: number, cellIndex: number, objectId: string, patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>) => void;
 
   // callouts
@@ -411,6 +413,10 @@ export function createEditorStore(
       set((s) => ({ book: M.removeCellObject(s.book, ci, si, ri, cellIndex, objIndex) })),
     moveCellObject: (ci, si, ri, cellIndex, objIndex, dir) =>
       set((s) => ({ book: M.moveCellObject(s.book, ci, si, ri, cellIndex, objIndex, dir) })),
+    addCellText: (ci, si, ri, cellIndex) =>
+      set((s) => ({ book: M.addCellText(s.book, ci, si, ri, cellIndex) })),
+    updateCellText: (ci, si, ri, cellIndex, objIndex, text) =>
+      set((s) => ({ book: M.updateCellText(s.book, ci, si, ri, cellIndex, objIndex, text) })),
     updateCellObjectPlacement: (ci, si, ri, cellIndex, objectId, patch) =>
       set((s) => ({ book: M.updateCellObjectPlacement(s.book, ci, si, ri, cellIndex, objectId, patch) })),
 

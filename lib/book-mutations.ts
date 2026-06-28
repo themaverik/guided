@@ -594,6 +594,24 @@ export function updateCellObjectPlacement(
   return next;
 }
 
+/** Append an empty text block to a cell's object stack (flow-stacked). */
+export function addCellText(book: Book, ci: number, si: number, ri: number, cellIndex: number): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  cell.objects.push({ id: annotationId(), role: "secondary", kind: "text", x: 0, y: 0, w: 1, h: 1, text: "" });
+  return next;
+}
+
+/** Set a text block's content. Kind-guarded; bad index or non-text returns the same book ref. */
+export function updateCellText(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, text: string): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "text") return book;
+  obj.text = text;
+  return next;
+}
+
 export const CALLOUT_TYPES: CalloutType[] = [
   "info",
   "note",

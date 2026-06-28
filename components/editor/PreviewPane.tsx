@@ -36,6 +36,8 @@ export default function PreviewPane() {
   const setOverflows = useEditor((s) => s.setOverflows);
   const projectSlug = useEditor((s) => s.projectSlug);
   const selectedAnnotation = useEditor((s) => s.selectedAnnotation);
+  const hideGridChrome = useEditor((s) => s.hideGridChrome);
+  const toggleGridChrome = useEditor((s) => s.toggleGridChrome);
   const saveStatus = useAutosave();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,6 +102,12 @@ export default function PreviewPane() {
     [pageCount],
   );
 
+  const selStep =
+    selection.stepIndex != null
+      ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
+      : null;
+  const isGridStep = selStep ? stepLayoutMode(selStep) === "grid" : false;
+
   return (
     <div className="editor-right">
       <div className="preview-toolbar">
@@ -116,6 +124,11 @@ export default function PreviewPane() {
           <span className="overflow-warn">
             {overflows.length} page{overflows.length === 1 ? "" : "s"} overflow
           </span>
+        ) : null}
+        {isGridStep ? (
+          <button onClick={toggleGridChrome}>
+            {hideGridChrome ? "Show grid" : "Hide grid"}
+          </button>
         ) : null}
         <span className="spacer" />
         {saveStatus !== "idle" ? (
@@ -150,7 +163,7 @@ export default function PreviewPane() {
           style={{ height: naturalH ? naturalH * scale : undefined }}
         >
           <div
-            className="preview-scaler"
+            className={`preview-scaler${hideGridChrome ? " chrome-hidden" : ""}`}
             ref={scalerRef}
             style={{ transform: `scale(${scale})` }}
           >
@@ -164,7 +177,7 @@ export default function PreviewPane() {
                 selection.stepIndex != null
                   ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
                   : null;
-              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 && !hideGridChrome ? (
                 <PreviewGridSelect
                   scalerRef={scalerRef}
                   pageIndex={currentPage}
@@ -198,7 +211,7 @@ export default function PreviewPane() {
                 gridMode={(() => {
                   const s =
                     book.chapters[selection.chapterIndex]?.steps[selection.stepIndex];
-                  return s ? stepLayoutMode(s) === "grid" : false;
+                  return s ? stepLayoutMode(s) === "grid" && !hideGridChrome : false;
                 })()}
               />
             ) : null}
@@ -207,7 +220,7 @@ export default function PreviewPane() {
                 selection.stepIndex != null
                   ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
                   : null;
-              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 && !hideGridChrome ? (
                 <PreviewGridResize
                   scalerRef={scalerRef}
                   pageIndex={currentPage}
@@ -225,7 +238,7 @@ export default function PreviewPane() {
                 selection.stepIndex != null
                   ? book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
                   : null;
-              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 ? (
+              return sel && stepLayoutMode(sel) === "grid" && sel.grid && sel.grid.length > 0 && !hideGridChrome ? (
                 <PreviewCellFloat
                   scalerRef={scalerRef}
                   pageIndex={currentPage}

@@ -55,6 +55,8 @@ export interface EditorState {
   selectedAnnotation: string | null;
   /** data-screen-labels of pages that still overflow after the last fit pass. */
   overflows: string[];
+  /** Transient: hide grid editor chrome (guides + handles) for a clean preview. */
+  hideGridChrome: boolean;
 
   // selection
   selectChapter: (chapterIndex: number) => void;
@@ -62,6 +64,7 @@ export interface EditorState {
   selectRow: (chapterIndex: number, stepIndex: number, rowIndex: number) => void;
   selectCell: (ci: number, si: number, ri: number, cellIndex: number) => void;
   selectCellObject: (ci: number, si: number, ri: number, cellIndex: number, objectId: string) => void;
+  toggleGridChrome: () => void;
 
   // book meta
   updateBookMeta: (
@@ -211,6 +214,7 @@ export function createEditorStore(
     },
     selectedAnnotation: null,
     overflows: [],
+    hideGridChrome: false,
 
     // ── selection ──
     selectChapter: (chapterIndex) =>
@@ -294,6 +298,7 @@ export function createEditorStore(
         return { book: { ...s.book, ending: { ...current, ...patch } } };
       }),
     setOverflows: (overflows) => set({ overflows }),
+    toggleGridChrome: () => set((s) => ({ hideGridChrome: !s.hideGridChrome })),
 
     // ── chapters ──
     addChapter: () =>

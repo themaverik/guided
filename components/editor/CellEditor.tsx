@@ -37,6 +37,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
   const moveCellObject = useEditor((s) => s.moveCellObject);
   const addCellText = useEditor((s) => s.addCellText);
   const updateCellText = useEditor((s) => s.updateCellText);
+  const setCellTextAlign = useEditor((s) => s.setCellTextAlign);
   const updateCellObjectPlacement = useEditor((s) => s.updateCellObjectPlacement);
   const selectedObjId = useEditor((s) => s.selection.objectId ?? null);
 
@@ -146,6 +147,19 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
             <div className={`callout-item${selectedObjId === o.id ? " selected" : ""}`} key={o.id}>
               <div className="callout-item-head">
                 <span className="block-label">Text</span>
+                <div className="seg align-seg">
+                  {(["left", "center", "right"] as const).map((a) => (
+                    <button
+                      key={a}
+                      className={`seg-btn${(o.align ?? "left") === a ? " active" : ""}`}
+                      onClick={() => setCellTextAlign(ci, si, ri, cellIndex, i, a)}
+                      aria-label={`Align ${a}`}
+                      title={`Align ${a}`}
+                    >
+                      {a === "left" ? "⯇" : a === "center" ? "≡" : "⯈"}
+                    </button>
+                  ))}
+                </div>
                 <div className="mini-btns">
                   <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, -1)} aria-label="Move up">↑</button>
                   <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, 1)} aria-label="Move down">↓</button>

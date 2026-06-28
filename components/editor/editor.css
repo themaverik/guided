@@ -1210,3 +1210,16 @@
   outline-offset: 2px;
   border-radius: 6px;
 }
+.cell-editor .block-label {
+  font-family: var(--font-heading, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink, inherit);
+}
+.cell-editor .cell-add-row {
+  display: flex;
+  gap: 8px;
+}
+.cell-editor .cell-add-row .add-btn {
+  flex: 1;
+}

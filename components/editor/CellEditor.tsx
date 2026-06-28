@@ -35,6 +35,8 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
   const updateCellCallout = useEditor((s) => s.updateCellCallout);
   const removeCellObject = useEditor((s) => s.removeCellObject);
   const moveCellObject = useEditor((s) => s.moveCellObject);
+  const addCellText = useEditor((s) => s.addCellText);
+  const updateCellText = useEditor((s) => s.updateCellText);
   const updateCellObjectPlacement = useEditor((s) => s.updateCellObjectPlacement);
   const selectedObjId = useEditor((s) => s.selection.objectId ?? null);
 
@@ -58,7 +60,9 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
   const cellAspect = (cell.widthFr * body.w) / (row.heightFr * body.h);
   const misfit = imgAspect != null && Math.abs(imgAspect - cellAspect) / cellAspect > 0.1;
   const showCropPrompt = Boolean(imageRef) && misfit && fit === "contain";
-  const callouts = cell.objects.map((o, i) => ({ o, i })).filter(({ o }) => o.kind === "callout");
+  const blocks = cell.objects
+    .map((o, i) => ({ o, i }))
+    .filter(({ o }) => o.kind === "callout" || o.kind === "text");
 
   return (
     <section className="editor-section cell-editor">
@@ -100,48 +104,74 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
       </div>
 
       <div className="callout-list">
-        {callouts.map(({ o, i }) => (
-          <div className={`callout-item${selectedObjId === o.id ? " selected" : ""}`} key={o.id}>
-            <div className="callout-item-head">
-              <select
-                value={normalizeCalloutType(o.callout?.type)}
-                onChange={(e) => updateCellCallout(ci, si, ri, cellIndex, i, { type: e.target.value as Callout["type"] })}
-              >
-                {CALLOUT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <div className="mini-btns">
-                {o.positioned ? (
-                  <button
-                    className="mini-btn"
-                    onClick={() => updateCellObjectPlacement(ci, si, ri, cellIndex, o.id, { positioned: false })}
-                    aria-label="Dock to flow"
-                    title="Dock to flow"
-                  >
-                    ⤓
-                  </button>
-                ) : null}
-                <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, -1)} aria-label="Move up">↑</button>
-                <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, 1)} aria-label="Move down">↓</button>
-                <button className="mini-btn danger" onClick={() => removeCellObject(ci, si, ri, cellIndex, i)} aria-label="Remove">×</button>
+        {blocks.map(({ o, i }) =>
+          o.kind === "callout" ? (
+            <div className={`callout-item${selectedObjId === o.id ? " selected" : ""}`} key={o.id}>
+              <div className="callout-item-head">
+                <select
+                  value={normalizeCalloutType(o.callout?.type)}
+                  onChange={(e) => updateCellCallout(ci, si, ri, cellIndex, i, { type: e.target.value as Callout["type"] })}
+                >
+                  {CALLOUT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <div className="mini-btns">
+                  {o.positioned ? (
+                    <button
+                      className="mini-btn"
+                      onClick={() => updateCellObjectPlacement(ci, si, ri, cellIndex, o.id, { positioned: false })}
+                      aria-label="Dock to flow"
+                      title="Dock to flow"
+                    >
+                      ⤓
+                    </button>
+                  ) : null}
+                  <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, -1)} aria-label="Move up">↑</button>
+                  <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, 1)} aria-label="Move down">↓</button>
+                  <button className="mini-btn danger" onClick={() => removeCellObject(ci, si, ri, cellIndex, i)} aria-label="Remove">×</button>
+                </div>
               </div>
+              <input
+                placeholder="Title"
+                value={o.callout?.title ?? ""}
+                onChange={(e) => updateCellCallout(ci, si, ri, cellIndex, i, { title: e.target.value })}
+              />
+              <RichTextArea
+                rows={2}
+                placeholder="Body"
+                value={o.callout?.body ?? ""}
+                onChange={(v) => updateCellCallout(ci, si, ri, cellIndex, i, { body: v })}
+              />
             </div>
-            <input
-              placeholder="Title"
-              value={o.callout?.title ?? ""}
-              onChange={(e) => updateCellCallout(ci, si, ri, cellIndex, i, { title: e.target.value })}
-            />
-            <RichTextArea
-              rows={2}
-              placeholder="Body"
-              value={o.callout?.body ?? ""}
-              onChange={(v) => updateCellCallout(ci, si, ri, cellIndex, i, { body: v })}
-            />
-          </div>
-        ))}
+          ) : (
+            <div className={`callout-item${selectedObjId === o.id ? " selected" : ""}`} key={o.id}>
+              <div className="callout-item-head">
+                <span className="block-label">Text</span>
+                <div className="mini-btns">
+                  <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, -1)} aria-label="Move up">↑</button>
+                  <button className="mini-btn" onClick={() => moveCellObject(ci, si, ri, cellIndex, i, 1)} aria-label="Move down">↓</button>
+                  <button className="mini-btn danger" onClick={() => removeCellObject(ci, si, ri, cellIndex, i)} aria-label="Remove">×</button>
+                </div>
+              </div>
+              <RichTextArea
+                rows={4}
+                placeholder="Text…"
+                value={o.text ?? ""}
+                onChange={(v) => updateCellText(ci, si, ri, cellIndex, i, v)}
+                showHeadings
+                showStrike
+              />
+            </div>
+          ),
+        )}
       </div>
-      <button className="add-btn" onClick={() => addCellCallout(ci, si, ri, cellIndex)}>
-        + Add callout
-      </button>
+      <div className="cell-add-row">
+        <button className="add-btn" onClick={() => addCellCallout(ci, si, ri, cellIndex)}>
+          + Add callout
+        </button>
+        <button className="add-btn" onClick={() => addCellText(ci, si, ri, cellIndex)}>
+          + Add text
+        </button>
+      </div>
     </section>
   );
 }

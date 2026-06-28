@@ -133,7 +133,7 @@ export function fitGrid(container: HTMLElement): string[] {
     const gridStep = page.querySelector<HTMLElement>(".grid-step");
     if (!gridStep) return; // legacy step → handled by fitSteps
 
-    // Only cells that contain a callout can overflow; image-only cells stay 1:1.
+    // Only cells that contain a callout or a text block can overflow; image-only cells stay 1:1.
     const contents = [...gridStep.querySelectorAll<HTMLElement>(".grid-cell")]
       .filter((cell) => cell.querySelector(":scope > .grid-cell-content .callout, :scope > .grid-cell-content .grid-text"))
       .map((cell) => cell.querySelector<HTMLElement>(":scope > .grid-cell-content"))

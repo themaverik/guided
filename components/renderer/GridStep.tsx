@@ -51,12 +51,14 @@ export default function GridStep({
                       return <Callout key={obj.id} data={obj.callout} domId={obj.id} />;
                     }
                     if (obj.kind === "text") {
+                      const alignCls =
+                        obj.align && obj.align !== "left" ? ` align-${obj.align}` : "";
                       return (
                         <RichText
                           key={obj.id}
                           as="div"
                           block
-                          className="grid-text"
+                          className={`grid-text${alignCls}`}
                           text={obj.text}
                         />
                       );

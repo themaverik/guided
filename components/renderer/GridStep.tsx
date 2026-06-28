@@ -10,6 +10,7 @@ import { displayPath, imageSrc } from "@/lib/book-render";
 import { flowObjects, floatingCallouts } from "@/lib/grid-render";
 import Callout from "./Callout";
 import ImageSlot from "./ImageSlot";
+import RichText from "./RichText";
 
 export default function GridStep({
   grid,
@@ -49,7 +50,18 @@ export default function GridStep({
                     if (obj.kind === "callout" && obj.callout) {
                       return <Callout key={obj.id} data={obj.callout} domId={obj.id} />;
                     }
-                    return null; // text objects: Plan 10
+                    if (obj.kind === "text") {
+                      return (
+                        <RichText
+                          key={obj.id}
+                          as="div"
+                          block
+                          className="grid-text"
+                          text={obj.text}
+                        />
+                      );
+                    }
+                    return null;
                   })}
                 </div>
                 {floats.length > 0 ? (

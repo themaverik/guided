@@ -869,6 +869,52 @@
 .grid-cell-float {
   position: absolute; /* left/top/width set inline from x/y/w; height auto from content */
 }
+/* Rich-text block in a grid cell (Plan 10). Flow-stacked; reuses the body type
+   scale. Lists keep indentation; headings + strike are sized for in-cell use. */
+.grid-text {
+  font-family: var(--font-body);
+  font-size: 10.5pt;
+  line-height: 1.6;
+  color: var(--ink-text);
+  text-wrap: pretty;
+}
+.grid-text h2 {
+  font-family: var(--font-heading);
+  font-size: 13pt;
+  font-weight: 600;
+  margin: 0 0 1.5mm;
+  color: var(--ink);
+}
+.grid-text h3 {
+  font-family: var(--font-heading);
+  font-size: 11pt;
+  font-weight: 600;
+  margin: 0 0 1mm;
+  color: var(--ink);
+}
+.grid-text p {
+  margin: 0 0 1.5mm;
+}
+.grid-text p:last-child {
+  margin-bottom: 0;
+}
+.grid-text ul,
+.grid-text ol {
+  margin: 1mm 0;
+  padding-left: 5mm;
+}
+.grid-text ul {
+  list-style: disc outside;
+}
+.grid-text ol {
+  list-style: decimal outside;
+}
+.grid-text li {
+  margin: 0.5mm 0;
+}
+.grid-text del {
+  text-decoration: line-through;
+}
 .grid-cell .img-slot {
   width: 100%;
   height: 100%;

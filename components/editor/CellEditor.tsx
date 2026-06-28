@@ -100,9 +100,11 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
             ) : null}
             {(() => {
               const rb = resolveBorder(image?.border);
-              const colorHex = /^#[0-9a-fA-F]{6}$/.test(rb.color) ? rb.color : "#cfd6e4";
-              const widthPx = parseInt(rb.width, 10) || 6;
-              const radiusPx = parseInt(rb.radius, 10) || 20;
+              const colorHex = /^#[0-9a-fA-F]{6}$/.test(rb.color) ? rb.color : "#d7dede";
+              const wn = parseInt(rb.width, 10);
+              const widthPx = Number.isFinite(wn) ? wn : 6;
+              const rn = parseInt(rb.radius, 10);
+              const radiusPx = Number.isFinite(rn) ? rn : 20;
               const full: BorderStyle = { color: colorHex, width: `${widthPx}px`, radius: `${radiusPx}px`, shadow: rb.shadow };
               const patch = (p: Partial<BorderStyle>) => setCellImageBorder(ci, si, ri, cellIndex, { ...full, ...p });
               return (

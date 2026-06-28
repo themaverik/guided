@@ -229,3 +229,11 @@ grid-uniform factor (floor 0.5); image-only cells stay exempt.
 
 The field is additive and optional — existing books carry no text objects, so there
 is **no `schemaVersion` bump and no migration** (absence of `text` is valid).
+
+## Amendment (Plan 11, 2026-06-28): text alignment + per-image border
+
+`StackedObject` gains two optional fields:
+- `align?: "left" | "center" | "right"` — text-block (`kind:"text"`) alignment; absent = left. Applies to the whole block: paragraphs via `text-align`, lists via a shrink-wrapped block (`width: fit-content` + auto margins) so a centred list centres as a unit and a right-aligned list aligns to its longest item. Renders (prints) via a `.grid-text.align-*` modifier class.
+- `border?: Border` — per-image (`kind:"image"`) frame, reusing the existing `Border`/`BorderStyle` model (colour/width/radius/shadow). Absent = `ImageSlot`'s default frame, so existing grid images are unchanged. In `contain` mode the framed slot shrink-wraps the displayed image so border + shadow hug the screenshot, not the cell; crop modes fill the cell.
+
+Both are additive/optional — no `schemaVersion` bump, no migration. Mutations `setCellTextAlign` / `setCellImageBorder` (immutable; kind/none-guarded; same-`book` ref on no-op).

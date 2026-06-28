@@ -12,6 +12,7 @@
 import {
   type Annotation,
   type Book,
+  type Border,
   type Callout,
   type CalloutType,
   type Chapter,
@@ -609,6 +610,26 @@ export function updateCellText(book: Book, ci: number, si: number, ri: number, c
   const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
   if (!obj || obj.kind !== "text") return book;
   obj.text = text;
+  return next;
+}
+
+/** Set a text block's alignment. Kind-guarded to "text"; bad index / non-text → same book ref. */
+export function setCellTextAlign(book: Book, ci: number, si: number, ri: number, cellIndex: number, objIndex: number, align: "left" | "center" | "right"): Book {
+  const next = clone(book);
+  const obj = cellOf(next, ci, si, ri, cellIndex)?.objects[objIndex];
+  if (!obj || obj.kind !== "text") return book;
+  obj.align = align;
+  return next;
+}
+
+/** Set the cell's primary image border. No image in the cell → same book ref. */
+export function setCellImageBorder(book: Book, ci: number, si: number, ri: number, cellIndex: number, border: Border): Book {
+  const next = clone(book);
+  const cell = cellOf(next, ci, si, ri, cellIndex);
+  if (!cell) return book;
+  const idx = cell.objects.findIndex((o) => o.kind === "image" && o.role === "primary");
+  if (idx < 0) return book;
+  cell.objects[idx] = { ...cell.objects[idx], border };
   return next;
 }
 

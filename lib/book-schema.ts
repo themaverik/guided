@@ -224,6 +224,12 @@ export interface StackedObject {
   positioned?: boolean;
   /** Text block content (markdown subset) when kind === "text". */
   text?: string;
+  /** Text block alignment when kind === "text"; absent = left. Applies to the
+   *  whole block (paragraphs + lists). */
+  align?: "left" | "center" | "right";
+  /** Per-image frame when kind === "image" (reuses the Border model); absent =
+   *  ImageSlot's default frame. */
+  border?: Border;
   /** Cell-anchored annotations (0–1 of the cell). */
   annotations?: Annotation[];
 }

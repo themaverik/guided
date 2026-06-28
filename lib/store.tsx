@@ -15,6 +15,7 @@ import type {
   Annotation,
   Background,
   Book,
+  Border,
   Callout,
   Chapter,
   Connector,
@@ -132,6 +133,8 @@ export interface EditorState {
   addCellText: (ci: number, si: number, ri: number, cellIndex: number) => void;
   updateCellText: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, text: string) => void;
   updateCellObjectPlacement: (ci: number, si: number, ri: number, cellIndex: number, objectId: string, patch: Partial<Pick<StackedObject, "positioned" | "x" | "y" | "w">>) => void;
+  setCellTextAlign: (ci: number, si: number, ri: number, cellIndex: number, objIndex: number, align: "left" | "center" | "right") => void;
+  setCellImageBorder: (ci: number, si: number, ri: number, cellIndex: number, border: Border) => void;
 
   // callouts
   setCalloutCount: (ci: number, si: number, ri: number, n: number) => void;
@@ -419,6 +422,10 @@ export function createEditorStore(
       set((s) => ({ book: M.updateCellText(s.book, ci, si, ri, cellIndex, objIndex, text) })),
     updateCellObjectPlacement: (ci, si, ri, cellIndex, objectId, patch) =>
       set((s) => ({ book: M.updateCellObjectPlacement(s.book, ci, si, ri, cellIndex, objectId, patch) })),
+    setCellTextAlign: (ci, si, ri, cellIndex, objIndex, align) =>
+      set((s) => ({ book: M.setCellTextAlign(s.book, ci, si, ri, cellIndex, objIndex, align) })),
+    setCellImageBorder: (ci, si, ri, cellIndex, border) =>
+      set((s) => ({ book: M.setCellImageBorder(s.book, ci, si, ri, cellIndex, border) })),
 
     // ── callouts ──
     setCalloutCount: (ci, si, ri, n) =>

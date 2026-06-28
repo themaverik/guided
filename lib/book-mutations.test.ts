@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText, setCellTextAlign, setCellImageBorder } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
@@ -255,6 +255,25 @@ describe("cell mutations", () => {
     const out = setCellImage(start, 0, 0, 0, 9, "x.jpg");
     expect(start).toEqual(snap);
     expect(out).toBe(start); // bad index → same reference
+  });
+  it("setCellTextAlign sets the alignment on a text block", () => {
+    const start = addCellText(gridBookCell([]), 0, 0, 0, 0);
+    const out = setCellTextAlign(start, 0, 0, 0, 0, 0, "center");
+    expect(cellObjs(out)[0].align).toBe("center");
+  });
+  it("setCellTextAlign no-ops on a non-text object (same reference)", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(setCellTextAlign(start, 0, 0, 0, 0, 0, "right")).toBe(start);
+  });
+  it("setCellImageBorder sets the primary image's border", () => {
+    const start = setCellImage(gridBookCell([]), 0, 0, 0, 0, "a.jpg");
+    const out = setCellImageBorder(start, 0, 0, 0, 0, { color: "#ff0000", shadow: false });
+    const img = cellObjs(out).find((o) => o.kind === "image" && o.role === "primary");
+    expect(img?.border).toEqual({ color: "#ff0000", shadow: false });
+  });
+  it("setCellImageBorder no-ops when the cell has no image (same reference)", () => {
+    const start = gridBookCell([]);
+    expect(setCellImageBorder(start, 0, 0, 0, 0, false)).toBe(start);
   });
 });
 

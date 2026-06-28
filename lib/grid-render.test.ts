@@ -73,3 +73,13 @@ describe("grid-render floating partition", () => {
     expect(floatingCallouts(cell)).toEqual([]);
   });
 });
+
+const textObj = (id: string): StackedObject => ({ id, role: "secondary", kind: "text", x: 0, y: 0, w: 1, h: 1, text: "hi" });
+
+describe("text objects in the flow", () => {
+  it("includes a text object in flowObjects (never floats)", () => {
+    const cell: GridCell = { widthFr: 1, objects: [textObj("t1")] };
+    expect(flowObjects(cell).map((o) => o.id)).toEqual(["t1"]);
+    expect(floatingCallouts(cell)).toEqual([]);
+  });
+});

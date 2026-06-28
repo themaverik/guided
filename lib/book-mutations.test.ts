@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
@@ -211,6 +211,23 @@ describe("cell mutations", () => {
     const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
     const out = updateCellCallout(start, 0, 0, 0, 0, 0, { body: "hello", type: "warning" });
     expect(cellObjs(out)[0].callout).toMatchObject({ body: "hello", type: "warning" });
+  });
+  it("addCellText appends a secondary text object with empty text", () => {
+    const out = addCellText(gridBookCell([]), 0, 0, 0, 0);
+    expect(cellObjs(out)[0]).toMatchObject({ role: "secondary", kind: "text", text: "" });
+  });
+  it("updateCellText sets the text content", () => {
+    const start = addCellText(gridBookCell([]), 0, 0, 0, 0);
+    const out = updateCellText(start, 0, 0, 0, 0, 0, "## Hello");
+    expect(cellObjs(out)[0].text).toBe("## Hello");
+  });
+  it("updateCellText no-ops on a non-text object (same reference)", () => {
+    const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);
+    expect(updateCellText(start, 0, 0, 0, 0, 0, "x")).toBe(start);
+  });
+  it("addCellText no-ops on a bad cell index (same reference)", () => {
+    const start = gridBookCell([]);
+    expect(addCellText(start, 0, 0, 9, 0)).toBe(start);
   });
   it("removeCellObject removes by index", () => {
     const start = addCellCallout(gridBookCell([]), 0, 0, 0, 0);

@@ -212,3 +212,20 @@ filter is scoped to `.grid-cell-content .callout` so a cell whose only callout i
 floated is not shrunk; anything past the cell edge clips via `.grid-cell{overflow:hidden}`.
 Drag/resize handles are editor-only (`components/editor/PreviewCellFloat.tsx`); the
 position itself is document data and renders in print.
+
+## Amendment (Plan 10, 2026-06-28): rich-text blocks in cells
+
+`StackedObject` gains `text?: string`, used when `kind === "text"` (the kind was
+already reserved in the union). A text block is a flow-stacked content object —
+rich text only (markdown subset: bold/italic/lists + new `## `/`### ` headings and
+`~~strike~~`), distinct from a callout (no type, no icon). It is NOT floatable: the
+Plan 9 `positioned` path stays callout-guarded.
+
+`GridStep` renders a text block in the flow layer (`.grid-cell-content`) via
+`<RichText block>`, so it prints and participates in stack order. It is fit-aware:
+`fitGrid`'s overflow filter widens from `.grid-cell-content .callout` to also match
+`.grid-cell-content .grid-text`, so a text-bearing cell shrinks under the same
+grid-uniform factor (floor 0.5); image-only cells stay exempt.
+
+The field is additive and optional — existing books carry no text objects, so there
+is **no `schemaVersion` bump and no migration** (absence of `text` is valid).

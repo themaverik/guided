@@ -222,6 +222,8 @@ export interface StackedObject {
   /** Callout only: true = floats at absolute x/y/w within the cell (out of the
    *  flow stack). Absent/false = flowed (x/y/w ignored). Height is content-driven. */
   positioned?: boolean;
+  /** Text block content (markdown subset) when kind === "text". */
+  text?: string;
   /** Cell-anchored annotations (0–1 of the cell). */
   annotations?: Annotation[];
 }

@@ -1,12 +1,16 @@
 /*
  * Tiny, dependency-free markdown subset → HTML. SAFE BY CONSTRUCTION: the input
  * is HTML-escaped first, then only a fixed set of tags is emitted
- * (<strong>, <em>, <p>, <ul>/<ol>/<li>). No raw HTML from the input is ever
- * passed through, so there is no XSS surface and no sanitizer is needed.
+ * (<strong>, <em>, <del>, <h2>, <h3>, <p>, <ul>/<ol>/<li>). No raw HTML from the
+ * input is ever passed through, so there is no XSS surface and no sanitizer is
+ * needed.
  *
  * Supported:
  *   **bold** / __bold__        → <strong>
  *   *italic* / _italic_        → <em>
+ *   ~~strike~~                 → <del>
+ *   ## heading                 → <h2>
+ *   ### subheading             → <h3>
  *   - item / * item            → <ul><li>
  *   1. item                    → <ol><li>
  *   blank line                 → paragraph break
@@ -25,14 +29,19 @@ function inline(escaped: string): string {
   return escaped
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+    .replace(/~~([^~]+)~~/g, "<del>$1</del>")
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
     .replace(/(^|[^_])_([^_\n]+)_/g, "$1<em>$2</em>");
 }
 
-type LineKind = "ul" | "ol" | "p" | "blank";
+type LineKind = "h2" | "h3" | "ul" | "ol" | "p" | "blank";
 
 function classify(line: string): { kind: LineKind; text: string } {
   if (/^\s*$/.test(line)) return { kind: "blank", text: "" };
+  const h3 = line.match(/^###\s+(.*)$/);
+  if (h3) return { kind: "h3", text: h3[1] };
+  const h2 = line.match(/^##\s+(.*)$/);
+  if (h2) return { kind: "h2", text: h2[1] };
   const ul = line.match(/^\s*[-*]\s+(.*)$/);
   if (ul) return { kind: "ul", text: ul[1] };
   const ol = line.match(/^\s*\d+\.\s+(.*)$/);
@@ -72,6 +81,12 @@ export function renderMarkdownBlocks(src: string): string {
     if (kind === "blank") {
       flushPara();
       flushList();
+      continue;
+    }
+    if (kind === "h2" || kind === "h3") {
+      flushPara();
+      flushList();
+      out.push(`<${kind}>${inline(escapeHtml(text))}</${kind}>`);
       continue;
     }
     if (kind === "ul" || kind === "ol") {

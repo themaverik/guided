@@ -407,9 +407,16 @@ dev-only dependency advisories (esbuild / js-yaml) via `pnpm.overrides`.
 Captured from review + smoke testing; sequenced just-in-time into plans (brainstorm → spec → plan →
 subagent-driven execution), each with its own ADR if it touches the schema or annotation model.
 
-- **Callout lists (numbered + bullet):** expose bullet / numbered-list authoring for callout bodies.
-  The markdown subset (`lib/markdown.ts`) and `RichTextArea` already support `- ` / `1. ` lists — verify
-  the option is available and rendering correctly in every callout editor (legacy + grid cell).
+- **Callout lists (numbered + bullet)** — [done]. Verified already implemented end-to-end: the bullet
+  (`•`) and numbered (`1.`) toolbar buttons are always present in `RichTextArea`
+  (`components/editor/RichTextArea.tsx:99-112`, not prop-gated); both callout body editors use it — legacy
+  `CalloutEditor.tsx:148-153` and grid-cell `CellEditor.tsx:182-187`; the renderer runs callout bodies
+  through block markdown in preview and print (`Callout.tsx:38` → `RichText.tsx:20-22` →
+  `renderMarkdownBlocks`), with list CSS (disc/decimal + padding, Tailwind-preflight restored) at
+  `renderer.css:452-513`. No code gap — only the missing numbered-list (`<ol>`) regression test was added
+  (`lib/markdown.test.ts`, 4 cases incl. inline-marks-in-items and marker-type-switch; suite 121/121).
+  By-design limits (documented in `markdown.ts:8-17`): no nested lists; bullet+numbered can't mix in one
+  block.
 - **Annotation snapping — more options:** extend snapping beyond image edges / center / manual anchors
   (e.g. snap to the grid, to other objects' edges/centers, and equal-spacing / alignment guides). Builds
   on the Phase-11 "snapping needs design" note.

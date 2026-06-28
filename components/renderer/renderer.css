@@ -930,29 +930,50 @@
   width: fit-content;
   margin: 1mm 0 1mm auto;
 }
+/* Contain (default, no fit class): the framed slot shrink-wraps its displayed
+   image so border + shadow hug the screenshot, not the cell. The img is laid
+   out statically (overriding the base absolute fill) and constrained to the
+   cell minus a small gutter so .grid-cell{overflow:hidden} (fitGrid) doesn't
+   clip the shadow. */
 .grid-cell .img-slot {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: calc(100% - 12px);
+  max-height: calc(100% - 12px);
+  align-self: center;  /* centre the shrink-wrapped slot on the cross axis;
+                          stays in vertical flow so a sibling callout/text below
+                          is not pushed (no main-axis margin:auto) */
 }
 .grid-cell .img-slot img {
-  width: 100%;
-  height: 100%;
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
-/* Image fit modes (Plan 6). Default (no class) keeps object-fit: contain.
-   The base .img-slot img is position:absolute; inset:0 — releasing one inset
-   edge + auto-sizing that axis lets the cell's overflow:hidden crop it. */
+/* Crop modes fill the cell (frame hugs the cell, which is correct when cropping). */
+.grid-cell .img-slot.fit-width,
+.grid-cell .img-slot.fit-height {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
 .grid-cell .img-slot.fit-width img {
+  position: absolute;
   inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
   width: 100%;
   height: auto;
-  object-fit: fill; /* box already matches intrinsic ratio (height:auto) → no distortion; overrides inherited contain so the crop intent is explicit */
+  object-fit: fill;
 }
 .grid-cell .img-slot.fit-height img {
+  position: absolute;
   inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
   width: auto;
   height: 100%;
-  object-fit: fill; /* box already matches intrinsic ratio (width:auto) → no distortion; overrides inherited contain */
+  object-fit: fill;
 }
 
 /* ────────────── PRINT ────────────── */

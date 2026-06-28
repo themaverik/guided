@@ -44,6 +44,7 @@ export default function GridStep({
                           label="Screen"
                           path={displayPath(chapter.id, obj.ref)}
                           fit={obj.fit}
+                          border={obj.border}
                         />
                       );
                     }

@@ -7,8 +7,8 @@
  * Callouts are flow-stacked (Plan 6 render); drag is Plan 9.
  */
 import { useEffect, useState } from "react";
-import type { Callout, ImageFit } from "@/lib/book-schema";
-import { DEFAULT_PAGE_CONFIG, normalizeCalloutType } from "@/lib/book-schema";
+import type { BorderStyle, Callout, ImageFit } from "@/lib/book-schema";
+import { DEFAULT_PAGE_CONFIG, normalizeCalloutType, resolveBorder } from "@/lib/book-schema";
 import { CALLOUT_TYPES } from "@/lib/book-mutations";
 import { bodyRegion } from "@/lib/grid-math";
 import { assetUrl } from "@/lib/project-routes";
@@ -31,6 +31,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
   const setCellImage = useEditor((s) => s.setCellImage);
   const removeCellImage = useEditor((s) => s.removeCellImage);
   const setCellImageFit = useEditor((s) => s.setCellImageFit);
+  const setCellImageBorder = useEditor((s) => s.setCellImageBorder);
   const addCellCallout = useEditor((s) => s.addCellCallout);
   const updateCellCallout = useEditor((s) => s.updateCellCallout);
   const removeCellObject = useEditor((s) => s.removeCellObject);
@@ -97,6 +98,46 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
                 This image doesn&apos;t fill the cell — choose a crop above, or keep the ratio.
               </p>
             ) : null}
+            {(() => {
+              const rb = resolveBorder(image?.border);
+              const colorHex = /^#[0-9a-fA-F]{6}$/.test(rb.color) ? rb.color : "#cfd6e4";
+              const widthPx = parseInt(rb.width, 10) || 6;
+              const radiusPx = parseInt(rb.radius, 10) || 20;
+              const full: BorderStyle = { color: colorHex, width: `${widthPx}px`, radius: `${radiusPx}px`, shadow: rb.shadow };
+              const patch = (p: Partial<BorderStyle>) => setCellImageBorder(ci, si, ri, cellIndex, { ...full, ...p });
+              return (
+                <div className="border-controls">
+                  <label className="ctrl-row">
+                    <span className="ctrl-label">Border</span>
+                    <input
+                      type="checkbox"
+                      checked={rb.show}
+                      onChange={(e) => setCellImageBorder(ci, si, ri, cellIndex, e.target.checked ? full : false)}
+                    />
+                  </label>
+                  {rb.show ? (
+                    <>
+                      <label className="ctrl-row">
+                        <span className="ctrl-label">Colour</span>
+                        <input type="color" value={colorHex} onChange={(e) => patch({ color: e.target.value })} />
+                      </label>
+                      <label className="ctrl-row">
+                        <span className="ctrl-label">Width</span>
+                        <input type="number" min={0} max={24} value={widthPx} onChange={(e) => patch({ width: `${e.target.value}px` })} />
+                      </label>
+                      <label className="ctrl-row">
+                        <span className="ctrl-label">Radius</span>
+                        <input type="number" min={0} max={60} value={radiusPx} onChange={(e) => patch({ radius: `${e.target.value}px` })} />
+                      </label>
+                      <label className="ctrl-row">
+                        <span className="ctrl-label">Shadow</span>
+                        <input type="checkbox" checked={rb.shadow} onChange={(e) => patch({ shadow: e.target.checked })} />
+                      </label>
+                    </>
+                  ) : null}
+                </div>
+              );
+            })()}
             <button className="mini-btn danger" onClick={() => removeCellImage(ci, si, ri, cellIndex)}>
               Remove image
             </button>

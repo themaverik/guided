@@ -432,6 +432,12 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   ADR-004 amended. Deferred: two-corner (Z) route when both endpoints anchor to conflicting axes.
 - **Bug — connector angle handling is not smooth:** adjusting a connector's angle is jumpy and hard to
   control; smooth the interaction and review the waypoint / segment-drag math.
+- **Rounded square-corner connectors:** the `square` (orthogonal) route currently draws as separate
+  butt-capped `<line>` segments meeting at a sharp 90° elbow (`AnnotationLayer.ConnectorLine`), which can
+  show a slight notch at the outer corner at thicker widths. Render the connector polyline as a single
+  `<path>` with `stroke-linejoin="round"` (optionally an explicit corner radius via a small arc) so the
+  elbow is rounded and the notch is gone — in both editor overlay and print. Editor + render change (data
+  unchanged); keep print-accurate.
 
 ## Later (v3 remainder)
 

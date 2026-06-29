@@ -23,6 +23,7 @@ import {
   connectorPoints,
   diamondSegments,
   resolveEndpoint,
+  snapAxisVector,
   snapPoint,
 } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
@@ -154,17 +155,9 @@ export default function PreviewAnnotations({
         });
       } else if (a.kind === "line") {
         // A line points any direction, so allow negative extent (full 360°
-        // rotation). Snap to horizontal/vertical; Shift hard-locks the axis.
-        let w = p.x - a.x;
-        let h = p.y - a.y;
-        if (shift) {
-          if (Math.abs(w) >= Math.abs(h)) h = 0;
-          else w = 0;
-        } else {
-          const AXIS = 0.04;
-          if (Math.abs(h) <= AXIS) h = 0;
-          else if (Math.abs(w) <= AXIS) w = 0;
-        }
+        // rotation). Snap to horizontal/vertical within a small angle; Shift
+        // hard-locks the dominant axis.
+        const { dx: w, dy: h } = snapAxisVector(p.x - a.x, p.y - a.y, shift);
         updateAnnotation(ci, si, d.id, { w, h });
       } else {
         // Box/bracket need a positive extent.
@@ -188,20 +181,12 @@ export default function PreviewAnnotations({
       ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
     } else {
       // Axis-snap a free endpoint into line with the opposite endpoint, so a
-      // perfectly horizontal/vertical connector is easy to make. Holding Shift
-      // hard-locks to the dominant axis; otherwise snap within a tolerance.
+      // perfectly horizontal/vertical connector is easy to make. The snap is
+      // angle-based (Shift hard-locks the dominant axis), so a shallow angle
+      // holds at any connector length.
       const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
-      let x = snap.x;
-      let y = snap.y;
-      if (shift) {
-        if (Math.abs(x - other.x) >= Math.abs(y - other.y)) y = other.y;
-        else x = other.x;
-      } else {
-        const AXIS = 0.04;
-        if (Math.abs(y - other.y) <= AXIS) y = other.y;
-        else if (Math.abs(x - other.x) <= AXIS) x = other.x;
-      }
-      ep = { style: cur.style, size: cur.size, x, y };
+      const { dx, dy } = snapAxisVector(snap.x - other.x, snap.y - other.y, shift);
+      ep = { style: cur.style, size: cur.size, x: other.x + dx, y: other.y + dy };
     }
     updateAnnotation(ci, si, d.id, { [d.part]: ep });
   };

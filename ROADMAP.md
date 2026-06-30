@@ -456,11 +456,18 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     arrowhead markers kept in the outer `%` space via trimmed end-`<line>`s (a nested viewBox would distort
     them), meeting the rounded middle seamlessly. No schema change; editor + print identical; verified in the
     `elbow-demo` print render. Spec/plan `docs/superpowers/{specs,plans}/2026-06-30-connector-rounded-corners*`.
-  - **P3 — interactive segment handles + relative-offset storage** — axis-constrained midpoint handles on
-    each straight run (horizontal segment drags vertically, vertical drags horizontally), a *stored*
-    relative-offset model so manual drags persist, and reflow preservation when a connected object moves.
-    Schema change + its own ADR amendment; needs a dedicated brainstorm for the offset storage model
-    (today's `waypoints` are absolute and won't track object moves).
+  - **P3 — interactive segment handles + relative-offset storage** — [done] (`feat/connector-segment-handles`).
+    Additive `Connector.bends?: ConnectorBend[]` (`{ seg, axis, offset }`) storing each manual drag as a
+    perpendicular **offset from the recomputed auto-route** (rides reflow; dropped on L↔Z↔C↔U class change;
+    one bend per base segment). Pure `routeWithBends` (interior runs displace in place, anchored runs insert a
+    `STUB` stub+jog for L-bending) + `connectorRoute`/`squareBaseRoute`/`bendForDrag` in `lib/annotations.ts`;
+    `connectorPoints` delegates (no-bend path unrounded → byte-identical), so editor + print render identically
+    and P2 rounding applies unchanged — `AnnotationLayer`/print path untouched. Editor: axis-constrained
+    midpoint handle per draggable segment in `PreviewAnnotations.tsx`, writing `bends` immutably; `straight`
+    keeps its `waypoints` handles. Suite 160/160; typecheck + lint clean; verified in the `elbow-demo` print
+    render. Spec/plan `docs/superpowers/{specs,plans}/2026-06-30-connector-segment-handles*`, ADR-004 amended.
+  - **Epic complete** — `square` connectors reach FigJam parity: orthogonal auto-routing (P1) + rounded
+    corners (P2) + draggable, reflow-surviving segment handles (P3).
 
 ## Later (v3 remainder)
 

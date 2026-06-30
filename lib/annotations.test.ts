@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -449,5 +449,29 @@ describe("connectorRoute / connectorPoints wiring", () => {
     const pts = connectorPoints(anns, c);
     expect(pts[1]).toEqual({ x: 0.5, y: 0.2 });
     expect(pts).toHaveLength(3);
+  });
+});
+
+describe("bendForDrag", () => {
+  const lBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.7, y: 0.3 },
+    { x: 0.7, y: 0.8 },
+  ];
+
+  it("offsets a horizontal run by pointer.y minus the base perpendicular", () => {
+    expect(bendForDrag(lBase, 0, "h", { x: 0.5, y: 0.45 })).toEqual({
+      seg: 0, axis: "h", offset: 0.15,
+    });
+  });
+
+  it("offsets a vertical run by pointer.x minus the base perpendicular", () => {
+    expect(bendForDrag(lBase, 1, "v", { x: 0.85, y: 0.5 })).toEqual({
+      seg: 1, axis: "v", offset: 0.15,
+    });
+  });
+
+  it("returns null (snap-to-auto / remove) within tolerance", () => {
+    expect(bendForDrag(lBase, 0, "h", { x: 0.5, y: 0.305 })).toBeNull();
   });
 });

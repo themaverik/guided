@@ -186,7 +186,7 @@ export default function PreviewAnnotations({
       const nb = bendForDrag(base, d.baseSeg, d.axis, p);
       const merged = (a.bends ?? []).filter((bd) => bd.seg !== d.baseSeg);
       if (nb) merged.push(nb);
-      updateAnnotation(ci, si, d.id, { bends: merged });
+      updateAnnotation(ci, si, d.id, { bends: merged.length ? merged : undefined });
       return;
     }
     if (d.part === "wp" && d.wp != null) {
@@ -228,6 +228,14 @@ export default function PreviewAnnotations({
   };
 
   const showSnap = focused?.kind === "connector";
+
+  const fc = focused?.kind === "connector" ? (focused as Connector) : null;
+  const fcWps = fc?.waypoints ?? [];
+  const fcHasBends = !!fc?.bends?.length;
+  // Use segment handles only when the connector is actually using the bends/auto
+  // route. A square connector that still carries legacy waypoints (and no bends)
+  // is rendered via the passThrough path, so keep the waypoint diamond handles.
+  const segHandleMode = fc?.routing === "square" && !(fcWps.length > 0 && !fcHasBends);
 
   return (
     <svg
@@ -382,7 +390,7 @@ export default function PreviewAnnotations({
               H={H}
               onDown={startDrag(focused.id, "to")}
             />
-            {(focused as Connector).routing === "square"
+            {segHandleMode
               ? (() => {
                   const route = connectorRoute(annotations, focused as Connector);
                   return route.segments.map((m, i) => {

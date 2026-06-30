@@ -119,13 +119,13 @@ export interface SegmentMeta {
   /** Index into `bends` this segment's perpendicular position is governed by,
    *  or null if this rendered segment is not the draggable run of a bend. */
   bend: number | null;
+  /** Whether this rendered segment is user-draggable (false for structural stubs/jogs). */
+  draggable: boolean;
 }
 
 export function routeWithBends(
   base: Point[],
   bends: ConnectorBend[],
-  from: Endpoint,
-  to: Endpoint,
 ): { points: Point[]; segments: SegmentMeta[] };
 ```
 

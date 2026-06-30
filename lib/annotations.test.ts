@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -291,5 +291,187 @@ describe("buildRoundedConnector — rounded elbow path", () => {
 
   it("CORNER_RADIUS is the tunable default", () => {
     expect(CORNER_RADIUS).toBe(0.02);
+  });
+});
+
+describe("routeWithBends — interior runs", () => {
+  // Z route: a(0.2,0.3) → corner(0.5,0.3) → corner(0.5,0.7) → b(0.8,0.7)
+  const zBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.5, y: 0.3 },
+    { x: 0.5, y: 0.7 },
+    { x: 0.8, y: 0.7 },
+  ];
+
+  it("returns the base route unchanged when there are no bends", () => {
+    const r = routeWithBends(zBase, []);
+    expect(r.points).toEqual(zBase);
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: null, draggable: true },
+      { baseSeg: 1, bend: null, draggable: true },
+      { baseSeg: 2, bend: null, draggable: true },
+    ]);
+  });
+
+  it("displaces an interior vertical cross-run by its offset", () => {
+    const r = routeWithBends(zBase, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },
+      { x: 0.6, y: 0.3 },
+      { x: 0.6, y: 0.7 },
+      { x: 0.8, y: 0.7 },
+    ]);
+    expect(r.segments[1]).toEqual({ baseSeg: 1, bend: 0, draggable: true });
+  });
+
+  it("drops a bend whose seg is out of range", () => {
+    expect(routeWithBends(zBase, [{ seg: 9, axis: "v", offset: 0.1 }]).points).toEqual(zBase);
+  });
+
+  it("drops a bend whose axis disagrees with the base segment", () => {
+    // seg 1 is vertical; an "h" bend there is invalid.
+    expect(routeWithBends(zBase, [{ seg: 1, axis: "h", offset: 0.1 }]).points).toEqual(zBase);
+  });
+
+  it("rides the recomputed base: same offset, shifted base → shifted run", () => {
+    const shifted = [
+      { x: 0.2, y: 0.3 },
+      { x: 0.55, y: 0.3 },
+      { x: 0.55, y: 0.7 },
+      { x: 0.9, y: 0.7 },
+    ];
+    const r = routeWithBends(shifted, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points[1].x).toBeCloseTo(0.65, 10);
+    expect(r.points[2].x).toBeCloseTo(0.65, 10);
+  });
+});
+
+describe("routeWithBends — anchored runs (L-bending)", () => {
+  // L route: a(0.2,0.3) →[right exit, h] corner(0.7,0.3) →[v] b(0.7,0.8) [top exit]
+  const lBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.7, y: 0.3 },
+    { x: 0.7, y: 0.8 },
+  ];
+
+  it("inserts a stub+jog detour when bending the from-anchored run", () => {
+    const r = routeWithBends(lBase, [{ seg: 0, axis: "h", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },  // a
+      { x: 0.24, y: 0.3 }, // stub (perpendicular exit preserved)
+      { x: 0.24, y: 0.4 }, // jog
+      { x: 0.7, y: 0.4 },  // displaced run end (corner, y shifted)
+      { x: 0.7, y: 0.8 },  // b
+    ]);
+    // Only the displaced run is draggable; stub + jog are structural.
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: 0, draggable: false },
+      { baseSeg: 0, bend: 0, draggable: false },
+      { baseSeg: 0, bend: 0, draggable: true },
+      { baseSeg: 1, bend: null, draggable: true },
+    ]);
+  });
+
+  it("inserts a detour at the to-anchored end", () => {
+    const r = routeWithBends(lBase, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },   // a
+      { x: 0.8, y: 0.3 },   // run end (corner, x shifted)
+      { x: 0.8, y: 0.76 },  // displaced run / jog start
+      { x: 0.7, y: 0.76 },  // jog
+      { x: 0.7, y: 0.8 },   // stub (perpendicular exit preserved) → b
+    ]);
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: null, draggable: true },
+      { baseSeg: 1, bend: 0, draggable: true },
+      { baseSeg: 1, bend: 0, draggable: false },
+      { baseSeg: 1, bend: 0, draggable: false },
+    ]);
+  });
+
+  it("bends both legs of an L into an S (multi-bend, shared corner)", () => {
+    const r = routeWithBends(lBase, [
+      { seg: 0, axis: "h", offset: 0.1 },
+      { seg: 1, axis: "v", offset: 0.1 },
+    ]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },
+      { x: 0.24, y: 0.3 },
+      { x: 0.24, y: 0.4 },
+      { x: 0.8, y: 0.4 },   // shared corner: x shifted by seg1, y shifted by seg0
+      { x: 0.8, y: 0.76 },
+      { x: 0.7, y: 0.76 },
+      { x: 0.7, y: 0.8 },
+    ]);
+  });
+});
+
+describe("connectorRoute / connectorPoints wiring", () => {
+  const boxA = { id: "A", kind: "box", x: 0.1, y: 0.2, w: 0.2, h: 0.2, stroke: "#000", width: 2 } as const;
+  const boxB = { id: "B", kind: "box", x: 0.6, y: 0.6, w: 0.2, h: 0.2, stroke: "#000", width: 2 } as const;
+  const sq = (extra: object): Connector => ({
+    id: "c", kind: "connector", stroke: "#000", width: 2, routing: "square",
+    from: { ref: "A", anchor: "right", style: "arrow" },
+    to: { ref: "B", anchor: "left", style: "arrow" },
+    ...extra,
+  });
+
+  it("square + no bends is identical to [a, ...squareRoute, b]", () => {
+    const c = sq({});
+    const anns = [boxA, boxB, c];
+    expect(connectorPoints(anns, c)).toEqual(squareBaseRoute(anns, c));
+  });
+
+  it("square + a bend reshapes the route", () => {
+    const c = sq({ bends: [{ seg: 1, axis: "v", offset: 0.05 }] });
+    const anns = [boxA, boxB, c];
+    const base = squareBaseRoute(anns, c);
+    const bent = connectorPoints(anns, c);
+    expect(bent).not.toEqual(base);
+    expect(bent.length).toBe(base.length); // interior displacement keeps point count
+  });
+
+  it("straight connector is unchanged (free waypoints through points)", () => {
+    const c: Connector = {
+      id: "c", kind: "connector", stroke: "#000", width: 2, routing: "straight",
+      from: { x: 0.1, y: 0.1, style: "arrow" },
+      to: { x: 0.9, y: 0.9, style: "arrow" },
+      waypoints: [{ x: 0.5, y: 0.2 }],
+    };
+    expect(connectorPoints([c], c)).toEqual([
+      { x: 0.1, y: 0.1 }, { x: 0.5, y: 0.2 }, { x: 0.9, y: 0.9 },
+    ]);
+  });
+
+  it("legacy square + waypoints (no bends) still renders the waypoint route", () => {
+    const c = sq({ waypoints: [{ x: 0.5, y: 0.2 }] });
+    const anns = [boxA, boxB, c];
+    const pts = connectorPoints(anns, c);
+    expect(pts[1]).toEqual({ x: 0.5, y: 0.2 });
+    expect(pts).toHaveLength(3);
+  });
+});
+
+describe("bendForDrag", () => {
+  const lBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.7, y: 0.3 },
+    { x: 0.7, y: 0.8 },
+  ];
+
+  it("offsets a horizontal run by pointer.y minus the base perpendicular", () => {
+    expect(bendForDrag(lBase, 0, "h", { x: 0.5, y: 0.45 })).toEqual({
+      seg: 0, axis: "h", offset: 0.15,
+    });
+  });
+
+  it("offsets a vertical run by pointer.x minus the base perpendicular", () => {
+    expect(bendForDrag(lBase, 1, "v", { x: 0.85, y: 0.5 })).toEqual({
+      seg: 1, axis: "v", offset: 0.15,
+    });
+  });
+
+  it("returns null (snap-to-auto / remove) within tolerance", () => {
+    expect(bendForDrag(lBase, 0, "h", { x: 0.5, y: 0.305 })).toBeNull();
   });
 });

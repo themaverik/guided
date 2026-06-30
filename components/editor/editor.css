@@ -661,6 +661,21 @@
 .preview-anno-wp:active {
   cursor: grabbing;
 }
+.preview-anno-seg {
+  fill: #fff;
+  stroke: var(--color-accent, #658995);
+  stroke-width: 2;
+  pointer-events: auto;
+}
+.preview-anno-seg.h {
+  cursor: ns-resize;
+}
+.preview-anno-seg.v {
+  cursor: ew-resize;
+}
+.preview-anno-seg:active {
+  cursor: grabbing;
+}
 .anno-hint {
   font-size: 11px;
   color: var(--color-muted);

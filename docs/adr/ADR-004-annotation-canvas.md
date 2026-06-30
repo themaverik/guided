@@ -208,3 +208,43 @@ in the `elbow-demo` print render.
 P2 of the FigJam-style elbow-connector epic. Remaining: **P3** interactive
 axis-constrained segment-midpoint handles + relative-offset storage (schema change
 + its own amendment).
+
+## Amendment (2026-06-30): interactive segment handles + relative-offset bends (P3)
+
+`square` connectors gain manual segment adjustment (FigJam-style elbow handles),
+the final phase of the elbow epic (after P1 routing, P2 rounding). Completes the
+"segment handles are the remedy" note left by P1.
+
+- **Schema (additive, no migration, no version bump):**
+  `Connector.bends?: ConnectorBend[]`, each `{ seg, axis, offset }`. `offset` is a
+  perpendicular displacement **from the recomputed auto-route**, not an absolute
+  coordinate — so a bend rides along when a connected surface moves. A bend is
+  dropped at render time if a reflow puts its `seg` out of range or changes that
+  base segment's axis (graceful degradation on L↔Z↔C↔U class change). At most one
+  bend per base segment (first wins).
+- **Geometry (`lib/annotations.ts`, pure):** `routeWithBends(base, bends)` layers
+  bends onto the `squareRoute` auto-route — interior runs displace perpendicular in
+  place; a bend on an anchored run (touching `a`/`b`) inserts a `STUB`-length stub +
+  perpendicular jog (L-bending) so the endpoint exit stays perpendicular (the P1
+  invariant). It returns the rendered polyline plus `SegmentMeta` provenance
+  (`{ baseSeg, bend, draggable }`). `connectorRoute` wires it; `connectorPoints`
+  delegates (signature unchanged); `squareBaseRoute` exposes the unbent route for
+  offset computation; `bendForDrag` converts a perpendicular drag into a bend (or
+  null to snap-to-auto). The no-bend path returns the base route **unrounded**, so
+  existing routes are byte-identical.
+- **Render parity:** editor preview and the Playwright print path both consume
+  `connectorPoints`; `AnnotationLayer.tsx` and the print path are **unchanged**, and
+  P2 rounded corners apply to the bent polyline unchanged. `waypoints` (absolute) is
+  retained for `straight` connectors; legacy square+waypoints (no bends) renders as
+  before.
+- **Editor (`PreviewAnnotations.tsx`):** a midpoint handle per draggable rendered
+  segment; the drag is axis-constrained (horizontal run moves in Y, vertical in X)
+  and writes `bends` immutably via `updateAnnotation`. Endpoint drag/snapping
+  unchanged.
+- Tests: `lib/annotations.test.ts` (interior displacement, L-bending insert,
+  graceful drop, ride-with-reflow, provenance, `bendForDrag`, wiring/back-compat).
+  Verified in the `elbow-demo` print render (bent L + Z routes stay orthogonal with
+  rounded corners; unbent C + U unchanged).
+
+This completes the FigJam-style elbow-connector epic (P1 routing + P2 rounding + P3
+segment handles).

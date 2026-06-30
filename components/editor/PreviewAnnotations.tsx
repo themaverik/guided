@@ -19,17 +19,20 @@ import type {
 import {
   FONT_STACKS,
   anchorPoint,
+  bendForDrag,
   bracketSegments,
   connectorPoints,
+  connectorRoute,
   diamondSegments,
   resolveEndpoint,
   snapAxisVector,
   snapPoint,
+  squareBaseRoute,
 } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-type Part = "move" | "resize" | "from" | "to" | "wp";
+type Part = "move" | "resize" | "from" | "to" | "wp" | "seg";
 
 const surfaceAnchors = (s: Surface): Anchor[] =>
   s.kind === "box" || s.kind === "text"
@@ -81,6 +84,8 @@ export default function PreviewAnnotations({
     grabX: number;
     grabY: number;
     wp?: number;
+    baseSeg?: number;
+    axis?: "h" | "v";
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
@@ -142,6 +147,14 @@ export default function PreviewAnnotations({
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
+  const startSeg =
+    (id: string, baseSeg: number, axis: "h" | "v") => (e: React.PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current = { id, part: "seg", grabX: 0, grabY: 0, baseSeg, axis };
+      svgRef.current?.setPointerCapture(e.pointerId);
+    };
+
   const apply = (p: { x: number; y: number }, shift = false) => {
     const d = drag.current;
     if (!d) return;
@@ -166,6 +179,14 @@ export default function PreviewAnnotations({
           h: Math.max(0.005, p.y - a.y),
         });
       }
+      return;
+    }
+    if (d.part === "seg" && d.baseSeg != null && d.axis) {
+      const base = squareBaseRoute(annotations, a);
+      const nb = bendForDrag(base, d.baseSeg, d.axis, p);
+      const merged = (a.bends ?? []).filter((bd) => bd.seg !== d.baseSeg);
+      if (nb) merged.push(nb);
+      updateAnnotation(ci, si, d.id, { bends: merged.length ? merged : undefined });
       return;
     }
     if (d.part === "wp" && d.wp != null) {
@@ -207,6 +228,14 @@ export default function PreviewAnnotations({
   };
 
   const showSnap = focused?.kind === "connector";
+
+  const fc = focused?.kind === "connector" ? (focused as Connector) : null;
+  const fcWps = fc?.waypoints ?? [];
+  const fcHasBends = !!fc?.bends?.length;
+  // Use segment handles only when the connector is actually using the bends/auto
+  // route. A square connector that still carries legacy waypoints (and no bends)
+  // is rendered via the passThrough path, so keep the waypoint diamond handles.
+  const segHandleMode = fc?.routing === "square" && !(fcWps.length > 0 && !fcHasBends);
 
   return (
     <svg
@@ -361,18 +390,43 @@ export default function PreviewAnnotations({
               H={H}
               onDown={startDrag(focused.id, "to")}
             />
-            {(focused as Connector).waypoints?.map((wp, i) => (
-              <rect
-                key={i}
-                x={wp.x * W - 5}
-                y={wp.y * H - 5}
-                width={10}
-                height={10}
-                transform={`rotate(45 ${wp.x * W} ${wp.y * H})`}
-                className="preview-anno-wp"
-                onPointerDown={startWp(focused.id, i)}
-              />
-            ))}
+            {segHandleMode
+              ? (() => {
+                  const route = connectorRoute(annotations, focused as Connector);
+                  return route.segments.map((m, i) => {
+                    if (!m.draggable) return null;
+                    const p1 = route.points[i];
+                    const p2 = route.points[i + 1];
+                    const ax: "h" | "v" =
+                      Math.abs(p2.x - p1.x) >= Math.abs(p2.y - p1.y) ? "h" : "v";
+                    const mx = ((p1.x + p2.x) / 2) * W;
+                    const my = ((p1.y + p2.y) / 2) * H;
+                    return (
+                      <rect
+                        key={`seg-${i}`}
+                        x={mx - 5}
+                        y={my - 5}
+                        width={10}
+                        height={10}
+                        rx={2}
+                        className={`preview-anno-seg ${ax}`}
+                        onPointerDown={startSeg(focused.id, m.baseSeg, ax)}
+                      />
+                    );
+                  });
+                })()
+              : (focused as Connector).waypoints?.map((wp, i) => (
+                  <rect
+                    key={i}
+                    x={wp.x * W - 5}
+                    y={wp.y * H - 5}
+                    width={10}
+                    height={10}
+                    transform={`rotate(45 ${wp.x * W} ${wp.y * H})`}
+                    className="preview-anno-wp"
+                    onPointerDown={startWp(focused.id, i)}
+                  />
+                ))}
           </>
         ) : editingId === focused.id ? null : (
           <>

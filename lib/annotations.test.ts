@@ -84,13 +84,6 @@ describe("connectorPoints — square routing respects anchored edges", () => {
     expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // segment 1 is horizontal
     expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // segment 2 is vertical
   };
-  /** First segment vertical (exits/enters along y), then horizontal. */
-  const expectVerticalFirst = (pts: { x: number; y: number }[]) => {
-    expect(pts).toHaveLength(3);
-    expect(pts[1].x).toBeCloseTo(pts[0].x, 10); // segment 1 is vertical
-    expect(pts[1].y).toBeCloseTo(pts[2].y, 10); // segment 2 is horizontal
-  };
-
   it("exits a right-anchored source horizontally even when the run is taller than wide", () => {
     // from boxA right (0.30, 0.175) to a free point (0.70, 0.60): |dx|=0.40 < |dy|=0.425,
     // so the bare heuristic would go vertical-first and run down the box's edge. The
@@ -106,16 +99,117 @@ describe("connectorPoints — square routing respects anchored edges", () => {
     const c = connector({ x: 0.5, y: 0.1, style: "none" }, { ref: "boxB", anchor: "top", style: "arrow" }, "square");
     expectHorizontalFirst(connectorPoints(surfaces, c));
   });
+});
 
-  it("the source anchor wins when both endpoints are anchored", () => {
-    // from boxA bottom (vertical exit) to boxB top (vertical entry): both agree on
-    // vertical, so the corner is vertical-first off the source.
+describe("connectorPoints — orthogonal routing (elbow shapes)", () => {
+  it("routes a single elbow (L) when both ends anchor to perpendicular edges", () => {
+    // boxA right (0.30, 0.175) → boxB top (0.70, 0.60): one horizontal magnet, one
+    // vertical — a single elbow satisfies both, so there is no second corner.
+    const surfaces: Annotation[] = [box("boxA", 0.1, 0.1, 0.2, 0.15), box("boxB", 0.6, 0.6, 0.2, 0.15)];
+    const c = connector(
+      { ref: "boxA", anchor: "right", style: "none" },
+      { ref: "boxB", anchor: "top", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(3);
+    expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // horizontal-first off the right edge
+    expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // vertical into the top edge
+  });
+
+  it("routes a Z when opposite horizontal magnets face toward each other", () => {
+    // boxA right (0.30, 0.30) → boxB left (0.60, 0.50); B is to the right, so the
+    // magnets face each other: a single elbow can't exit right AND enter left, so it
+    // bends twice at the midpoint x.
+    const surfaces: Annotation[] = [box("boxA", 0.1, 0.2, 0.2, 0.2), box("boxB", 0.6, 0.4, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "right", style: "none" },
+      { ref: "boxB", anchor: "left", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(4);
+    expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // seg1 horizontal (exits right)
+    expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // seg2 vertical
+    expect(pts[2].y).toBeCloseTo(pts[3].y, 10); // seg3 horizontal (enters left)
+    expect(pts[1].x).toBeCloseTo((pts[0].x + pts[3].x) / 2, 10); // corner at midpoint x
+  });
+
+  it("routes a Z when opposite vertical magnets face toward each other", () => {
+    // boxA bottom (0.20, 0.25) → boxB top (0.70, 0.60): both magnets vertical and
+    // facing each other → two bends at the midpoint y (was a single elbow before P1).
+    const surfaces: Annotation[] = [box("boxA", 0.1, 0.1, 0.2, 0.15), box("boxB", 0.6, 0.6, 0.2, 0.15)];
     const c = connector(
       { ref: "boxA", anchor: "bottom", style: "none" },
       { ref: "boxB", anchor: "top", style: "arrow" },
       "square",
     );
-    expectVerticalFirst(connectorPoints(surfaces, c));
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(4);
+    expect(pts[1].x).toBeCloseTo(pts[0].x, 10); // seg1 vertical (exits bottom)
+    expect(pts[1].y).toBeCloseTo(pts[2].y, 10); // seg2 horizontal
+    expect(pts[2].x).toBeCloseTo(pts[3].x, 10); // seg3 vertical (enters top)
+    expect(pts[1].y).toBeCloseTo((pts[0].y + pts[3].y) / 2, 10); // corner at midpoint y
+  });
+
+  it("routes a C when both ends anchor to the same horizontal edge (parallel magnets)", () => {
+    // boxA right (0.30, 0.30) and boxB right (0.90, 0.50): both exit +x, so the route
+    // goes out past the farther right edge, down, and back in.
+    const surfaces: Annotation[] = [box("boxA", 0.1, 0.2, 0.2, 0.2), box("boxB", 0.7, 0.4, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "right", style: "none" },
+      { ref: "boxB", anchor: "right", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(4);
+    expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // seg1 horizontal
+    expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // seg2 vertical at the shared extreme x
+    expect(pts[2].y).toBeCloseTo(pts[3].y, 10); // seg3 horizontal
+    expect(pts[1].x).toBeGreaterThan(pts[0].x); // exits outward (right)
+    expect(pts[1].x).toBeGreaterThan(pts[3].x); // beyond both right edges
+  });
+
+  it("routes a U when opposite horizontal magnets face away from each other", () => {
+    // boxA right (0.80, 0.30) → boxB left (0.00, 0.60): B sits to the LEFT, so the
+    // right/left magnets point away. Both ends stub outward; the route crosses at midY.
+    const surfaces: Annotation[] = [box("boxA", 0.6, 0.2, 0.2, 0.2), box("boxB", 0.0, 0.5, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "right", style: "none" },
+      { ref: "boxB", anchor: "left", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(6);
+    expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // seg1 horizontal (stub out right)
+    expect(pts[1].x).toBeGreaterThan(pts[0].x); //   ...outward
+    expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // seg2 vertical
+    expect(pts[2].y).toBeCloseTo(pts[3].y, 10); // seg3 horizontal (cross at midY)
+    expect(pts[3].x).toBeCloseTo(pts[4].x, 10); // seg4 vertical
+    expect(pts[4].y).toBeCloseTo(pts[5].y, 10); // seg5 horizontal (stub into left)
+    expect(pts[4].x).toBeLessThan(pts[5].x); //     enters from the left
+    expect(pts[2].y).toBeCloseTo((pts[0].y + pts[5].y) / 2, 10); // cross at midpoint y
+  });
+
+  it("routes a U when opposite vertical magnets face away from each other", () => {
+    // boxA bottom (0.30, 0.80) → boxB top (0.60, 0.00): B sits ABOVE, so bottom/top
+    // magnets point away. Both ends stub outward; the route crosses at midX.
+    const surfaces: Annotation[] = [box("boxA", 0.2, 0.6, 0.2, 0.2), box("boxB", 0.5, 0.0, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "bottom", style: "none" },
+      { ref: "boxB", anchor: "top", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(6);
+    expect(pts[1].x).toBeCloseTo(pts[0].x, 10); // seg1 vertical (stub down)
+    expect(pts[1].y).toBeGreaterThan(pts[0].y); //   ...outward (downward)
+    expect(pts[1].y).toBeCloseTo(pts[2].y, 10); // seg2 horizontal
+    expect(pts[2].x).toBeCloseTo(pts[3].x, 10); // seg3 vertical (cross at midX)
+    expect(pts[3].y).toBeCloseTo(pts[4].y, 10); // seg4 horizontal
+    expect(pts[4].x).toBeCloseTo(pts[5].x, 10); // seg5 vertical (stub into top)
+    expect(pts[4].y).toBeLessThan(pts[5].y); //     enters from above
+    expect(pts[2].x).toBeCloseTo((pts[0].x + pts[5].x) / 2, 10); // cross at midpoint x
   });
 });
 

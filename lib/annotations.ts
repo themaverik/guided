@@ -163,6 +163,106 @@ function anchorAxis(ep: Endpoint): "h" | "v" | null {
   }
 }
 
+/** Outward stub length (normalized) an edge-anchored end steps off its edge
+ *  before routing, so square routes don't backtrack over the box for parallel
+ *  (C) or facing-away (U) arrangements. Tunable. */
+const STUB = 0.04;
+
+/** Outward edge normal for an endpoint's anchor, or null for free points and
+ *  non-edge anchors (center / corners / line ends). Sign-aware sibling of
+ *  anchorAxis: a `right` edge exits +x, a `top` edge exits −y, etc. */
+function anchorDir(ep: Endpoint): Point | null {
+  if (!ep.ref) return null;
+  switch (ep.anchor) {
+    case "right":
+      return { x: 1, y: 0 };
+    case "left":
+      return { x: -1, y: 0 };
+    case "bottom":
+      return { x: 0, y: 1 };
+    case "top":
+      return { x: 0, y: -1 };
+    default:
+      return null;
+  }
+}
+
+/** Interior corners when both ends exit horizontally (dax/dbx are the x-signs of
+ *  the two edge normals). Parallel magnets → C (route past the far right/left
+ *  edge); opposite magnets → Z (corner at the midpoint x). */
+function horizontalRoute(a: Point, b: Point, dax: number, dbx: number): Point[] {
+  if (dax === dbx) {
+    const extX = dax > 0 ? Math.max(a.x, b.x) + STUB : Math.min(a.x, b.x) - STUB;
+    return [
+      { x: extX, y: a.y },
+      { x: extX, y: b.y },
+    ];
+  }
+  const toward = dax > 0 ? b.x >= a.x : b.x <= a.x;
+  if (!toward) {
+    const ax = a.x + dax * STUB;
+    const bx = b.x + dbx * STUB;
+    const midY = (a.y + b.y) / 2;
+    return [
+      { x: ax, y: a.y },
+      { x: ax, y: midY },
+      { x: bx, y: midY },
+      { x: bx, y: b.y },
+    ];
+  }
+  const midX = (a.x + b.x) / 2;
+  return [
+    { x: midX, y: a.y },
+    { x: midX, y: b.y },
+  ];
+}
+
+/** Interior corners when both ends exit vertically (day/dby are the y-signs of
+ *  the two edge normals). Mirror of horizontalRoute. */
+function verticalRoute(a: Point, b: Point, day: number, dby: number): Point[] {
+  if (day === dby) {
+    const extY = day > 0 ? Math.max(a.y, b.y) + STUB : Math.min(a.y, b.y) - STUB;
+    return [
+      { x: a.x, y: extY },
+      { x: b.x, y: extY },
+    ];
+  }
+  const toward = day > 0 ? b.y >= a.y : b.y <= a.y;
+  if (!toward) {
+    const ay = a.y + day * STUB;
+    const by = b.y + dby * STUB;
+    const midX = (a.x + b.x) / 2;
+    return [
+      { x: a.x, y: ay },
+      { x: midX, y: ay },
+      { x: midX, y: by },
+      { x: b.x, y: by },
+    ];
+  }
+  const midY = (a.y + b.y) / 2;
+  return [
+    { x: a.x, y: midY },
+    { x: b.x, y: midY },
+  ];
+}
+
+/** Interior corner(s) of a square (orthogonal) route between resolved points a
+ *  and b. Both ends edge-anchored to the SAME axis route via horizontalRoute /
+ *  verticalRoute (a single elbow can't satisfy both); every other case (differing
+ *  axes, or an unanchored / center / corner end) uses the single perpendicular
+ *  elbow from squareHorizontalFirst. */
+function squareRoute(a: Point, b: Point, from: Endpoint, to: Endpoint): Point[] {
+  const dirA = anchorDir(from);
+  const dirB = anchorDir(to);
+  if (dirA && dirB) {
+    if (dirA.x !== 0 && dirB.x !== 0) return horizontalRoute(a, b, dirA.x, dirB.x);
+    if (dirA.y !== 0 && dirB.y !== 0) return verticalRoute(a, b, dirA.y, dirB.y);
+  }
+  return squareHorizontalFirst(a, b, from, to)
+    ? [{ x: b.x, y: a.y }]
+    : [{ x: a.x, y: b.y }];
+}
+
 /**
  * Whether a square route's first segment runs horizontally. An anchored endpoint
  * wins over the dominant-axis heuristic: the source's edge sets the first
@@ -200,10 +300,7 @@ export function connectorPoints(
   // Manual waypoints take over the path shape (straight segments through them).
   if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
   if (c.routing !== "square") return [a, b];
-  const corner = squareHorizontalFirst(a, b, c.from, c.to)
-    ? { x: b.x, y: a.y }
-    : { x: a.x, y: b.y };
-  return [a, corner, b];
+  return [a, ...squareRoute(a, b, c.from, c.to), b];
 }
 
 /** Resolve a connector endpoint to a concrete normalized point. */

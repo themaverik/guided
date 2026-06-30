@@ -345,3 +345,63 @@ describe("routeWithBends — interior runs", () => {
     expect(r.points[2].x).toBeCloseTo(0.65, 10);
   });
 });
+
+describe("routeWithBends — anchored runs (L-bending)", () => {
+  // L route: a(0.2,0.3) →[right exit, h] corner(0.7,0.3) →[v] b(0.7,0.8) [top exit]
+  const lBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.7, y: 0.3 },
+    { x: 0.7, y: 0.8 },
+  ];
+
+  it("inserts a stub+jog detour when bending the from-anchored run", () => {
+    const r = routeWithBends(lBase, [{ seg: 0, axis: "h", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },  // a
+      { x: 0.24, y: 0.3 }, // stub (perpendicular exit preserved)
+      { x: 0.24, y: 0.4 }, // jog
+      { x: 0.7, y: 0.4 },  // displaced run end (corner, y shifted)
+      { x: 0.7, y: 0.8 },  // b
+    ]);
+    // Only the displaced run is draggable; stub + jog are structural.
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: 0, draggable: false },
+      { baseSeg: 0, bend: 0, draggable: false },
+      { baseSeg: 0, bend: 0, draggable: true },
+      { baseSeg: 1, bend: null, draggable: true },
+    ]);
+  });
+
+  it("inserts a detour at the to-anchored end", () => {
+    const r = routeWithBends(lBase, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },   // a
+      { x: 0.8, y: 0.3 },   // run end (corner, x shifted)
+      { x: 0.8, y: 0.76 },  // displaced run / jog start
+      { x: 0.7, y: 0.76 },  // jog
+      { x: 0.7, y: 0.8 },   // stub (perpendicular exit preserved) → b
+    ]);
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: null, draggable: true },
+      { baseSeg: 1, bend: 0, draggable: true },
+      { baseSeg: 1, bend: 0, draggable: false },
+      { baseSeg: 1, bend: 0, draggable: false },
+    ]);
+  });
+
+  it("bends both legs of an L into an S (multi-bend, shared corner)", () => {
+    const r = routeWithBends(lBase, [
+      { seg: 0, axis: "h", offset: 0.1 },
+      { seg: 1, axis: "v", offset: 0.1 },
+    ]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },
+      { x: 0.24, y: 0.3 },
+      { x: 0.24, y: 0.4 },
+      { x: 0.8, y: 0.4 },   // shared corner: x shifted by seg1, y shifted by seg0
+      { x: 0.8, y: 0.76 },
+      { x: 0.7, y: 0.76 },
+      { x: 0.7, y: 0.8 },
+    ]);
+  });
+});

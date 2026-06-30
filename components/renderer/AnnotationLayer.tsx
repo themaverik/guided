@@ -15,9 +15,11 @@ import type {
   Surface,
 } from "@/lib/book-schema";
 import {
+  CORNER_RADIUS,
   FONT_STACKS,
   MARKER_PX,
   bracketSegments,
+  buildRoundedConnector,
   connectorPoints,
   pct,
 } from "@/lib/annotations";
@@ -202,7 +204,7 @@ function ConnectorLine({
   annotations: Annotation[];
 }) {
   const pts = connectorPoints(annotations, c);
-  const last = pts.length - 2;
+  const { d, startSeg, endSeg } = buildRoundedConnector(pts, CORNER_RADIUS);
   const startId = `m-${c.id}-s`;
   const endId = `m-${c.id}-e`;
   return (
@@ -211,23 +213,41 @@ function ConnectorLine({
         {endpointMarker(startId, c.from.style, c.from.size, c.stroke)}
         {endpointMarker(endId, c.to.style, c.to.size, c.stroke)}
       </defs>
-      {pts.slice(0, -1).map((p, i) => (
-        <line
-          key={i}
-          x1={pct(p.x)}
-          y1={pct(p.y)}
-          x2={pct(pts[i + 1].x)}
-          y2={pct(pts[i + 1].y)}
-          stroke={c.stroke}
-          strokeWidth={c.width}
-          markerStart={
-            i === 0 && c.from.style !== "none" ? `url(#${startId})` : undefined
-          }
-          markerEnd={
-            i === last && c.to.style !== "none" ? `url(#${endId})` : undefined
-          }
-        />
-      ))}
+      {d ? (
+        <svg
+          viewBox="0 0 1 1"
+          preserveAspectRatio="none"
+          overflow="visible"
+          width="100%"
+          height="100%"
+        >
+          <path
+            d={d}
+            stroke={c.stroke}
+            strokeWidth={c.width}
+            vectorEffect="non-scaling-stroke"
+            fill="none"
+          />
+        </svg>
+      ) : null}
+      <line
+        x1={pct(startSeg[0].x)}
+        y1={pct(startSeg[0].y)}
+        x2={pct(startSeg[1].x)}
+        y2={pct(startSeg[1].y)}
+        stroke={c.stroke}
+        strokeWidth={c.width}
+        markerStart={c.from.style !== "none" ? `url(#${startId})` : undefined}
+      />
+      <line
+        x1={pct(endSeg[0].x)}
+        y1={pct(endSeg[0].y)}
+        x2={pct(endSeg[1].x)}
+        y2={pct(endSeg[1].y)}
+        stroke={c.stroke}
+        strokeWidth={c.width}
+        markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
+      />
     </g>
   );
 }

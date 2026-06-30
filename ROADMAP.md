@@ -450,12 +450,12 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     140/140; typecheck 0; lint clean. Spec `docs/superpowers/specs/2026-06-29-connector-orthogonal-routing-design.md`,
     plan `docs/superpowers/plans/2026-06-29-connector-orthogonal-routing.md`, ADR-004 amended. Deferred:
     true obstacle avoidance (routing around box bodies in degenerate overlaps) — P3 handles are the remedy.
-  - **P2 — rounded corners** — the `square` route currently draws as separate butt-capped `<line>` segments
-    meeting at a sharp 90° elbow (`AnnotationLayer.ConnectorLine`), which can show a slight notch at the outer
-    corner at thicker widths. Render the connector polyline as a single `<path>` with
-    `stroke-linejoin="round"` (optionally an explicit corner radius via a small arc) so the elbow is rounded
-    and the notch is gone — in both editor overlay and print. Editor + render change (data unchanged); keep
-    print-accurate.
+  - **P2 — rounded corners** — [done] (`feat/connector-rounded-corners`). Pure `buildRoundedConnector` helper
+    (`lib/annotations.ts`) + `ConnectorLine` render: each elbow is a quadratic bend of `CORNER_RADIUS=0.02`
+    (clamped per corner) in a nested `<svg viewBox="0 0 1 1">` path with `vector-effect="non-scaling-stroke"`;
+    arrowhead markers kept in the outer `%` space via trimmed end-`<line>`s (a nested viewBox would distort
+    them), meeting the rounded middle seamlessly. No schema change; editor + print identical; verified in the
+    `elbow-demo` print render. Spec/plan `docs/superpowers/{specs,plans}/2026-06-30-connector-rounded-corners*`.
   - **P3 — interactive segment handles + relative-offset storage** — axis-constrained midpoint handles on
     each straight run (horizontal segment drags vertically, vertical drags horizontally), a *stored*
     relative-offset model so manual drags persist, and reflow preservation when a connected object moves.

@@ -182,3 +182,29 @@ This is **P1 of the FigJam-style elbow-connector epic**. Follow-ups (own specs):
 **P2** rounded corners (single `<path>` + `stroke-linejoin="round"`, pure render);
 **P3** interactive axis-constrained segment-midpoint handles + a relative-offset
 storage model that survives object moves (schema change + its own amendment).
+
+## Amendment (2026-06-30): rounded connector corners (P2)
+
+`square` connector elbows now render with a visible rounded corner. Because
+`AnnotationLayer` is `viewBox`-free and uses percentage coordinates (so it never
+measures the DOM — required for the static print path), and SVG `<path d>` forbids
+percentages, the rounded geometry is built by the pure helper
+`buildRoundedConnector` (`lib/annotations.ts`) and rendered in a nested
+`<svg viewBox="0 0 1 1" preserveAspectRatio="none">` with
+`vector-effect="non-scaling-stroke"` — the same pattern the diamond surface uses.
+Each interior corner becomes a quadratic bend of `CORNER_RADIUS = 0.02`
+(normalized; clamped per corner to half the shorter adjoining segment).
+
+Arrowhead markers use `markerUnits="userSpaceOnUse"` with px sizes, which a nested
+`viewBox` would blow up and distort, so the **first and last straight segments are
+drawn as outer percentage `<line>`s that carry the markers**, and only the rounded
+*middle* lives in the nested path. The two meet collinearly at the corner
+pull-back points, so the join is seamless and markers stay undistorted. Straight
+(2-point) connectors emit no path and are unchanged. No schema change; editor and
+print render identically through `ConnectorLine`. Corner arcs are slightly
+elliptical under the page's non-square aspect (accepted; small radius). Verified
+in the `elbow-demo` print render.
+
+P2 of the FigJam-style elbow-connector epic. Remaining: **P3** interactive
+axis-constrained segment-midpoint handles + relative-offset storage (schema change
++ its own amendment).

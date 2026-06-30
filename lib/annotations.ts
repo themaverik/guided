@@ -497,6 +497,23 @@ export function routeWithBends(
   return { points, segments };
 }
 
+/** Build the bend for dragging base segment `baseSeg` (orientation `axis`) to
+ *  `pointer`. The offset is the perpendicular delta from the auto-route; within
+ *  `tol` of the auto-route it returns null (snap back / remove the bend). Pure. */
+export function bendForDrag(
+  base: Point[],
+  baseSeg: number,
+  axis: "h" | "v",
+  pointer: Point,
+  tol = 0.01,
+): ConnectorBend | null {
+  const basePerp = axis === "h" ? base[baseSeg].y : base[baseSeg].x;
+  const ptrPerp = axis === "h" ? pointer.y : pointer.x;
+  const offset = round4(ptrPerp - basePerp);
+  if (Math.abs(offset) < tol) return null;
+  return { seg: baseSeg, axis, offset };
+}
+
 /** Resolve a connector endpoint to a concrete normalized point. */
 export function resolveEndpoint(
   annotations: Annotation[],

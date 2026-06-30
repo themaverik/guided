@@ -6,6 +6,7 @@
 import type {
   Anchor,
   Annotation,
+  ConnectorBend,
   Endpoint,
   EndpointSize,
   EndpointStyle,
@@ -360,6 +361,63 @@ export function buildRoundedConnector(
     startSeg: [pt(p0.x, p0.y), firstPullback],
     endSeg: [lastPullback, pt(pLast.x, pLast.y)],
   };
+}
+
+/** Orientation of a base route segment, or null if degenerate (zero-length). */
+function segAxis(p: Point, q: Point): "h" | "v" | null {
+  if (p.y === q.y && p.x !== q.x) return "h";
+  if (p.x === q.x && p.y !== q.y) return "v";
+  return null;
+}
+
+/** Provenance of one rendered route segment, so the editor can map a handle drag
+ *  back to a bend. `draggable` is false for the structural stub/jog of an inserted
+ *  detour. `bend` is the index into the connector's `bends` array governing this
+ *  run, or null for an un-adjusted base run. */
+export interface SegmentMeta {
+  baseSeg: number;
+  bend: number | null;
+  draggable: boolean;
+}
+
+/** Apply manual segment bends to a square connector's auto-route `base` (the
+ *  `[a, ...squareRoute, b]` polyline). Interior runs displace perpendicular in
+ *  place. Returns the rendered polyline plus per-segment provenance. Pure.
+ *  NOTE: anchored runs (seg 0 / last) are added in Task 2; here they are dropped. */
+export function routeWithBends(
+  base: Point[],
+  bends: ConnectorBend[],
+): { points: Point[]; segments: SegmentMeta[] } {
+  const segCount = base.length - 1;
+  const bySeg = new Map<number, { idx: number; bend: ConnectorBend }>();
+  bends.forEach((b, idx) => {
+    if (b.seg <= 0 || b.seg >= segCount - 1) return; // interior only (Task 2 widens this)
+    if (segAxis(base[b.seg], base[b.seg + 1]) !== b.axis) return;
+    if (!bySeg.has(b.seg)) bySeg.set(b.seg, { idx, bend: b });
+  });
+
+  if (bySeg.size === 0) {
+    return {
+      points: base.map((p) => ({ x: p.x, y: p.y })),
+      segments: base.slice(1).map((_, i) => ({ baseSeg: i, bend: null, draggable: true })),
+    };
+  }
+
+  const pts = base.map((p) => ({ x: p.x, y: p.y }));
+  for (const [seg, { bend }] of bySeg) {
+    const k = bend.axis === "h" ? "y" : "x";
+    pts[seg][k] += bend.offset;
+    pts[seg + 1][k] += bend.offset;
+  }
+
+  const points: Point[] = [pt(pts[0].x, pts[0].y)];
+  const segments: SegmentMeta[] = [];
+  for (let i = 0; i < segCount; i++) {
+    const bm = bySeg.get(i);
+    points.push(pt(pts[i + 1].x, pts[i + 1].y));
+    segments.push({ baseSeg: i, bend: bm ? bm.idx : null, draggable: true });
+  }
+  return { points, segments };
 }
 
 /** Resolve a connector endpoint to a concrete normalized point. */

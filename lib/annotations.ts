@@ -284,24 +284,47 @@ function squareHorizontalFirst(
   return Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
 }
 
-/**
- * The polyline points of a connector in normalized coords. `straight` is two
- * points; `square` inserts a right-angle corner (orthogonal route). The elbow
- * leaves/enters an anchored endpoint perpendicular to its edge (see
- * `squareHorizontalFirst`); for free points it goes horizontal-first when the
- * run is wider than tall, else vertical-first.
- */
-export function connectorPoints(
+/** The unbent square auto-route `[a, ...squareRoute, b]` for a connector. Used by
+ *  the editor to compute bend offsets relative to the auto-route. */
+export function squareBaseRoute(
   annotations: Annotation[],
   c: import("./book-schema").Connector,
 ): Point[] {
   const a = resolveEndpoint(annotations, c.from);
   const b = resolveEndpoint(annotations, c.to);
-  const wps = c.waypoints ?? [];
-  // Manual waypoints take over the path shape (straight segments through them).
-  if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
-  if (c.routing !== "square") return [a, b];
   return [a, ...squareRoute(a, b, c.from, c.to), b];
+}
+
+/** The rendered polyline of a connector plus per-segment provenance. `square`
+ *  routes through `routeWithBends` (auto-route + manual bends); a `square`
+ *  connector still carrying legacy `waypoints` (and no `bends`) renders the
+ *  waypoint route for back-compat; `straight` routes through its waypoints. */
+export function connectorRoute(
+  annotations: Annotation[],
+  c: import("./book-schema").Connector,
+): { points: Point[]; segments: SegmentMeta[] } {
+  const a = resolveEndpoint(annotations, c.from);
+  const b = resolveEndpoint(annotations, c.to);
+  const wps = c.waypoints ?? [];
+  const passThrough = (pts: Point[]) => ({
+    points: pts,
+    segments: pts.slice(1).map((_, i) => ({ baseSeg: i, bend: null, draggable: false })),
+  });
+  if (c.routing !== "square") {
+    return passThrough([a, ...wps.map((p) => ({ x: p.x, y: p.y })), b]);
+  }
+  if (wps.length > 0 && !(c.bends && c.bends.length)) {
+    return passThrough([a, ...wps.map((p) => ({ x: p.x, y: p.y })), b]);
+  }
+  return routeWithBends([a, ...squareRoute(a, b, c.from, c.to), b], c.bends ?? []);
+}
+
+/** The polyline points of a connector in normalized coords (see connectorRoute). */
+export function connectorPoints(
+  annotations: Annotation[],
+  c: import("./book-schema").Connector,
+): Point[] {
+  return connectorRoute(annotations, c).points;
 }
 
 /** Corner radius (normalized) for rounded square-connector elbows. Clamped per

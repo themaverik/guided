@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -403,5 +403,51 @@ describe("routeWithBends — anchored runs (L-bending)", () => {
       { x: 0.7, y: 0.76 },
       { x: 0.7, y: 0.8 },
     ]);
+  });
+});
+
+describe("connectorRoute / connectorPoints wiring", () => {
+  const boxA = { id: "A", kind: "box", x: 0.1, y: 0.2, w: 0.2, h: 0.2, stroke: "#000", width: 2 } as const;
+  const boxB = { id: "B", kind: "box", x: 0.6, y: 0.6, w: 0.2, h: 0.2, stroke: "#000", width: 2 } as const;
+  const sq = (extra: object): Connector => ({
+    id: "c", kind: "connector", stroke: "#000", width: 2, routing: "square",
+    from: { ref: "A", anchor: "right", style: "arrow" },
+    to: { ref: "B", anchor: "left", style: "arrow" },
+    ...extra,
+  });
+
+  it("square + no bends is identical to [a, ...squareRoute, b]", () => {
+    const c = sq({});
+    const anns = [boxA, boxB, c];
+    expect(connectorPoints(anns, c)).toEqual(squareBaseRoute(anns, c));
+  });
+
+  it("square + a bend reshapes the route", () => {
+    const c = sq({ bends: [{ seg: 1, axis: "v", offset: 0.05 }] });
+    const anns = [boxA, boxB, c];
+    const base = squareBaseRoute(anns, c);
+    const bent = connectorPoints(anns, c);
+    expect(bent).not.toEqual(base);
+    expect(bent.length).toBe(base.length); // interior displacement keeps point count
+  });
+
+  it("straight connector is unchanged (free waypoints through points)", () => {
+    const c: Connector = {
+      id: "c", kind: "connector", stroke: "#000", width: 2, routing: "straight",
+      from: { x: 0.1, y: 0.1, style: "arrow" },
+      to: { x: 0.9, y: 0.9, style: "arrow" },
+      waypoints: [{ x: 0.5, y: 0.2 }],
+    };
+    expect(connectorPoints([c], c)).toEqual([
+      { x: 0.1, y: 0.1 }, { x: 0.5, y: 0.2 }, { x: 0.9, y: 0.9 },
+    ]);
+  });
+
+  it("legacy square + waypoints (no bends) still renders the waypoint route", () => {
+    const c = sq({ waypoints: [{ x: 0.5, y: 0.2 }] });
+    const anns = [boxA, boxB, c];
+    const pts = connectorPoints(anns, c);
+    expect(pts[1]).toEqual({ x: 0.5, y: 0.2 });
+    expect(pts).toHaveLength(3);
   });
 });

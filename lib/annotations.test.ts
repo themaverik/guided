@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { connectorPoints, snapAxisVector } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -248,5 +248,48 @@ describe("snapAxisVector — angle-based axis snapping", () => {
 
   it("returns a zero vector unchanged", () => {
     expect(snapAxisVector(0, 0, false)).toEqual({ dx: 0, dy: 0 });
+  });
+});
+
+describe("buildRoundedConnector — rounded elbow path", () => {
+  it("a straight (2-point) connector has no corners and both end-segments equal the whole line", () => {
+    const r = buildRoundedConnector([{ x: 0, y: 0 }, { x: 1, y: 1 }], 0.2);
+    expect(r.d).toBe("");
+    expect(r.startSeg).toEqual([{ x: 0, y: 0 }, { x: 1, y: 1 }]);
+    expect(r.endSeg).toEqual([{ x: 0, y: 0 }, { x: 1, y: 1 }]);
+  });
+
+  it("rounds a single (L) corner with a quadratic bend and trims both end-segments", () => {
+    const r = buildRoundedConnector(
+      [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
+      0.2,
+    );
+    expect(r.d).toBe("M 0.8,0 Q 1,0 1,0.2");
+    expect(r.startSeg).toEqual([{ x: 0, y: 0 }, { x: 0.8, y: 0 }]);
+    expect(r.endSeg).toEqual([{ x: 1, y: 0.2 }, { x: 1, y: 1 }]);
+  });
+
+  it("rounds both corners of a Z route", () => {
+    const r = buildRoundedConnector(
+      [{ x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 0.5, y: 1 }, { x: 1, y: 1 }],
+      0.2,
+    );
+    expect(r.d).toBe("M 0.3,0 Q 0.5,0 0.5,0.2 L 0.5,0.8 Q 0.5,1 0.7,1");
+    expect(r.startSeg).toEqual([{ x: 0, y: 0 }, { x: 0.3, y: 0 }]);
+    expect(r.endSeg).toEqual([{ x: 0.7, y: 1 }, { x: 1, y: 1 }]);
+  });
+
+  it("clamps the radius to half the shorter adjoining segment", () => {
+    const r = buildRoundedConnector(
+      [{ x: 0, y: 0 }, { x: 0.1, y: 0 }, { x: 0.1, y: 1 }],
+      0.2, // would overshoot the 0.1-long first segment; clamps to 0.05
+    );
+    expect(r.d).toBe("M 0.05,0 Q 0.1,0 0.1,0.05");
+    expect(r.startSeg).toEqual([{ x: 0, y: 0 }, { x: 0.05, y: 0 }]);
+    expect(r.endSeg).toEqual([{ x: 0.1, y: 0.05 }, { x: 0.1, y: 1 }]);
+  });
+
+  it("CORNER_RADIUS is the tunable default", () => {
+    expect(CORNER_RADIUS).toBe(0.02);
   });
 });

@@ -303,6 +303,65 @@ export function connectorPoints(
   return [a, ...squareRoute(a, b, c.from, c.to), b];
 }
 
+/** Corner radius (normalized) for rounded square-connector elbows. Clamped per
+ *  corner to half the shorter adjoining segment. Tunable. */
+export const CORNER_RADIUS = 0.02;
+
+const round4 = (n: number) => Math.round(n * 1e4) / 1e4;
+const pt = (x: number, y: number): Point => ({ x: round4(x), y: round4(y) });
+
+/** Split a connector polyline into outer marker-carrying end segments and a
+ *  rounded middle path. The first/last straight segments render as plain lines
+ *  (carrying the arrowhead markers in the outer % space, undistorted); the middle
+ *  replaces each interior corner with a quadratic bend of `radius` (clamped to
+ *  half the shorter adjoining segment) and renders as the returned path `d` (in
+ *  0..1 units for a nested viewBox). `d` is "" when there are no corners. Pure;
+ *  all output coordinates are rounded to 4 decimals for stable output. */
+export function buildRoundedConnector(
+  points: Point[],
+  radius: number,
+): { d: string; startSeg: [Point, Point]; endSeg: [Point, Point] } {
+  const n = points.length;
+  const p0 = points[0];
+  const pLast = points[n - 1];
+  if (n < 3) {
+    const a = pt(p0.x, p0.y);
+    const b = pt(pLast.x, pLast.y);
+    return { d: "", startSeg: [a, b], endSeg: [a, b] };
+  }
+  const f = (p: Point) => `${round4(p.x)},${round4(p.y)}`;
+  const cmds: string[] = [];
+  let firstPullback = pt(p0.x, p0.y);
+  let lastPullback = pt(pLast.x, pLast.y);
+  for (let i = 1; i < n - 1; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const next = points[i + 1];
+    const dIn = Math.hypot(curr.x - prev.x, curr.y - prev.y);
+    const dOut = Math.hypot(next.x - curr.x, next.y - curr.y);
+    const r = Math.min(radius, dIn / 2, dOut / 2);
+    const inX = dIn === 0 ? 0 : (prev.x - curr.x) / dIn;
+    const inY = dIn === 0 ? 0 : (prev.y - curr.y) / dIn;
+    const outX = dOut === 0 ? 0 : (next.x - curr.x) / dOut;
+    const outY = dOut === 0 ? 0 : (next.y - curr.y) / dOut;
+    const pin = pt(curr.x + r * inX, curr.y + r * inY);
+    const pout = pt(curr.x + r * outX, curr.y + r * outY);
+    if (i === 1) {
+      firstPullback = pin;
+      cmds.push(`M ${f(pin)}`);
+    } else {
+      cmds.push(`L ${f(pin)}`);
+    }
+    cmds.push(`Q ${f(curr)} ${f(pout)}`);
+    lastPullback = pout;
+  }
+  return {
+    d: cmds.join(" "),
+    startSeg: [pt(p0.x, p0.y), firstPullback],
+    endSeg: [lastPullback, pt(pLast.x, pLast.y)],
+  };
+}
+
 /** Resolve a connector endpoint to a concrete normalized point. */
 export function resolveEndpoint(
   annotations: Annotation[],

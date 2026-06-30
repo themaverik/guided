@@ -160,6 +160,19 @@ export interface Surface {
   swatchId?: string;
 }
 
+/** A manual adjustment to one segment of a square connector's auto-route (P3).
+ *  Stored as a perpendicular offset FROM the recomputed auto-route, so it rides
+ *  along when a connected surface moves. Dropped at render time if a reflow
+ *  changes the route so this segment no longer exists or no longer matches `axis`. */
+export interface ConnectorBend {
+  /** Index of the auto-route segment this bend adjusts (0-based). */
+  seg: number;
+  /** Run orientation: "h" = horizontal (offset shifts it in Y), "v" = vertical (offset shifts it in X). */
+  axis: "h" | "v";
+  /** Signed perpendicular offset from the auto-route, normalized page units. */
+  offset: number;
+}
+
 /** An arrow/line drawn between two endpoints (each free or surface-bound). */
 export interface Connector {
   id: string;
@@ -179,6 +192,9 @@ export interface Connector {
   /** Intermediate points the path passes through (normalized 0–1). Editor-only
    *  handles shape these; they print as the resulting bent path. */
   waypoints?: { x: number; y: number }[];
+  /** Manual segment adjustments for square routing (P3). Square-only — each rides
+   *  the recomputed auto-route. `waypoints` remains the `straight`-connector path. */
+  bends?: ConnectorBend[];
 }
 
 export type Annotation = Surface | Connector;

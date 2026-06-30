@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -291,5 +291,57 @@ describe("buildRoundedConnector — rounded elbow path", () => {
 
   it("CORNER_RADIUS is the tunable default", () => {
     expect(CORNER_RADIUS).toBe(0.02);
+  });
+});
+
+describe("routeWithBends — interior runs", () => {
+  // Z route: a(0.2,0.3) → corner(0.5,0.3) → corner(0.5,0.7) → b(0.8,0.7)
+  const zBase = [
+    { x: 0.2, y: 0.3 },
+    { x: 0.5, y: 0.3 },
+    { x: 0.5, y: 0.7 },
+    { x: 0.8, y: 0.7 },
+  ];
+
+  it("returns the base route unchanged when there are no bends", () => {
+    const r = routeWithBends(zBase, []);
+    expect(r.points).toEqual(zBase);
+    expect(r.segments).toEqual([
+      { baseSeg: 0, bend: null, draggable: true },
+      { baseSeg: 1, bend: null, draggable: true },
+      { baseSeg: 2, bend: null, draggable: true },
+    ]);
+  });
+
+  it("displaces an interior vertical cross-run by its offset", () => {
+    const r = routeWithBends(zBase, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points).toEqual([
+      { x: 0.2, y: 0.3 },
+      { x: 0.6, y: 0.3 },
+      { x: 0.6, y: 0.7 },
+      { x: 0.8, y: 0.7 },
+    ]);
+    expect(r.segments[1]).toEqual({ baseSeg: 1, bend: 0, draggable: true });
+  });
+
+  it("drops a bend whose seg is out of range", () => {
+    expect(routeWithBends(zBase, [{ seg: 9, axis: "v", offset: 0.1 }]).points).toEqual(zBase);
+  });
+
+  it("drops a bend whose axis disagrees with the base segment", () => {
+    // seg 1 is vertical; an "h" bend there is invalid.
+    expect(routeWithBends(zBase, [{ seg: 1, axis: "h", offset: 0.1 }]).points).toEqual(zBase);
+  });
+
+  it("rides the recomputed base: same offset, shifted base → shifted run", () => {
+    const shifted = [
+      { x: 0.2, y: 0.3 },
+      { x: 0.55, y: 0.3 },
+      { x: 0.55, y: 0.7 },
+      { x: 0.9, y: 0.7 },
+    ];
+    const r = routeWithBends(shifted, [{ seg: 1, axis: "v", offset: 0.1 }]);
+    expect(r.points[1].x).toBeCloseTo(0.65, 10);
+    expect(r.points[2].x).toBeCloseTo(0.65, 10);
   });
 });

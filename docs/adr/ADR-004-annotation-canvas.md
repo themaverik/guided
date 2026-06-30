@@ -153,3 +153,32 @@ based on **angle**, so the zone is the same width at any length; Shift still
 hard-locks the dominant axis and signs are preserved (lines keep 360° freedom).
 Shared by the connector-endpoint and line-resize paths in `PreviewAnnotations`.
 Editor-interaction only — no schema or render change.
+
+## Amendment (2026-06-30): orthogonal elbow routing (P1)
+
+Resolves the *Deferred* note in the 2026-06-28 anchor-aware square-routing
+amendment. `connectorPoints` now produces a full orthogonal route for `square`
+connectors via the pure helper `squareRoute` (`lib/annotations.ts`). Each
+edge-anchored end exits perpendicular to **and outward from** its edge; the shape
+is chosen deterministically from the two anchors and the resolved endpoints:
+
+- **L** — perpendicular axes (one horizontal magnet, one vertical): single elbow
+  (unchanged from the 2026-06-28 fix).
+- **Z** — opposite magnets facing toward each other: two corners at the midpoint
+  of the shared axis.
+- **C** — parallel magnets (same direction, e.g. right→right): route out past the
+  far edge by `STUB` and back.
+- **U** — opposite magnets facing away: stub both ends outward by `STUB` and cross
+  at the midpoint of the perpendicular axis.
+
+Direction comes only from the anchor name (`anchorDir`) — the connected surface's
+bounds are never consulted, so true **obstacle avoidance is out of scope** (a
+route may cross a box body in degenerate overlaps; the planned segment handles are
+the remedy). `STUB = 0.04` (normalized, tunable). No schema change; the route
+renders identically in `AnnotationLayer` (print) and `PreviewAnnotations` (editor)
+because both consume `connectorPoints`. Tests: `lib/annotations.test.ts`.
+
+This is **P1 of the FigJam-style elbow-connector epic**. Follow-ups (own specs):
+**P2** rounded corners (single `<path>` + `stroke-linejoin="round"`, pure render);
+**P3** interactive axis-constrained segment-midpoint handles + a relative-offset
+storage model that survives object moves (schema change + its own amendment).

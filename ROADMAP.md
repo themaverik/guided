@@ -439,12 +439,28 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   into `PreviewAnnotations` for *both* connector-endpoint and line-resize drags (same duplicated defect, now
   shared/DRY). 7 new unit tests; suite 135/135; typecheck 0; lint clean. ADR-004 amended. Note: the pure
   helper is fully unit-tested but the drag *feel* was not re-verified in-browser (extension not connected).
-- **Rounded square-corner connectors:** the `square` (orthogonal) route currently draws as separate
-  butt-capped `<line>` segments meeting at a sharp 90° elbow (`AnnotationLayer.ConnectorLine`), which can
-  show a slight notch at the outer corner at thicker widths. Render the connector polyline as a single
-  `<path>` with `stroke-linejoin="round"` (optionally an explicit corner radius via a small arc) so the
-  elbow is rounded and the notch is gone — in both editor overlay and print. Editor + render change (data
-  unchanged); keep print-accurate.
+- **FigJam-style elbow connectors (epic)** — bringing `square` connectors to FigJam parity, in three
+  sequenced sub-projects (each its own spec → plan):
+  - **P1 — orthogonal auto-routing** — [done] (`feat/connector-elbow-routing`). Full L/Z/C/U routing in
+    `connectorPoints` via the pure `squareRoute` helper (`lib/annotations.ts`): each edge-anchored end exits
+    perpendicular to **and outward from** its edge (`anchorDir` + `STUB`), with the shape chosen
+    deterministically — **L** (perpendicular axes), **Z** (opposite magnets facing toward), **C** (parallel
+    magnets), **U** (opposite magnets facing away). Resolves the old "two-corner (Z) route" deferral. Pure
+    geometry → renders identically in editor + print, no schema/renderer change. 6 new unit tests; suite
+    140/140; typecheck 0; lint clean. Spec `docs/superpowers/specs/2026-06-29-connector-orthogonal-routing-design.md`,
+    plan `docs/superpowers/plans/2026-06-29-connector-orthogonal-routing.md`, ADR-004 amended. Deferred:
+    true obstacle avoidance (routing around box bodies in degenerate overlaps) — P3 handles are the remedy.
+  - **P2 — rounded corners** — the `square` route currently draws as separate butt-capped `<line>` segments
+    meeting at a sharp 90° elbow (`AnnotationLayer.ConnectorLine`), which can show a slight notch at the outer
+    corner at thicker widths. Render the connector polyline as a single `<path>` with
+    `stroke-linejoin="round"` (optionally an explicit corner radius via a small arc) so the elbow is rounded
+    and the notch is gone — in both editor overlay and print. Editor + render change (data unchanged); keep
+    print-accurate.
+  - **P3 — interactive segment handles + relative-offset storage** — axis-constrained midpoint handles on
+    each straight run (horizontal segment drags vertically, vertical drags horizontally), a *stored*
+    relative-offset model so manual drags persist, and reflow preservation when a connected object moves.
+    Schema change + its own ADR amendment; needs a dedicated brainstorm for the offset storage model
+    (today's `waypoints` are absolute and won't track object moves).
 
 ## Later (v3 remainder)
 

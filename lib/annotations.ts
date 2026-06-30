@@ -198,6 +198,18 @@ function horizontalRoute(a: Point, b: Point, dax: number, dbx: number): Point[] 
       { x: extX, y: b.y },
     ];
   }
+  const toward = dax > 0 ? b.x >= a.x : b.x <= a.x;
+  if (!toward) {
+    const ax = a.x + dax * STUB;
+    const bx = b.x + dbx * STUB;
+    const midY = (a.y + b.y) / 2;
+    return [
+      { x: ax, y: a.y },
+      { x: ax, y: midY },
+      { x: bx, y: midY },
+      { x: bx, y: b.y },
+    ];
+  }
   const midX = (a.x + b.x) / 2;
   return [
     { x: midX, y: a.y },
@@ -213,6 +225,18 @@ function verticalRoute(a: Point, b: Point, day: number, dby: number): Point[] {
     return [
       { x: a.x, y: extY },
       { x: b.x, y: extY },
+    ];
+  }
+  const toward = day > 0 ? b.y >= a.y : b.y <= a.y;
+  if (!toward) {
+    const ay = a.y + day * STUB;
+    const by = b.y + dby * STUB;
+    const midX = (a.x + b.x) / 2;
+    return [
+      { x: a.x, y: ay },
+      { x: midX, y: ay },
+      { x: midX, y: by },
+      { x: b.x, y: by },
     ];
   }
   const midY = (a.y + b.y) / 2;

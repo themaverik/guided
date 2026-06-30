@@ -169,6 +169,48 @@ describe("connectorPoints — orthogonal routing (elbow shapes)", () => {
     expect(pts[1].x).toBeGreaterThan(pts[0].x); // exits outward (right)
     expect(pts[1].x).toBeGreaterThan(pts[3].x); // beyond both right edges
   });
+
+  it("routes a U when opposite horizontal magnets face away from each other", () => {
+    // boxA right (0.80, 0.30) → boxB left (0.00, 0.60): B sits to the LEFT, so the
+    // right/left magnets point away. Both ends stub outward; the route crosses at midY.
+    const surfaces: Annotation[] = [box("boxA", 0.6, 0.2, 0.2, 0.2), box("boxB", 0.0, 0.5, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "right", style: "none" },
+      { ref: "boxB", anchor: "left", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(6);
+    expect(pts[1].y).toBeCloseTo(pts[0].y, 10); // seg1 horizontal (stub out right)
+    expect(pts[1].x).toBeGreaterThan(pts[0].x); //   ...outward
+    expect(pts[1].x).toBeCloseTo(pts[2].x, 10); // seg2 vertical
+    expect(pts[2].y).toBeCloseTo(pts[3].y, 10); // seg3 horizontal (cross at midY)
+    expect(pts[3].x).toBeCloseTo(pts[4].x, 10); // seg4 vertical
+    expect(pts[4].y).toBeCloseTo(pts[5].y, 10); // seg5 horizontal (stub into left)
+    expect(pts[4].x).toBeLessThan(pts[5].x); //     enters from the left
+    expect(pts[2].y).toBeCloseTo((pts[0].y + pts[5].y) / 2, 10); // cross at midpoint y
+  });
+
+  it("routes a U when opposite vertical magnets face away from each other", () => {
+    // boxA bottom (0.30, 0.80) → boxB top (0.60, 0.00): B sits ABOVE, so bottom/top
+    // magnets point away. Both ends stub outward; the route crosses at midX.
+    const surfaces: Annotation[] = [box("boxA", 0.2, 0.6, 0.2, 0.2), box("boxB", 0.5, 0.0, 0.2, 0.2)];
+    const c = connector(
+      { ref: "boxA", anchor: "bottom", style: "none" },
+      { ref: "boxB", anchor: "top", style: "arrow" },
+      "square",
+    );
+    const pts = connectorPoints(surfaces, c);
+    expect(pts).toHaveLength(6);
+    expect(pts[1].x).toBeCloseTo(pts[0].x, 10); // seg1 vertical (stub down)
+    expect(pts[1].y).toBeGreaterThan(pts[0].y); //   ...outward (downward)
+    expect(pts[1].y).toBeCloseTo(pts[2].y, 10); // seg2 horizontal
+    expect(pts[2].x).toBeCloseTo(pts[3].x, 10); // seg3 vertical (cross at midX)
+    expect(pts[3].y).toBeCloseTo(pts[4].y, 10); // seg4 horizontal
+    expect(pts[4].x).toBeCloseTo(pts[5].x, 10); // seg5 vertical (stub into top)
+    expect(pts[4].y).toBeLessThan(pts[5].y); //     enters from above
+    expect(pts[2].x).toBeCloseTo((pts[0].x + pts[5].x) / 2, 10); // cross at midpoint x
+  });
 });
 
 describe("snapAxisVector — angle-based axis snapping", () => {

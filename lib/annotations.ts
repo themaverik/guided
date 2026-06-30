@@ -6,6 +6,7 @@
 import type {
   Anchor,
   Annotation,
+  ConnectorBend,
   Endpoint,
   EndpointSize,
   EndpointStyle,
@@ -283,24 +284,47 @@ function squareHorizontalFirst(
   return Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
 }
 
-/**
- * The polyline points of a connector in normalized coords. `straight` is two
- * points; `square` inserts a right-angle corner (orthogonal route). The elbow
- * leaves/enters an anchored endpoint perpendicular to its edge (see
- * `squareHorizontalFirst`); for free points it goes horizontal-first when the
- * run is wider than tall, else vertical-first.
- */
-export function connectorPoints(
+/** The unbent square auto-route `[a, ...squareRoute, b]` for a connector. Used by
+ *  the editor to compute bend offsets relative to the auto-route. */
+export function squareBaseRoute(
   annotations: Annotation[],
   c: import("./book-schema").Connector,
 ): Point[] {
   const a = resolveEndpoint(annotations, c.from);
   const b = resolveEndpoint(annotations, c.to);
-  const wps = c.waypoints ?? [];
-  // Manual waypoints take over the path shape (straight segments through them).
-  if (wps.length > 0) return [a, ...wps.map((p) => ({ x: p.x, y: p.y })), b];
-  if (c.routing !== "square") return [a, b];
   return [a, ...squareRoute(a, b, c.from, c.to), b];
+}
+
+/** The rendered polyline of a connector plus per-segment provenance. `square`
+ *  routes through `routeWithBends` (auto-route + manual bends); a `square`
+ *  connector still carrying legacy `waypoints` (and no `bends`) renders the
+ *  waypoint route for back-compat; `straight` routes through its waypoints. */
+export function connectorRoute(
+  annotations: Annotation[],
+  c: import("./book-schema").Connector,
+): { points: Point[]; segments: SegmentMeta[] } {
+  const a = resolveEndpoint(annotations, c.from);
+  const b = resolveEndpoint(annotations, c.to);
+  const wps = c.waypoints ?? [];
+  const passThrough = (pts: Point[]) => ({
+    points: pts,
+    segments: pts.slice(1).map((_, i) => ({ baseSeg: i, bend: null, draggable: false })),
+  });
+  if (c.routing !== "square") {
+    return passThrough([a, ...wps.map((p) => ({ x: p.x, y: p.y })), b]);
+  }
+  if (wps.length > 0 && !(c.bends && c.bends.length)) {
+    return passThrough([a, ...wps.map((p) => ({ x: p.x, y: p.y })), b]);
+  }
+  return routeWithBends([a, ...squareRoute(a, b, c.from, c.to), b], c.bends ?? []);
+}
+
+/** The polyline points of a connector in normalized coords (see connectorRoute). */
+export function connectorPoints(
+  annotations: Annotation[],
+  c: import("./book-schema").Connector,
+): Point[] {
+  return connectorRoute(annotations, c).points;
 }
 
 /** Corner radius (normalized) for rounded square-connector elbows. Clamped per
@@ -360,6 +384,134 @@ export function buildRoundedConnector(
     startSeg: [pt(p0.x, p0.y), firstPullback],
     endSeg: [lastPullback, pt(pLast.x, pLast.y)],
   };
+}
+
+/** Orientation of a base route segment, or null if degenerate (zero-length). */
+function segAxis(p: Point, q: Point): "h" | "v" | null {
+  if (p.y === q.y && p.x !== q.x) return "h";
+  if (p.x === q.x && p.y !== q.y) return "v";
+  return null;
+}
+
+/** Provenance of one rendered route segment, so the editor can map a handle drag
+ *  back to a bend. `draggable` is false for the structural stub/jog of an inserted
+ *  detour. `bend` is the index into the connector's `bends` array governing this
+ *  run, or null for an un-adjusted base run. */
+export interface SegmentMeta {
+  baseSeg: number;
+  bend: number | null;
+  draggable: boolean;
+}
+
+/** Apply manual segment bends to a square connector's auto-route `base` (the
+ *  `[a, ...squareRoute, b]` polyline). Interior runs displace perpendicular in
+ *  place; a bend on an anchored run (touching `a` or `b`) inserts a stub+jog
+ *  detour so the perpendicular exit is preserved (L-bending). Returns the
+ *  rendered polyline plus per-segment provenance. Pure; at most one bend per
+ *  base segment (first wins). Output coordinates rounded to 4 decimals. */
+export function routeWithBends(
+  base: Point[],
+  bends: ConnectorBend[],
+): { points: Point[]; segments: SegmentMeta[] } {
+  const segCount = base.length - 1;
+  const bySeg = new Map<number, { idx: number; bend: ConnectorBend }>();
+  bends.forEach((b, idx) => {
+    if (b.seg < 0 || b.seg >= segCount) return; // out of range → drop
+    if (segAxis(base[b.seg], base[b.seg + 1]) !== b.axis) return; // axis mismatch → drop
+    if (!bySeg.has(b.seg)) bySeg.set(b.seg, { idx, bend: b });
+  });
+
+  if (bySeg.size === 0) {
+    return {
+      points: base.map((p) => ({ x: p.x, y: p.y })),
+      segments: base.slice(1).map((_, i) => ({ baseSeg: i, bend: null, draggable: true })),
+    };
+  }
+
+  const perpKey = (axis: "h" | "v") => (axis === "h" ? "y" : "x") as "x" | "y";
+  // Working corners with perpendicular pre-shifts (interior: both ends; anchored:
+  // the inner corner only — the anchor itself stays fixed for its perpendicular exit).
+  const pts = base.map((p) => ({ x: p.x, y: p.y }));
+  for (const [seg, { bend }] of bySeg) {
+    const k = perpKey(bend.axis);
+    if (seg === 0) pts[1][k] += bend.offset;
+    else if (seg === segCount - 1) pts[segCount - 1][k] += bend.offset;
+    else {
+      pts[seg][k] += bend.offset;
+      pts[seg + 1][k] += bend.offset;
+    }
+  }
+
+  // Unit step off an endpoint along its segment's axis (toward the inner corner).
+  const along = (p: Point, q: Point): Point =>
+    Math.abs(q.x - p.x) >= Math.abs(q.y - p.y)
+      ? { x: Math.sign(q.x - p.x), y: 0 }
+      : { x: 0, y: Math.sign(q.y - p.y) };
+
+  const points: Point[] = [pt(pts[0].x, pts[0].y)];
+  const segments: SegmentMeta[] = [];
+  const addSeg = (p: Point, meta: SegmentMeta) => {
+    points.push(pt(p.x, p.y));
+    segments.push(meta);
+  };
+
+  // HEAD (seg 0).
+  const head = bySeg.get(0);
+  if (head) {
+    const k = perpKey(head.bend.axis);
+    const dir = along(base[0], base[1]);
+    const stub = { x: base[0].x + dir.x * STUB, y: base[0].y + dir.y * STUB };
+    const jog = { x: stub.x, y: stub.y };
+    jog[k] = stub[k] + head.bend.offset;
+    addSeg(stub, { baseSeg: 0, bend: head.idx, draggable: false });
+    addSeg(jog, { baseSeg: 0, bend: head.idx, draggable: false });
+    addSeg(pts[1], { baseSeg: 0, bend: head.idx, draggable: true });
+  } else {
+    addSeg(pts[1], { baseSeg: 0, bend: null, draggable: true });
+  }
+
+  // INTERIOR runs (seg 1 .. segCount-2).
+  for (let i = 1; i <= segCount - 2; i++) {
+    const bm = bySeg.get(i);
+    addSeg(pts[i + 1], { baseSeg: i, bend: bm ? bm.idx : null, draggable: true });
+  }
+
+  // TAIL (last segment), when the route has more than one segment.
+  if (segCount >= 2) {
+    const tail = bySeg.get(segCount - 1);
+    if (tail) {
+      const k = perpKey(tail.bend.axis);
+      const bEnd = base[segCount];
+      const dir = along(bEnd, base[segCount - 1]);
+      const stub = { x: bEnd.x + dir.x * STUB, y: bEnd.y + dir.y * STUB };
+      const jog = { x: stub.x, y: stub.y };
+      jog[k] = stub[k] + tail.bend.offset;
+      addSeg(jog, { baseSeg: segCount - 1, bend: tail.idx, draggable: true });
+      addSeg(stub, { baseSeg: segCount - 1, bend: tail.idx, draggable: false });
+      addSeg(bEnd, { baseSeg: segCount - 1, bend: tail.idx, draggable: false });
+    } else {
+      addSeg(pts[segCount], { baseSeg: segCount - 1, bend: null, draggable: true });
+    }
+  }
+
+  return { points, segments };
+}
+
+/** Build the bend for dragging base segment `baseSeg` (orientation `axis`) to
+ *  `pointer`. The offset is the perpendicular delta from the auto-route; within
+ *  `tol` of the auto-route it returns null (snap back / remove the bend). Pure. */
+export function bendForDrag(
+  base: Point[],
+  baseSeg: number,
+  axis: "h" | "v",
+  pointer: Point,
+  tol = 0.01,
+): ConnectorBend | null {
+  const basePerp = axis === "h" ? base[baseSeg].y : base[baseSeg].x;
+  const ptrPerp = axis === "h" ? pointer.y : pointer.x;
+  const offset = round4(ptrPerp - basePerp);
+  if (Math.abs(offset) < tol) return null;
+  return { seg: baseSeg, axis, offset };
 }
 
 /** Resolve a connector endpoint to a concrete normalized point. */

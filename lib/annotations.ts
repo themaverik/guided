@@ -622,6 +622,37 @@ export interface GuideLine { axis: "x" | "y"; at: number }
 
 export interface AlignSnapResult { dx: number; dy: number; guides: GuideLine[] }
 
+/** The 9 anchor points of a rectangle: 4 corners, 4 edge midpoints, center.
+ *  Order: top-left, top-center, top-right, mid-left, center, mid-right,
+ *  bottom-left, bottom-center, bottom-right. */
+export function rectAnchors(rect: Rect): Point[] {
+  const { x, y, w, h } = rect;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const r = x + w;
+  const b = y + h;
+  return [
+    { x, y }, { x: cx, y }, { x: r, y },
+    { x, y: cy }, { x: cx, y: cy }, { x: r, y: cy },
+    { x, y: b }, { x: cx, y: b }, { x: r, y: b },
+  ];
+}
+
+/** The point nearest to `p` within `thr` (Euclidean, normalized), or null.
+ *  Strictly-nearest; first wins on an exact tie. */
+export function nearestPoint(p: Point, points: Point[], thr: number): Point | null {
+  let best: Point | null = null;
+  let bestDist = Infinity;
+  for (const q of points) {
+    const d = Math.hypot(q.x - p.x, q.y - p.y);
+    if (d <= thr && d < bestDist) {
+      bestDist = d;
+      best = q;
+    }
+  }
+  return best;
+}
+
 /** Nearest target line to any source line within `thr`; returns the signed delta
  *  (target − source) and the matched target coordinate, or null. */
 function nearestLine(

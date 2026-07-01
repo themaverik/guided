@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -548,5 +548,39 @@ describe("snapAlign — object alignment", () => {
   it("returns no snap when there are no targets", () => {
     const res = snapAlign(r(0.5, 0.3, 0.1, 0.1), [], T, T, "move");
     expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+});
+
+describe("rectAnchors", () => {
+  it("returns the 9 box anchors in TL→BR order", () => {
+    // r(0.25, 0.25, 0.5, 0.25): right 0.75, bottom 0.5, center (0.5, 0.375)
+    expect(rectAnchors({ x: 0.25, y: 0.25, w: 0.5, h: 0.25 })).toEqual([
+      { x: 0.25, y: 0.25 }, { x: 0.5, y: 0.25 }, { x: 0.75, y: 0.25 },
+      { x: 0.25, y: 0.375 }, { x: 0.5, y: 0.375 }, { x: 0.75, y: 0.375 },
+      { x: 0.25, y: 0.5 }, { x: 0.5, y: 0.5 }, { x: 0.75, y: 0.5 },
+    ]);
+  });
+});
+
+describe("nearestPoint", () => {
+  it("returns the closest point within the threshold", () => {
+    expect(
+      nearestPoint({ x: 0.5, y: 0.5 }, [{ x: 0.52, y: 0.5 }, { x: 0.9, y: 0.9 }], 0.05),
+    ).toEqual({ x: 0.52, y: 0.5 });
+  });
+
+  it("returns null when every point is beyond the threshold", () => {
+    expect(nearestPoint({ x: 0.5, y: 0.5 }, [{ x: 0.9, y: 0.9 }], 0.05)).toBeNull();
+  });
+
+  it("returns null for an empty candidate list", () => {
+    expect(nearestPoint({ x: 0.5, y: 0.5 }, [], 0.05)).toBeNull();
+  });
+
+  it("returns the first of two equidistant points (deterministic tie)", () => {
+    // both at distance 0.125 from x=0.5
+    expect(
+      nearestPoint({ x: 0.5, y: 0.5 }, [{ x: 0.375, y: 0.5 }, { x: 0.625, y: 0.5 }], 0.2),
+    ).toEqual({ x: 0.375, y: 0.5 });
   });
 });

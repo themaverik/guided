@@ -333,3 +333,22 @@ Phase 2 (later): an on-canvas drag handle to set `dir` spatially. Known Phase-1
 limitation: for a mixed case (explicit `dir` on one end, the other end anchored on
 a different axis) the `dir` is not yet forced over the far anchor (sign follows
 layout).
+
+## Amendment (2026-07-01): connector direction drag handle (Phase 2)
+
+Completes the endpoint-direction feature: an on-canvas direction knob to set
+`Endpoint.dir` spatially (Phase 1 shipped the panel control).
+
+- **Editor-only (`PreviewAnnotations.tsx`):** a focused `square` connector shows a
+  draggable knob on a short stem (`KNOB_PX = 24`) at each endpoint, positioned along
+  the endpoint's current run direction (derived from `connectorRoute`'s first/last
+  segment, so it reflects `dir` or the auto route — the `to` knob sits on the arrow
+  side, the `from` knob along the leave direction). A new `"dir"` drag part snaps the
+  `(pointer − endpoint)` vector via the pure `compassDir(dx, dy)` helper
+  (`lib/annotations.ts`) and writes `ep.dir` immutably — uniform "drag the way it
+  runs here" (the routing's role-aware `anchorDir` handles the from/to sign).
+  Clearing to auto stays on the panel.
+- **Reuses Phase-1 `dir`; no schema change; no renderer/print change** (the knob is
+  editor chrome, not in `AnnotationLayer`). Square-only.
+
+The endpoint-direction override is now complete (panel + on-canvas).

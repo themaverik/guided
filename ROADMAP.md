@@ -435,6 +435,13 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   (free point) → axis-snap; **Alt** bypasses; ~8px threshold. No schema change; renderer/print untouched.
   Spec/plan `docs/superpowers/{specs,plans}/2026-07-01-connector-grid-content-snapping*`, ADR-004 amended.
   *Still open (future):* true re-tracking binding of a connector to grid content.
+- **Connector endpoint direction override** — [done] (Phase 1 `feat/connector-endpoint-direction`, Phase 2
+  `feat/connector-direction-handle`). Complete: **panel** control (Phase 1) + **on-canvas drag knob**
+  (Phase 2). Phase 2 adds a draggable direction knob on a stem at each endpoint of a focused square
+  connector (`KNOB_PX=24`, run direction from `connectorRoute`); drag snaps `(pointer−endpoint)` via pure
+  `compassDir` and writes `Endpoint.dir` (reuses Phase-1 field, no schema change). Editor-only (no print),
+  `compassDir` 3 tests, suite 181/181. Spec/plan
+  `docs/superpowers/{specs,plans}/2026-07-01-connector-direction-handle*`, ADR-004 amended.
 - **Connector endpoint direction override (Phase 1)** — [done] (`feat/connector-endpoint-direction`).
   A square connector's endpoint can carry `Endpoint.dir?: "left"|"right"|"up"|"down"` so the arrow points a
   chosen way instead of only the dominant-axis heuristic (fixes "arrow stuck pointing up"). Routing

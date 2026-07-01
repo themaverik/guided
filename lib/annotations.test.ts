@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -473,5 +473,80 @@ describe("bendForDrag", () => {
 
   it("returns null (snap-to-auto / remove) within tolerance", () => {
     expect(bendForDrag(lBase, 0, "h", { x: 0.5, y: 0.305 })).toBeNull();
+  });
+});
+
+describe("snapAlign — object alignment", () => {
+  const T = 0.02;
+  const r = (x: number, y: number, w: number, h: number) => ({ x, y, w, h });
+
+  it("snaps a moving left edge to a target left edge", () => {
+    const res = snapAlign(r(0.5, 0.3, 0.1, 0.1), [r(0.51, 0.0, 0.1, 0.05)], T, T, "move");
+    expect(res.dx).toBeCloseTo(0.01, 6);
+    expect(res.dy).toBe(0);
+    expect(res.guides).toHaveLength(1);
+    expect(res.guides[0].axis).toBe("x");
+    expect(res.guides[0].at).toBeCloseTo(0.51, 6);
+  });
+
+  it("snaps center-to-center", () => {
+    // moving centerX = 0.49; target centerX = 0.5 (target edges 0.45/0.55 kept clear
+    // of the moving lines so any-to-any doesn't grab an edge first).
+    const res = snapAlign(r(0.39, 0.4, 0.2, 0.2), [r(0.45, 0.0, 0.1, 0.02)], T, T, "move");
+    expect(res.dx).toBeCloseTo(0.01, 6);
+    expect(res.guides[0].at).toBeCloseTo(0.5, 6);
+  });
+
+  it("snaps to the page center (page passed as a target rect)", () => {
+    // moving centerX = 0.49; page centerX = 0.5
+    const res = snapAlign(r(0.46, 0.1, 0.06, 0.06), [r(0, 0, 1, 1)], T, T, "move");
+    expect(res.dx).toBeCloseTo(0.01, 6);
+    expect(res.guides[0].at).toBeCloseTo(0.5, 6);
+  });
+
+  it("resize snaps only the dragged right/bottom edge, not the left/top", () => {
+    // moving right edge = 0.49; a target left edge at 0.5 → snap; a target near the
+    // moving LEFT edge (0.205) must be ignored in resize mode.
+    const res = snapAlign(
+      r(0.2, 0.2, 0.29, 0.1),
+      [r(0.5, 0.0, 0.1, 0.1), r(0.205, 0.0, 0.01, 0.01)],
+      T, T, "resize",
+    );
+    expect(res.dx).toBeCloseTo(0.01, 6); // grows w toward the 0.5 edge
+    expect(res.dy).toBe(0);
+    expect(res.guides[0].at).toBeCloseTo(0.5, 6);
+  });
+
+  it("chooses the nearest target line", () => {
+    // moving left = 0.5; guide lines at 0.515 (d 0.015) and 0.49 (d 0.01) → pick 0.49.
+    // Degenerate rects (w=h=0) act as single vertical guide lines; y=0.9 keeps them
+    // clear of the moving Y lines.
+    const res = snapAlign(r(0.5, 0.3, 0.1, 0.1), [r(0.515, 0.9, 0, 0), r(0.49, 0.9, 0, 0)], T, T, "move");
+    expect(res.guides[0].at).toBeCloseTo(0.49, 6);
+    expect(res.dx).toBeCloseTo(-0.01, 6);
+  });
+
+  it("does not snap beyond the threshold", () => {
+    const res = snapAlign(r(0.5, 0.3, 0.1, 0.1), [r(0.9, 0.9, 0.05, 0.05)], T, T, "move");
+    expect(res.dx).toBe(0);
+    expect(res.dy).toBe(0);
+    expect(res.guides).toEqual([]);
+  });
+
+  it("snaps X and Y independently to different targets", () => {
+    const res = snapAlign(
+      r(0.39, 0.39, 0.2, 0.2), // centerX 0.49, centerY 0.49
+      // Single guide lines: one vertical at x=0.5, one horizontal at y=0.5.
+      [r(0.5, 0.9, 0, 0) /* x-line 0.5 */, r(0.9, 0.5, 0, 0) /* y-line 0.5 */],
+      T, T, "move",
+    );
+    expect(res.dx).toBeCloseTo(0.01, 6);
+    expect(res.dy).toBeCloseTo(0.01, 6);
+    expect(res.guides).toHaveLength(2);
+  });
+
+  it("returns no snap when there are no targets", () => {
+    const res = snapAlign(r(0.5, 0.3, 0.1, 0.1), [], T, T, "move");
+    expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
   });
 });

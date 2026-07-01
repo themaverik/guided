@@ -407,6 +407,22 @@ dev-only dependency advisories (esbuild / js-yaml) via `pnpm.overrides`.
 Captured from review + smoke testing; sequenced just-in-time into plans (brainstorm → spec → plan →
 subagent-driven execution), each with its own ADR if it touches the schema or annotation model.
 
+- **Floating annotation palette (per DESIGN.md / PRD.md)** — [todo]. Move annotation authoring off the
+  left panel and onto the canvas, per the design's **hybrid inspector**: a **floating tool + swatch palette
+  over the page canvas** (draw / select / drag / snap shapes directly on the page), a **compact popover
+  anchored to the selection** for quick edits (color/width/endpoint/direction), with full numeric
+  properties remaining in the left panel. See `DESIGN.md:170-179` ("tools + palette live in a floating
+  toolbar over the page canvas … the inspector is a popover anchored to the selection") and `PRD.md:95`
+  (hybrid inspector). Today authoring lives entirely in the left-panel `AnnotationEditor`; this is a
+  substantial editor-UX effort — decompose during brainstorm (palette shell → tool buttons → selection
+  popover → migrate the per-shape controls). Editor-only; no `Book`/schema change expected (reuses the
+  existing mutations + `updateAnnotation`). Likely pairs with the OKLCH swatch palette (PRD Phase D).
+- **UI polish (per DESIGN.md)** — [todo]. Catch-all for visual + interaction refinement against the
+  canonical design system in `DESIGN.md` (tokens, type scale, spacing, control styling, focus states,
+  mini-toolbars, popovers, mobile touch targets ≥768/<768). Not yet scoped — break into concrete,
+  verifiable passes during a brainstorm (e.g. audit editor chrome vs `DESIGN.md` section by section).
+  Editor-only; `DESIGN.md` is the source of truth on visual questions.
+
 - **Callout lists (numbered + bullet)** — [done]. Verified already implemented end-to-end: the bullet
   (`•`) and numbered (`1.`) toolbar buttons are always present in `RichTextArea`
   (`components/editor/RichTextArea.tsx:99-112`, not prop-gated); both callout body editors use it — legacy

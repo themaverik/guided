@@ -676,6 +676,22 @@
 .preview-anno-seg:active {
   cursor: grabbing;
 }
+.preview-anno-dir {
+  fill: #fff;
+  stroke: var(--color-accent, #658995);
+  stroke-width: 2;
+  cursor: grab;
+  pointer-events: auto;
+}
+.preview-anno-dir:active {
+  cursor: grabbing;
+}
+.preview-anno-dir-stem {
+  stroke: var(--color-accent, #658995);
+  stroke-width: 1.5;
+  pointer-events: none;
+  opacity: 0.6;
+}
 .preview-anno-guide {
   stroke: #e5484d;
   stroke-width: 1;

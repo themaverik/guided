@@ -562,6 +562,57 @@ describe("rectAnchors", () => {
   });
 });
 
+describe("connectorPoints — endpoint direction override (dir)", () => {
+  const sq = (from: Connector["from"], to: Connector["to"]): Connector => ({
+    id: "c", kind: "connector", stroke: "#000", width: 2, routing: "square", from, to,
+  });
+
+  it("to.dir 'right' with target to the right → vertical-first, arrow points right", () => {
+    const c = sq({ x: 0.2, y: 0.3, style: "none" }, { x: 0.7, y: 0.6, style: "arrow", dir: "right" });
+    expect(connectorPoints([], c)).toEqual([
+      { x: 0.2, y: 0.3 }, { x: 0.2, y: 0.6 }, { x: 0.7, y: 0.6 },
+    ]); // last segment horizontal, +x
+  });
+
+  it("to.dir 'left' with target to the right → stub forces the arrow to point left", () => {
+    const c = sq({ x: 0.2, y: 0.3, style: "none" }, { x: 0.7, y: 0.6, style: "arrow", dir: "left" });
+    const pts = connectorPoints([], c);
+    expect(pts).toHaveLength(4);
+    expect(pts[3]).toEqual({ x: 0.7, y: 0.6 });      // ends at b
+    expect(pts[2].y).toBe(pts[3].y);                  // last segment horizontal
+    expect(pts[2].x).toBeGreaterThan(pts[3].x);       // …travelling −x → arrow points LEFT
+    expect(pts[1].x).toBe(pts[2].x);                  // the stub column
+  });
+
+  it("no dir → unchanged dominant-axis route (regression)", () => {
+    const c = sq({ x: 0.2, y: 0.3, style: "none" }, { x: 0.7, y: 0.6, style: "arrow" });
+    expect(connectorPoints([], c)).toEqual([
+      { x: 0.2, y: 0.3 }, { x: 0.7, y: 0.3 }, { x: 0.7, y: 0.6 },
+    ]); // horizontal-first (|Δx|≥|Δy|)
+  });
+
+  it("from.dir 'down' → connector leaves downward", () => {
+    const c = sq({ x: 0.2, y: 0.3, style: "none", dir: "down" }, { x: 0.7, y: 0.6, style: "arrow" });
+    expect(connectorPoints([], c)).toEqual([
+      { x: 0.2, y: 0.3 }, { x: 0.2, y: 0.6 }, { x: 0.7, y: 0.6 },
+    ]); // first segment vertical, +y (down)
+  });
+
+  it("both ends directed → orthogonal route honoring both (from leaves right, arrow points left)", () => {
+    const c = sq(
+      { x: 0.2, y: 0.4, style: "none", dir: "right" },
+      { x: 0.8, y: 0.6, style: "arrow", dir: "left" },
+    );
+    const pts = connectorPoints([], c);
+    expect(pts).toHaveLength(4);
+    expect(pts[1].x).toBeGreaterThan(pts[0].x); // seg1 +x (leaves right)
+    expect(pts[0].y).toBe(pts[1].y);
+    expect(pts[3]).toEqual({ x: 0.8, y: 0.6 });
+    expect(pts[2].x).toBeGreaterThan(pts[3].x); // last seg −x (arrow left)
+    expect(pts[2].y).toBe(pts[3].y);
+  });
+});
+
 describe("nearestPoint", () => {
   it("returns the closest point within the threshold", () => {
     expect(

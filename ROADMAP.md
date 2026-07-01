@@ -426,6 +426,15 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   Editor-only (guides never print); renderer/print untouched; no schema change. Spec/plan
   `docs/superpowers/{specs,plans}/2026-07-01-annotation-alignment-snapping*`, ADR-004 amended. Suite 168/168.
   *Still open (separate item):* fixed-**grid** snapping and equal-spacing/distribution guides.
+- **Connector endpoints snap to grid content** — [done] (`feat/connector-grid-content-snapping`).
+  A connector endpoint snaps to grid-content anchors — cell borders, screenshots, callouts, text blocks
+  (`.grid-cell`/`.img-slot`/`.callout`/`.grid-text`) — landing as a **free point** (snap-and-stay, no
+  binding), with snap dots shown on that content when a connector is focused (previously a grid step with
+  no drawn shapes offered nothing to snap to). Pure `rectAnchors` + `nearestPoint` (`lib/annotations.ts`,
+  5 tests); editor measures grid rects in `PreviewAnnotations`; precedence drawn-surface (binds) → grid
+  (free point) → axis-snap; **Alt** bypasses; ~8px threshold. No schema change; renderer/print untouched.
+  Spec/plan `docs/superpowers/{specs,plans}/2026-07-01-connector-grid-content-snapping*`, ADR-004 amended.
+  *Still open (future):* true re-tracking binding of a connector to grid content.
 - **Bug — square (orthogonal) connector routing** — [done] (`fix/connector-orthogonal-routing`). Root
   cause: `connectorPoints` picked the elbow orientation purely from the normalized run (`|Δx|≥|Δy|`) and
   ignored the side an *anchored* endpoint attaches to, so a connector bound to e.g. a box's **right** edge

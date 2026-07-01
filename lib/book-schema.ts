@@ -111,6 +111,10 @@ export interface Endpoint {
   style: EndpointStyle;
   /** Marker size (default "medium"). */
   size?: EndpointSize;
+  /** Overrides square-routing direction at this end (Phase 1). The way the
+   *  connector runs here — for `to` the arrowhead points this way; for `from` it
+   *  leaves this way. Absent = auto (dominant-axis heuristic). Square routing only. */
+  dir?: "left" | "right" | "up" | "down";
 }
 
 /** Font families offered for text annotations (CSS font-family stacks). */

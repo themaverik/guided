@@ -306,3 +306,30 @@ and no snap dots.)
 
 Out of scope (future): true binding/re-tracking of a connector to grid content;
 binding to sub-parts of a callout.
+
+## Amendment (2026-07-01): connector endpoint direction override (Phase 1)
+
+A square connector's arrowhead orients along its final segment; for a free-point
+connector that orientation came only from a dominant-axis heuristic, so the arrow
+direction couldn't be controlled. New additive `Endpoint.dir?: "left" | "right" |
+"up" | "down"` sets the way the connector runs at that end — for `to` the arrow
+points that way; for `from` it leaves that way. Absent = auto.
+
+- **Routing (`lib/annotations.ts`, pure):** `anchorAxis`/`anchorDir` honor `dir`
+  even for free points (precedence explicit `dir` → anchor edge → heuristic);
+  `anchorDir(ep, isTo)` is role-aware (`to`'s outward normal is −arrow).
+  `squareRoute` sign-forces a single explicitly-directed end (clean elbow when the
+  far end already sits on the arrow side, else a `STUB` so `left` vs `right` differ)
+  — gated on an explicit `dir` (`from.dir`/`to.dir`, not `anchorDir`) so anchored /
+  free-no-`dir` connectors route byte-identically (no regression). P3 bends still
+  apply on top.
+- **Editor + print parity:** `dir` flows through `connectorPoints`; the renderer
+  (`AnnotationLayer.tsx`) is untouched. Square routing only; no schema-version
+  bump / migration.
+- **UI:** an auto/←/→/↑/↓ `<select>` in the connector inspector's From/To rows
+  (shown only for square connectors).
+
+Phase 2 (later): an on-canvas drag handle to set `dir` spatially. Known Phase-1
+limitation: for a mixed case (explicit `dir` on one end, the other end anchored on
+a different axis) the `dir` is not yet forced over the far anchor (sign follows
+layout).

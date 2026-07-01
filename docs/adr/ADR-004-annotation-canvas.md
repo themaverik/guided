@@ -248,3 +248,35 @@ the final phase of the elbow epic (after P1 routing, P2 rounding). Completes the
 
 This completes the FigJam-style elbow-connector epic (P1 routing + P2 rounding + P3
 segment handles).
+
+## Amendment (2026-07-01): object alignment snapping + smart guides
+
+Moving or resizing a rectangular surface (box, diamond, text, bracket) now snaps
+its edges/center to alignment lines from other surfaces, the grid cells and primary
+image slots beneath, and the page (center + edges), with Figma-style guide lines.
+
+- **Pure geometry (`lib/annotations.ts`):** `snapAlign(moving, targets, thrX, thrY,
+  mode)` returns `{ dx, dy, guides }` — the per-axis nearest-line delta plus one
+  `GuideLine { axis, at }` per snapped axis. Matching is **any-to-any** (any moving
+  line may snap to any target line — edge-to-edge, edge-to-center, center-to-center),
+  the exact Figma behavior. `move` snaps all six reference lines; `resize` snaps only
+  the dragged right/bottom edge. X and Y resolve independently. The result type is
+  `AlignSnapResult` (the name `SnapResult` was already taken by `snapPoint`). The
+  helper is source-agnostic; the caller supplies the target rects.
+- **Editor (`PreviewAnnotations.tsx`):** at drag-start it collects targets once via
+  `collectSnapTargets` — data-model rectangular surfaces (excluding the dragged one)
+  + DOM-measured `.grid-cell`/`.img-slot` rects (normalized to the page rect, the
+  same measurement `PreviewGridResize` uses) + the page `{0,0,1,1}`. Threshold is
+  screen-consistent (`SNAP_PX = 6` px ÷ on-screen size `W*scale`/`H*scale`). Guides
+  render as transient red lines and clear on pointer-up. **Editor-only — nothing
+  prints** (guides live in `PreviewAnnotations`, not `AnnotationLayer`; verified by
+  grep — no snapping/guide refs in the renderer or print path). **No schema change.**
+- **Connectors stay free:** endpoints are neither source nor target of alignment
+  snapping; behavior is unchanged (anchor-snap-or-free).
+- **Alt = universal bypass:** disables alignment for surfaces and the anchor/axis
+  snap for connectors (fully-free placement on demand).
+
+Verification: 8 unit tests for `snapAlign` (suite 168/168). Live-drag UX is an
+in-browser check (the ephemeral demo project had expired at implementation time).
+Out of scope (future): fixed-grid snapping, distribution/equal-spacing guides,
+connector binding to cells/objects, object-spanning guide extent.

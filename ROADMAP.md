@@ -417,9 +417,15 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   (`lib/markdown.test.ts`, 4 cases incl. inline-marks-in-items and marker-type-switch; suite 121/121).
   By-design limits (documented in `markdown.ts:8-17`): no nested lists; bullet+numbered can't mix in one
   block.
-- **Annotation snapping — more options:** extend snapping beyond image edges / center / manual anchors
-  (e.g. snap to the grid, to other objects' edges/centers, and equal-spacing / alignment guides). Builds
-  on the Phase-11 "snapping needs design" note.
+- **Annotation snapping — object alignment + smart guides** — [done] (`feat/annotation-alignment-snapping`).
+  Moving/resizing a rectangular surface (box/diamond/text/bracket) snaps its edges/center to other
+  surfaces, the grid cell borders + primary image slots beneath, and the page (center + edges), any-to-any
+  (Figma-exact), with red smart-guide lines. Pure `snapAlign` helper (`lib/annotations.ts`, 8 tests) +
+  editor-collected targets (`collectSnapTargets` measures `.grid-cell`/`.img-slot`) in `PreviewAnnotations`;
+  screen-consistent ~6px threshold; **Alt** bypasses snapping (surfaces + connectors → fully-free placement).
+  Editor-only (guides never print); renderer/print untouched; no schema change. Spec/plan
+  `docs/superpowers/{specs,plans}/2026-07-01-annotation-alignment-snapping*`, ADR-004 amended. Suite 168/168.
+  *Still open (separate item):* fixed-**grid** snapping and equal-spacing/distribution guides.
 - **Bug — square (orthogonal) connector routing** — [done] (`fix/connector-orthogonal-routing`). Root
   cause: `connectorPoints` picked the elbow orientation purely from the normalized run (`|Δx|≥|Δy|`) and
   ignored the side an *anchored* endpoint attaches to, so a connector bound to e.g. a box's **right** edge

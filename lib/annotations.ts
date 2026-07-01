@@ -614,6 +614,69 @@ export function snapAxisVector(
   return { dx, dy };
 }
 
+/** An axis-aligned rectangle in normalized 0–1 page coordinates. */
+export interface Rect { x: number; y: number; w: number; h: number }
+
+/** A smart-guide line to draw while dragging (full-page extent in v1). */
+export interface GuideLine { axis: "x" | "y"; at: number }
+
+export interface AlignSnapResult { dx: number; dy: number; guides: GuideLine[] }
+
+/** Nearest target line to any source line within `thr`; returns the signed delta
+ *  (target − source) and the matched target coordinate, or null. */
+function nearestLine(
+  src: number[],
+  tgt: number[],
+  thr: number,
+): { delta: number; at: number } | null {
+  let bestDist = Infinity;
+  let out: { delta: number; at: number } | null = null;
+  for (const s of src) {
+    for (const t of tgt) {
+      const d = Math.abs(t - s);
+      if (d <= thr && d < bestDist) {
+        bestDist = d;
+        out = { delta: t - s, at: t };
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Figma-style alignment snap for a rectangular surface. Compares the moving
+ * rect's reference lines to every target's edges + centers, per axis, and returns
+ * the position/size delta to apply plus one guide per snapped axis. **Any** moving
+ * line may snap to **any** target line (edge-to-edge, edge-to-center,
+ * center-to-center) — the exact Figma behavior. `move` snaps all six lines;
+ * `resize` snaps only the dragged right (X) and bottom (Y) edges. X and Y resolve
+ * independently. Pure. `targets` should already exclude the moving surface itself.
+ */
+export function snapAlign(
+  moving: Rect,
+  targets: Rect[],
+  thrX: number,
+  thrY: number,
+  mode: "move" | "resize",
+): AlignSnapResult {
+  const srcX =
+    mode === "resize"
+      ? [moving.x + moving.w]
+      : [moving.x, moving.x + moving.w / 2, moving.x + moving.w];
+  const srcY =
+    mode === "resize"
+      ? [moving.y + moving.h]
+      : [moving.y, moving.y + moving.h / 2, moving.y + moving.h];
+  const tgtX = targets.flatMap((t) => [t.x, t.x + t.w / 2, t.x + t.w]);
+  const tgtY = targets.flatMap((t) => [t.y, t.y + t.h / 2, t.y + t.h]);
+  const bx = nearestLine(srcX, tgtX, thrX);
+  const by = nearestLine(srcY, tgtY, thrY);
+  const guides: GuideLine[] = [];
+  if (bx) guides.push({ axis: "x", at: bx.at });
+  if (by) guides.push({ axis: "y", at: by.at });
+  return { dx: bx ? bx.delta : 0, dy: by ? by.delta : 0, guides };
+}
+
 /** Normalized value → CSS/SVG percentage string. */
 export const pct = (n: number): string => `${n * 100}%`;
 

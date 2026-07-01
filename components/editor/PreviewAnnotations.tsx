@@ -25,14 +25,47 @@ import {
   connectorRoute,
   diamondSegments,
   resolveEndpoint,
+  snapAlign,
   snapAxisVector,
   snapPoint,
   squareBaseRoute,
 } from "@/lib/annotations";
+import type { GuideLine, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 type Part = "move" | "resize" | "from" | "to" | "wp" | "seg";
+
+/** Screen-space snap radius (px) for alignment; converted to normalized per axis. */
+const SNAP_PX = 6;
+
+/** Alignment snap targets in normalized page coords: other rectangular surfaces
+ *  (excluding the dragged one), the measured grid cells + primary image slots, and
+ *  the page itself. Measured once at drag-start (targets are static during a drag). */
+function collectSnapTargets(
+  pageEl: HTMLElement,
+  annotations: Annotation[],
+  excludeId: string,
+): Rect[] {
+  const pr = pageEl.getBoundingClientRect();
+  const norm = (b: DOMRect): Rect => ({
+    x: (b.left - pr.left) / pr.width,
+    y: (b.top - pr.top) / pr.height,
+    w: b.width / pr.width,
+    h: b.height / pr.height,
+  });
+  const rects: Rect[] = [{ x: 0, y: 0, w: 1, h: 1 }]; // the page
+  for (const an of annotations) {
+    if (an.id === excludeId) continue;
+    if (an.kind === "box" || an.kind === "diamond" || an.kind === "text" || an.kind === "bracket") {
+      rects.push({ x: an.x, y: an.y, w: an.w, h: an.h });
+    }
+  }
+  pageEl.querySelectorAll<HTMLElement>(".grid-cell, .img-slot").forEach((el) => {
+    rects.push(norm(el.getBoundingClientRect()));
+  });
+  return rects;
+}
 
 const surfaceAnchors = (s: Surface): Anchor[] =>
   s.kind === "box" || s.kind === "text"
@@ -86,9 +119,11 @@ export default function PreviewAnnotations({
     wp?: number;
     baseSeg?: number;
     axis?: "h" | "v";
+    targets?: Rect[];
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
+  const [activeGuides, setActiveGuides] = useState<GuideLine[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(
     null,
@@ -136,7 +171,12 @@ export default function PreviewAnnotations({
       grabX = p.x - a.x;
       grabY = p.y - a.y;
     }
-    drag.current = { id, part, grabX, grabY };
+    let targets: Rect[] | undefined;
+    if (part === "move" || part === "resize") {
+      const pageEl = scalerRef.current?.querySelectorAll<HTMLElement>(".page")[pageIndex];
+      if (pageEl) targets = collectSnapTargets(pageEl, annotations, id);
+    }
+    drag.current = { id, part, grabX, grabY, targets };
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
@@ -155,29 +195,45 @@ export default function PreviewAnnotations({
       svgRef.current?.setPointerCapture(e.pointerId);
     };
 
-  const apply = (p: { x: number; y: number }, shift = false) => {
+  const apply = (p: { x: number; y: number }, shift = false, alt = false) => {
     const d = drag.current;
     if (!d) return;
     const a = annotations.find((x) => x.id === d.id);
     if (!a) return;
+    const thrX = SNAP_PX / (W * scale);
+    const thrY = SNAP_PX / (H * scale);
     if (a.kind !== "connector") {
       if (d.part === "move") {
-        updateAnnotation(ci, si, d.id, {
-          x: clamp01(p.x - d.grabX),
-          y: clamp01(p.y - d.grabY),
-        });
+        let x = clamp01(p.x - d.grabX);
+        let y = clamp01(p.y - d.grabY);
+        let guides: GuideLine[] = [];
+        if (!alt && d.targets && a.kind !== "line") {
+          const s = snapAlign({ x, y, w: a.w, h: a.h }, d.targets, thrX, thrY, "move");
+          x = clamp01(x + s.dx);
+          y = clamp01(y + s.dy);
+          guides = s.guides;
+        }
+        setActiveGuides(guides);
+        updateAnnotation(ci, si, d.id, { x, y });
       } else if (a.kind === "line") {
+        setActiveGuides([]);
         // A line points any direction, so allow negative extent (full 360°
         // rotation). Snap to horizontal/vertical within a small angle; Shift
         // hard-locks the dominant axis.
         const { dx: w, dy: h } = snapAxisVector(p.x - a.x, p.y - a.y, shift);
         updateAnnotation(ci, si, d.id, { w, h });
       } else {
-        // Box/bracket need a positive extent.
-        updateAnnotation(ci, si, d.id, {
-          w: Math.max(0.01, p.x - a.x),
-          h: Math.max(0.005, p.y - a.y),
-        });
+        let w = Math.max(0.01, p.x - a.x);
+        let h = Math.max(0.005, p.y - a.y);
+        let guides: GuideLine[] = [];
+        if (!alt && d.targets) {
+          const s = snapAlign({ x: a.x, y: a.y, w, h }, d.targets, thrX, thrY, "resize");
+          w = Math.max(0.01, w + s.dx);
+          h = Math.max(0.005, h + s.dy);
+          guides = s.guides;
+        }
+        setActiveGuides(guides);
+        updateAnnotation(ci, si, d.id, { w, h });
       }
       return;
     }
@@ -195,19 +251,23 @@ export default function PreviewAnnotations({
       updateAnnotation(ci, si, d.id, { waypoints: wps });
       return;
     }
-    const snap = snapPoint(surfaces, p, 0.025);
     const cur = d.part === "from" ? a.from : a.to;
     let ep: Endpoint;
-    if (snap.ref) {
-      ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
+    if (alt) {
+      ep = { style: cur.style, size: cur.size, x: p.x, y: p.y };
     } else {
-      // Axis-snap a free endpoint into line with the opposite endpoint, so a
-      // perfectly horizontal/vertical connector is easy to make. The snap is
-      // angle-based (Shift hard-locks the dominant axis), so a shallow angle
-      // holds at any connector length.
-      const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
-      const { dx, dy } = snapAxisVector(snap.x - other.x, snap.y - other.y, shift);
-      ep = { style: cur.style, size: cur.size, x: other.x + dx, y: other.y + dy };
+      const snap = snapPoint(surfaces, p, 0.025);
+      if (snap.ref) {
+        ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
+      } else {
+        // Axis-snap a free endpoint into line with the opposite endpoint, so a
+        // perfectly horizontal/vertical connector is easy to make. The snap is
+        // angle-based (Shift hard-locks the dominant axis), so a shallow angle
+        // holds at any connector length.
+        const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
+        const { dx, dy } = snapAxisVector(snap.x - other.x, snap.y - other.y, shift);
+        ep = { style: cur.style, size: cur.size, x: other.x + dx, y: other.y + dy };
+      }
     }
     updateAnnotation(ci, si, d.id, { [d.part]: ep });
   };
@@ -216,14 +276,16 @@ export default function PreviewAnnotations({
     if (!drag.current) return;
     const p = toN(e);
     const shift = e.shiftKey;
+    const alt = e.altKey;
     if (raf.current != null) cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => apply(p, shift));
+    raf.current = requestAnimationFrame(() => apply(p, shift, alt));
   };
 
   const onUp = (e: React.PointerEvent) => {
     drag.current = null;
     if (raf.current != null) cancelAnimationFrame(raf.current);
     svgRef.current?.releasePointerCapture(e.pointerId);
+    setActiveGuides([]);
     force((n) => n + 1);
   };
 
@@ -256,6 +318,13 @@ export default function PreviewAnnotations({
         if (e.target === svgRef.current) selectAnnotation(null);
       }}
     >
+      {activeGuides.map((g, i) =>
+        g.axis === "x" ? (
+          <line key={`guide-${i}`} x1={g.at * W} y1={0} x2={g.at * W} y2={H} className="preview-anno-guide" />
+        ) : (
+          <line key={`guide-${i}`} x1={0} y1={g.at * H} x2={W} y2={g.at * H} className="preview-anno-guide" />
+        ),
+      )}
       {/* Transparent hit-areas: click any annotation to focus it. */}
       {annotations.map((a) => {
         const onDown = (e: React.PointerEvent) => {

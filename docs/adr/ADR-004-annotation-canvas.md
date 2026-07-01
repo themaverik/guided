@@ -280,3 +280,29 @@ Verification: 8 unit tests for `snapAlign` (suite 168/168). Live-drag UX is an
 in-browser check (the ephemeral demo project had expired at implementation time).
 Out of scope (future): fixed-grid snapping, distribution/equal-spacing guides,
 connector binding to cells/objects, object-spanning guide extent.
+
+## Amendment (2026-07-01): connector endpoints snap to grid content
+
+Connector endpoints now snap to **grid-content** anchors — cell borders, screenshots
+(`.img-slot`), callouts, and text blocks — landing as a **free point**
+(snap-and-stay, no binding). Drawn-Surface binding (`ref`+`anchor`) and the Alt
+bypass are unchanged. (Resolves the "connector snapping doesn't work over a grid
+step" report — a grid step with no drawn shapes previously offered no snap targets
+and no snap dots.)
+
+- **Pure helpers (`lib/annotations.ts`):** `rectAnchors(rect)` (the 9 box anchor
+  points) and `nearestPoint(p, points, thr)` (closest within threshold, or null).
+- **Editor (`PreviewAnnotations.tsx`):** when a connector is focused, a
+  `useLayoutEffect` measures `.grid-cell`/`.img-slot`/`.callout`/`.grid-text` rects
+  (normalized to the page rect) and flattens `rectAnchors` into `gridAnchors`; those
+  points render as snap dots (same `.preview-anno-snap` style) so targets are
+  visible. The endpoint drag snaps in precedence order: drawn-surface anchor (binds)
+  → grid-content anchor (free point, via `nearestPoint`, `POINT_SNAP_PX = 8` px ÷
+  on-screen size) → axis-snap fallback.
+- **No schema change; editor-only.** A grid snap stores a plain free `{x, y}` that
+  resolves identically in the PDF; the renderer/print path is untouched. Grid content
+  isn't re-tracked (snap-and-stay). The connector is stored in `step.annotations`
+  for both legacy and grid steps, so this works in both modes.
+
+Out of scope (future): true binding/re-tracking of a connector to grid content;
+binding to sub-parts of a callout.

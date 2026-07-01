@@ -24,13 +24,15 @@ import {
   connectorPoints,
   connectorRoute,
   diamondSegments,
+  nearestPoint,
+  rectAnchors,
   resolveEndpoint,
   snapAlign,
   snapAxisVector,
   snapPoint,
   squareBaseRoute,
 } from "@/lib/annotations";
-import type { GuideLine, Rect } from "@/lib/annotations";
+import type { GuideLine, Point, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -38,6 +40,8 @@ type Part = "move" | "resize" | "from" | "to" | "wp" | "seg";
 
 /** Screen-space snap radius (px) for alignment; converted to normalized per axis. */
 const SNAP_PX = 6;
+/** Screen-space snap radius (px) for connector-endpoint → grid-content anchors. */
+const POINT_SNAP_PX = 8;
 
 /** Alignment snap targets in normalized page coords: other rectangular surfaces
  *  (excluding the dragged one), the measured grid cells + primary image slots, and
@@ -124,6 +128,7 @@ export default function PreviewAnnotations({
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
   const [activeGuides, setActiveGuides] = useState<GuideLine[]>([]);
+  const [gridAnchors, setGridAnchors] = useState<Point[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(
     null,
@@ -142,6 +147,36 @@ export default function PreviewAnnotations({
     }
     setRect({ l: el.offsetLeft, t: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
   }, [scalerRef, pageIndex, fitKey, scale]);
+
+  // Grid-content anchor points (cells, screenshots, callouts, text) for the
+  // focused connector's endpoint snapping + snap dots. DOM-measured, editor-only.
+  useLayoutEffect(() => {
+    const focusedAnno = annotations.find((a) => a.id === selectedId);
+    const el = scalerRef.current?.querySelectorAll<HTMLElement>(".page")[pageIndex];
+    if (focusedAnno?.kind !== "connector" || !el) {
+      setGridAnchors([]);
+      return;
+    }
+    const pr = el.getBoundingClientRect();
+    if (!pr.width || !pr.height) {
+      setGridAnchors([]);
+      return;
+    }
+    const anchors: Point[] = [];
+    el.querySelectorAll<HTMLElement>(".grid-cell, .img-slot, .callout, .grid-text").forEach(
+      (node) => {
+        const b = node.getBoundingClientRect();
+        const r: Rect = {
+          x: (b.left - pr.left) / pr.width,
+          y: (b.top - pr.top) / pr.height,
+          w: b.width / pr.width,
+          h: b.height / pr.height,
+        };
+        anchors.push(...rectAnchors(r));
+      },
+    );
+    setGridAnchors(anchors);
+  }, [scalerRef, pageIndex, fitKey, scale, selectedId, annotations]);
 
   if (!rect) return null;
   const { w: W, h: H } = rect;
@@ -260,13 +295,20 @@ export default function PreviewAnnotations({
       if (snap.ref) {
         ep = { style: cur.style, size: cur.size, ref: snap.ref, anchor: snap.anchor };
       } else {
-        // Axis-snap a free endpoint into line with the opposite endpoint, so a
-        // perfectly horizontal/vertical connector is easy to make. The snap is
-        // angle-based (Shift hard-locks the dominant axis), so a shallow angle
-        // holds at any connector length.
-        const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
-        const { dx, dy } = snapAxisVector(snap.x - other.x, snap.y - other.y, shift);
-        ep = { style: cur.style, size: cur.size, x: other.x + dx, y: other.y + dy };
+        const gp = nearestPoint(p, gridAnchors, POINT_SNAP_PX / (W * scale));
+        if (gp) {
+          // Snap to a grid-content anchor (cell/screenshot/callout/text) as a
+          // free point — snap-and-stay, no binding.
+          ep = { style: cur.style, size: cur.size, x: gp.x, y: gp.y };
+        } else {
+          // Axis-snap a free endpoint into line with the opposite endpoint, so a
+          // perfectly horizontal/vertical connector is easy to make. The snap is
+          // angle-based (Shift hard-locks the dominant axis), so a shallow angle
+          // holds at any connector length.
+          const other = resolveEndpoint(annotations, d.part === "from" ? a.to : a.from);
+          const { dx, dy } = snapAxisVector(snap.x - other.x, snap.y - other.y, shift);
+          ep = { style: cur.style, size: cur.size, x: other.x + dx, y: other.y + dy };
+        }
       }
     }
     updateAnnotation(ci, si, d.id, { [d.part]: ep });
@@ -443,6 +485,17 @@ export default function PreviewAnnotations({
               );
             }),
           )
+        : null}
+      {showSnap
+        ? gridAnchors.map((gp, i) => (
+            <circle
+              key={`grid-snap-${i}`}
+              cx={gp.x * W}
+              cy={gp.y * H}
+              r={3.5}
+              className="preview-anno-snap"
+            />
+          ))
         : null}
       {focused ? (
         focused.kind === "connector" ? (

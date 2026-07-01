@@ -435,6 +435,17 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   (free point) → axis-snap; **Alt** bypasses; ~8px threshold. No schema change; renderer/print untouched.
   Spec/plan `docs/superpowers/{specs,plans}/2026-07-01-connector-grid-content-snapping*`, ADR-004 amended.
   *Still open (future):* true re-tracking binding of a connector to grid content.
+- **Connector endpoint direction override (Phase 1)** — [done] (`feat/connector-endpoint-direction`).
+  A square connector's endpoint can carry `Endpoint.dir?: "left"|"right"|"up"|"down"` so the arrow points a
+  chosen way instead of only the dominant-axis heuristic (fixes "arrow stuck pointing up"). Routing
+  (`lib/annotations.ts`): `anchorAxis`/`anchorDir` honor `dir` for free points (precedence explicit dir →
+  anchor → heuristic), role-aware `anchorDir(ep,isTo)`, `squareRoute` sign-forces a single directed end via
+  a `STUB` so ←/→ & ↑/↓ differ — gated on explicit `dir` so existing connectors route byte-identically. UI:
+  auto/←/→/↑/↓ select in the connector inspector's From/To rows. Data-driven (editor + PDF identical),
+  square-only, no schema bump. 5 tests, suite 178/178. Spec/plan
+  `docs/superpowers/{specs,plans}/2026-07-01-connector-endpoint-direction*`, ADR-004 amended.
+  *Phase 2 (pending):* on-canvas drag handle to set `dir` spatially. *Known limit:* mixed dir+far-anchor
+  on a different axis follows layout.
 - **Bug — square (orthogonal) connector routing** — [done] (`fix/connector-orthogonal-routing`). Root
   cause: `connectorPoints` picked the elbow orientation purely from the normalized run (`|Δx|≥|Δy|`) and
   ignored the side an *anchored* endpoint attaches to, so a connector bound to e.g. a box's **right** edge

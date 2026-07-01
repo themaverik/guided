@@ -676,6 +676,12 @@
 .preview-anno-seg:active {
   cursor: grabbing;
 }
+.preview-anno-guide {
+  stroke: #e5484d;
+  stroke-width: 1;
+  pointer-events: none;
+  shape-rendering: crispEdges;
+}
 .anno-hint {
   font-size: 11px;
   color: var(--color-muted);

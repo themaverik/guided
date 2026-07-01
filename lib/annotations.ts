@@ -151,6 +151,7 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
  * one — so the elbow exits/enters perpendicular to the bound edge.
  */
 function anchorAxis(ep: Endpoint): "h" | "v" | null {
+  if (ep.dir) return ep.dir === "left" || ep.dir === "right" ? "h" : "v";
   if (!ep.ref) return null;
   switch (ep.anchor) {
     case "left":
@@ -169,10 +170,24 @@ function anchorAxis(ep: Endpoint): "h" | "v" | null {
  *  (C) or facing-away (U) arrangements. Tunable. */
 const STUB = 0.04;
 
+/** Unit travel vector for an endpoint direction override. */
+const DIR_VEC: Record<NonNullable<import("./book-schema").Endpoint["dir"]>, Point> = {
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+};
+
 /** Outward edge normal for an endpoint's anchor, or null for free points and
  *  non-edge anchors (center / corners / line ends). Sign-aware sibling of
- *  anchorAxis: a `right` edge exits +x, a `top` edge exits −y, etc. */
-function anchorDir(ep: Endpoint): Point | null {
+ *  anchorAxis: a `right` edge exits +x, a `top` edge exits −y, etc.
+ *  When `ep.dir` is set, honors the explicit direction (role-aware for `to`
+ *  endpoints: `isTo=true` negates so the outward normal at b = −arrow). */
+function anchorDir(ep: Endpoint, isTo = false): Point | null {
+  if (ep.dir) {
+    const v = DIR_VEC[ep.dir];
+    return isTo ? { x: -v.x, y: -v.y } : v; // `to` end: outward = −arrow
+  }
   if (!ep.ref) return null;
   switch (ep.anchor) {
     case "right":
@@ -247,18 +262,51 @@ function verticalRoute(a: Point, b: Point, day: number, dby: number): Point[] {
   ];
 }
 
+/** Interior corners when only the `to` end is explicitly directed (outB = its
+ *  outward normal = −arrow). Uses a clean elbow when the far end already sits on
+ *  the arrow side, else a STUB so `left` vs `right` (and `up`/`down`) differ. */
+function directedToRoute(a: Point, b: Point, outB: Point): Point[] {
+  if (outB.x !== 0) {
+    const arrowSign = -outB.x;
+    if (Math.sign(b.x - a.x) === arrowSign) return [{ x: a.x, y: b.y }];
+    const penX = b.x + outB.x * STUB;
+    return [{ x: penX, y: a.y }, { x: penX, y: b.y }];
+  }
+  const arrowSign = -outB.y;
+  if (Math.sign(b.y - a.y) === arrowSign) return [{ x: b.x, y: a.y }];
+  const penY = b.y + outB.y * STUB;
+  return [{ x: a.x, y: penY }, { x: b.x, y: penY }];
+}
+
+/** Interior corners when only the `from` end is explicitly directed (outA = the
+ *  leave direction). Mirror of directedToRoute for the first segment. */
+function directedFromRoute(a: Point, b: Point, outA: Point): Point[] {
+  if (outA.x !== 0) {
+    if (Math.sign(b.x - a.x) === outA.x) return [{ x: b.x, y: a.y }];
+    const fx = a.x + outA.x * STUB;
+    return [{ x: fx, y: a.y }, { x: fx, y: b.y }];
+  }
+  if (Math.sign(b.y - a.y) === outA.y) return [{ x: a.x, y: b.y }];
+  const fy = a.y + outA.y * STUB;
+  return [{ x: a.x, y: fy }, { x: b.x, y: fy }];
+}
+
 /** Interior corner(s) of a square (orthogonal) route between resolved points a
  *  and b. Both ends edge-anchored to the SAME axis route via horizontalRoute /
- *  verticalRoute (a single elbow can't satisfy both); every other case (differing
+ *  verticalRoute (a single elbow can't satisfy both); exactly one end carries an
+ *  explicit `dir` → sign-forced single-directed route; every other case (differing
  *  axes, or an unanchored / center / corner end) uses the single perpendicular
  *  elbow from squareHorizontalFirst. */
 function squareRoute(a: Point, b: Point, from: Endpoint, to: Endpoint): Point[] {
-  const dirA = anchorDir(from);
-  const dirB = anchorDir(to);
+  const dirA = anchorDir(from, false);
+  const dirB = anchorDir(to, true);
   if (dirA && dirB) {
     if (dirA.x !== 0 && dirB.x !== 0) return horizontalRoute(a, b, dirA.x, dirB.x);
     if (dirA.y !== 0 && dirB.y !== 0) return verticalRoute(a, b, dirA.y, dirB.y);
   }
+  // Exactly one end directed by an EXPLICIT dir → sign-forced route.
+  if (from.dir && !dirB) return directedFromRoute(a, b, dirA!);
+  if (to.dir && !dirA) return directedToRoute(a, b, dirB!);
   return squareHorizontalFirst(a, b, from, to)
     ? [{ x: b.x, y: a.y }]
     : [{ x: a.x, y: b.y }];

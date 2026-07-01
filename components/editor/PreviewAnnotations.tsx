@@ -31,15 +31,18 @@ import {
   snapAxisVector,
   snapPoint,
   squareBaseRoute,
+  compassDir,
 } from "@/lib/annotations";
 import type { GuideLine, Point, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-type Part = "move" | "resize" | "from" | "to" | "wp" | "seg";
+type Part = "move" | "resize" | "from" | "to" | "wp" | "seg" | "dir";
 
 /** Screen-space snap radius (px) for alignment; converted to normalized per axis. */
 const SNAP_PX = 6;
+/** Screen-px stem length of the endpoint direction knob. */
+const KNOB_PX = 24;
 /** Screen-space snap radius (px) for connector-endpoint → grid-content anchors. */
 const POINT_SNAP_PX = 8;
 
@@ -124,6 +127,7 @@ export default function PreviewAnnotations({
     baseSeg?: number;
     axis?: "h" | "v";
     targets?: Rect[];
+    which?: "from" | "to";
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
@@ -230,6 +234,14 @@ export default function PreviewAnnotations({
       svgRef.current?.setPointerCapture(e.pointerId);
     };
 
+  const startDirDrag =
+    (id: string, which: "from" | "to") => (e: React.PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current = { id, part: "dir", grabX: 0, grabY: 0, which };
+      svgRef.current?.setPointerCapture(e.pointerId);
+    };
+
   const apply = (p: { x: number; y: number }, shift = false, alt = false) => {
     const d = drag.current;
     if (!d) return;
@@ -284,6 +296,13 @@ export default function PreviewAnnotations({
       const wps = [...(a.waypoints ?? [])];
       wps[d.wp] = { x: p.x, y: p.y };
       updateAnnotation(ci, si, d.id, { waypoints: wps });
+      return;
+    }
+    if (d.part === "dir" && d.which) {
+      const curEp = a[d.which];
+      const ep0 = resolveEndpoint(annotations, curEp);
+      const dir = compassDir(p.x - ep0.x, p.y - ep0.y);
+      updateAnnotation(ci, si, d.id, { [d.which]: { ...curEp, dir } });
       return;
     }
     const cur = d.part === "from" ? a.from : a.to;
@@ -549,6 +568,45 @@ export default function PreviewAnnotations({
                     onPointerDown={startWp(focused.id, i)}
                   />
                 ))}
+            {(focused as Connector).routing === "square"
+              ? (() => {
+                  const pts = connectorRoute(annotations, focused as Connector).points;
+                  return (["from", "to"] as const).map((which) => {
+                    const ep = resolveEndpoint(annotations, (focused as Connector)[which]);
+                    const [pA, pB] =
+                      which === "from"
+                        ? [pts[0], pts[1]]
+                        : [pts[pts.length - 2], pts[pts.length - 1]];
+                    const dx = pA && pB ? pB.x - pA.x : 0;
+                    const dy = pA && pB ? pB.y - pA.y : 0;
+                    const ux = Math.abs(dx) >= Math.abs(dy) ? Math.sign(dx) : 0;
+                    const uy = ux === 0 ? Math.sign(dy) : 0;
+                    if (ux === 0 && uy === 0) return null; // no derivable direction
+                    const ex = ep.x * W;
+                    const ey = ep.y * H;
+                    const kx = ex + ux * KNOB_PX;
+                    const ky = ey + uy * KNOB_PX;
+                    return (
+                      <g key={`dir-${which}`}>
+                        <line
+                          x1={ex}
+                          y1={ey}
+                          x2={kx}
+                          y2={ky}
+                          className="preview-anno-dir-stem"
+                        />
+                        <circle
+                          cx={kx}
+                          cy={ky}
+                          r={5}
+                          className="preview-anno-dir"
+                          onPointerDown={startDirDrag(focused.id, which)}
+                        />
+                      </g>
+                    );
+                  });
+                })()
+              : null}
           </>
         ) : editingId === focused.id ? null : (
           <>

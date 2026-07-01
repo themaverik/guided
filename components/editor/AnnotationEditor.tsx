@@ -187,6 +187,21 @@ export default function AnnotationEditor({
             ))}
           </select>
         ) : null}
+        {c.routing === "square" ? (
+          <select
+            value={ep.dir ?? ""}
+            onChange={(e) =>
+              set({ dir: (e.target.value || undefined) as Endpoint["dir"] })
+            }
+            title="Direction the connector runs at this end (arrow direction for the To end)"
+          >
+            <option value="">auto dir</option>
+            <option value="left">← left</option>
+            <option value="right">→ right</option>
+            <option value="up">↑ up</option>
+            <option value="down">↓ down</option>
+          </select>
+        ) : null}
       </div>
     );
   };

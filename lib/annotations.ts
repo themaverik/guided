@@ -662,6 +662,14 @@ export function snapAxisVector(
   return { dx, dy };
 }
 
+/** Snap a vector to the nearest compass direction (dominant axis + sign; an exact
+ *  tie resolves toward horizontal). Used to turn a direction-knob drag into an
+ *  `Endpoint.dir` value. */
+export function compassDir(dx: number, dy: number): "left" | "right" | "up" | "down" {
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "right" : "left";
+  return dy >= 0 ? "down" : "up";
+}
+
 /** An axis-aligned rectangle in normalized 0–1 page coordinates. */
 export interface Rect { x: number; y: number; w: number; h: number }
 

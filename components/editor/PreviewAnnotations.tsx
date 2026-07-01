@@ -207,7 +207,7 @@ export default function PreviewAnnotations({
         let x = clamp01(p.x - d.grabX);
         let y = clamp01(p.y - d.grabY);
         let guides: GuideLine[] = [];
-        if (!alt && d.targets) {
+        if (!alt && d.targets && a.kind !== "line") {
           const s = snapAlign({ x, y, w: a.w, h: a.h }, d.targets, thrX, thrY, "move");
           x = clamp01(x + s.dx);
           y = clamp01(y + s.dy);
@@ -217,6 +217,9 @@ export default function PreviewAnnotations({
         updateAnnotation(ci, si, d.id, { x, y });
       } else if (a.kind === "line") {
         setActiveGuides([]);
+        // A line points any direction, so allow negative extent (full 360°
+        // rotation). Snap to horizontal/vertical within a small angle; Shift
+        // hard-locks the dominant axis.
         const { dx: w, dy: h } = snapAxisVector(p.x - a.x, p.y - a.y, shift);
         updateAnnotation(ci, si, d.id, { w, h });
       } else {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -633,5 +633,21 @@ describe("nearestPoint", () => {
     expect(
       nearestPoint({ x: 0.5, y: 0.5 }, [{ x: 0.375, y: 0.5 }, { x: 0.625, y: 0.5 }], 0.2),
     ).toEqual({ x: 0.375, y: 0.5 });
+  });
+});
+
+describe("compassDir", () => {
+  it("snaps to the four axes", () => {
+    expect(compassDir(0.1, 0)).toBe("right");
+    expect(compassDir(-0.1, 0)).toBe("left");
+    expect(compassDir(0, 0.1)).toBe("down");
+    expect(compassDir(0, -0.1)).toBe("up");
+  });
+  it("picks the dominant axis", () => {
+    expect(compassDir(0.1, 0.05)).toBe("right");
+    expect(compassDir(0.05, -0.1)).toBe("up");
+  });
+  it("breaks an exact tie toward horizontal", () => {
+    expect(compassDir(0.1, 0.1)).toBe("right");
   });
 });

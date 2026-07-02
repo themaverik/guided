@@ -73,7 +73,7 @@ export default function AnnotationEditor({
   annotations: Annotation[];
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
-  const removeAnnotation = useEditor((s) => s.removeAnnotation);
+  const requestDeleteAnnotation = useEditor((s) => s.requestDeleteAnnotation);
   const selectAnnotation = useEditor((s) => s.selectAnnotation);
   const selectedAnnotation = useEditor((s) => s.selectedAnnotation);
 
@@ -242,7 +242,7 @@ export default function AnnotationEditor({
             />
             <button
               className="mini-btn danger"
-              onClick={() => removeAnnotation(ci, si, a.id)}
+              onClick={() => requestDeleteAnnotation(ci, si, a.id)}
               aria-label="Remove annotation"
             >
               ×

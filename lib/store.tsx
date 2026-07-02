@@ -71,6 +71,8 @@ export interface EditorState {
   activeTool: AnnotationTool;
   /** Transient: stroke color applied to newly-drawn shapes. */
   drawColor: string;
+  /** Transient: the annotation queued for delete-confirmation, or null. */
+  pendingDelete: { ci: number; si: number; id: string } | null;
 
   // selection
   selectChapter: (chapterIndex: number) => void;
@@ -183,6 +185,8 @@ export interface EditorState {
   selectAnnotation: (id: string | null) => void;
   setActiveTool: (tool: AnnotationTool) => void;
   setDrawColor: (color: string) => void;
+  requestDeleteAnnotation: (ci: number, si: number, id: string) => void;
+  cancelDeleteAnnotation: () => void;
 }
 
 export type EditorStore = StoreApi<EditorState>;
@@ -233,6 +237,7 @@ export function createEditorStore(
     hideGridChrome: false,
     activeTool: "select",
     drawColor: ANNO_STROKE,
+    pendingDelete: null,
 
     // ── selection ──
     selectChapter: (chapterIndex) =>
@@ -473,6 +478,8 @@ export function createEditorStore(
     selectAnnotation: (id) => set({ selectedAnnotation: id }),
     setActiveTool: (tool) => set({ activeTool: tool }),
     setDrawColor: (color) => set({ drawColor: color }),
+    requestDeleteAnnotation: (ci, si, id) => set({ pendingDelete: { ci, si, id } }),
+    cancelDeleteAnnotation: () => set({ pendingDelete: null }),
   }));
 }
 

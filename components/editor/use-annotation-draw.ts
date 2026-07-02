@@ -34,10 +34,13 @@ function buildShape(
   if (tool === "select") return null;
   if (tool === "connector") {
     const nc = newConnector();
+    // Reuse the line floor: a real drag is a signed vector; a bare click / sub-floor
+    // drag yields a default-length connector (so a click still makes a visible shape).
+    const seg = boundsFromDrag(a, b, "line");
     return {
       ...nc,
       from: { ...nc.from, x: a.x, y: a.y },
-      to: { ...nc.to, x: b.x, y: b.y },
+      to: { ...nc.to, x: seg.x + seg.w, y: seg.y + seg.h },
       stroke: color,
     };
   }

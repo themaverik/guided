@@ -424,6 +424,7 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     color/width/endpoint/direction edits without opening the left panel.
   - **SP3 — left-panel cleanup** — [todo]. Migrate or trim the per-shape property cards in the left panel
     now that the primary authoring flow lives on-canvas.
+
 - **Annotation delete key + confirm modal** — [done] (`feat/annotation-delete-confirm`).
   Delete/Backspace removes the selected annotation; the left-panel `×` uses the same path — both
   route through a reusable `ConfirmDialog` (Esc / overlay / Cancel dismiss; focus on Cancel;
@@ -431,6 +432,7 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   skips `<input>`/`<textarea>`/`<select>`/`contenteditable` so text editing is never hijacked.
   Transient `pendingDelete` store state; `AnnotationDeleteController` mounted inside the store
   provider; editor-only (no schema change, renderer/print untouched). ADR-004 amended.
+
 - **UI polish (per DESIGN.md)** — [todo]. Catch-all for visual + interaction refinement against the
   canonical design system in `DESIGN.md` (tokens, type scale, spacing, control styling, focus states,
   mini-toolbars, popovers, mobile touch targets ≥768/<768). Not yet scoped — break into concrete,

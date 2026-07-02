@@ -33,6 +33,7 @@ import type {
 } from "./book-schema";
 import { DEFAULT_WATERMARK_OPACITY, DEFAULT_PAGE_CONFIG } from "./book-schema";
 import * as M from "./book-mutations";
+import { ANNO_STROKE } from "./book-mutations";
 
 export interface Selection {
   chapterIndex: number;
@@ -46,6 +47,15 @@ export interface Selection {
   objectId?: string | null;
 }
 
+export type AnnotationTool =
+  | "select"
+  | "box"
+  | "line"
+  | "bracket"
+  | "diamond"
+  | "text"
+  | "connector";
+
 export interface EditorState {
   /** The project this editor is editing (its slug). */
   projectSlug: string;
@@ -57,6 +67,10 @@ export interface EditorState {
   overflows: string[];
   /** Transient: hide grid editor chrome (guides + handles) for a clean preview. */
   hideGridChrome: boolean;
+  /** Transient: the active annotation tool (drives on-canvas drawing). */
+  activeTool: AnnotationTool;
+  /** Transient: stroke color applied to newly-drawn shapes. */
+  drawColor: string;
 
   // selection
   selectChapter: (chapterIndex: number) => void;
@@ -167,6 +181,8 @@ export interface EditorState {
   ) => void;
   removeAnnotation: (ci: number, si: number, id: string) => void;
   selectAnnotation: (id: string | null) => void;
+  setActiveTool: (tool: AnnotationTool) => void;
+  setDrawColor: (color: string) => void;
 }
 
 export type EditorStore = StoreApi<EditorState>;
@@ -215,6 +231,8 @@ export function createEditorStore(
     selectedAnnotation: null,
     overflows: [],
     hideGridChrome: false,
+    activeTool: "select",
+    drawColor: ANNO_STROKE,
 
     // ── selection ──
     selectChapter: (chapterIndex) =>
@@ -453,6 +471,8 @@ export function createEditorStore(
           s.selectedAnnotation === id ? null : s.selectedAnnotation,
       })),
     selectAnnotation: (id) => set({ selectedAnnotation: id }),
+    setActiveTool: (tool) => set({ activeTool: tool }),
+    setDrawColor: (color) => set({ drawColor: color }),
   }));
 }
 

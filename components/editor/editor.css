@@ -699,6 +699,13 @@
   pointer-events: none;
   shape-rendering: crispEdges;
 }
+.preview-anno-draft {
+  fill: rgba(2, 68, 80, 0.06);
+  stroke: #024450;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
 .anno-hint {
   font-size: 11px;
   color: var(--color-muted);

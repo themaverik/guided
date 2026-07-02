@@ -14,6 +14,7 @@ import { assetBaseFor } from "@/lib/project-routes";
 import { useEditor } from "@/lib/store";
 import { useAutosave } from "@/lib/use-autosave";
 import { DEFAULT_PAGE_CONFIG, stepLayoutMode } from "@/lib/book-schema";
+import AnnotationPalette from "./AnnotationPalette";
 import PreviewAnnotations from "./PreviewAnnotations";
 import PreviewCellFloat from "./PreviewCellFloat";
 import PreviewGridResize from "./PreviewGridResize";
@@ -254,6 +255,9 @@ export default function PreviewPane() {
           </div>
         </div>
       </div>
+      {selection.stepIndex != null ? (
+        <AnnotationPalette ci={selection.chapterIndex} si={selection.stepIndex} />
+      ) : null}
     </div>
   );
 }

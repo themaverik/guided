@@ -407,16 +407,23 @@ dev-only dependency advisories (esbuild / js-yaml) via `pnpm.overrides`.
 Captured from review + smoke testing; sequenced just-in-time into plans (brainstorm → spec → plan →
 subagent-driven execution), each with its own ADR if it touches the schema or annotation model.
 
-- **Floating annotation palette (per DESIGN.md / PRD.md)** — [todo]. Move annotation authoring off the
-  left panel and onto the canvas, per the design's **hybrid inspector**: a **floating tool + swatch palette
-  over the page canvas** (draw / select / drag / snap shapes directly on the page), a **compact popover
-  anchored to the selection** for quick edits (color/width/endpoint/direction), with full numeric
-  properties remaining in the left panel. See `DESIGN.md:170-179` ("tools + palette live in a floating
-  toolbar over the page canvas … the inspector is a popover anchored to the selection") and `PRD.md:95`
-  (hybrid inspector). Today authoring lives entirely in the left-panel `AnnotationEditor`; this is a
-  substantial editor-UX effort — decompose during brainstorm (palette shell → tool buttons → selection
-  popover → migrate the per-shape controls). Editor-only; no `Book`/schema change expected (reuses the
-  existing mutations + `updateAnnotation`). Likely pairs with the OKLCH swatch palette (PRD Phase D).
+- **Floating annotation palette (per DESIGN.md / PRD.md)** — [in progress]. Annotation authoring moves
+  off the left panel onto the canvas, per the design's **hybrid inspector** (`DESIGN.md:170-179`,
+  `PRD.md:95`): a floating tool palette over the page canvas + a compact selection popover + full left-panel
+  properties. Decomposed into slices:
+  - **SP1 — floating tool palette + on-canvas drag-to-size creation + current-color control** — [done]
+    (`feat/floating-annotation-palette`). `AnnotationPalette` floating bar (bottom-center, fixed to preview
+    viewport); `activeTool`/`drawColor` transient store state (no schema change); `useAnnotationDraw` +
+    `PreviewAnnotations` wiring: press→drag→release creates shapes via `boundsFromDrag` (rubber-band for
+    box/diamond/text/bracket, signed start→end for line/connector), bare click drops a default-sized shape,
+    one-shot tools auto-revert to Select + select new shape, `Esc` cancels, grid-mode pointer-events toggle;
+    left-panel add-buttons removed (property cards kept). Editor-only; renderer + print untouched. ADR-004
+    amended. **The full OKLCH swatch palette is the immediate next item** (swap-in point is the plain-hex
+    color chip in SP1).
+  - **SP2 — selection popover** — [todo]. Compact popover anchored to the selected shape for quick
+    color/width/endpoint/direction edits without opening the left panel.
+  - **SP3 — left-panel cleanup** — [todo]. Migrate or trim the per-shape property cards in the left panel
+    now that the primary authoring flow lives on-canvas.
 - **UI polish (per DESIGN.md)** — [todo]. Catch-all for visual + interaction refinement against the
   canonical design system in `DESIGN.md` (tokens, type scale, spacing, control styling, focus states,
   mini-toolbars, popovers, mobile touch targets ≥768/<768). Not yet scoped — break into concrete,

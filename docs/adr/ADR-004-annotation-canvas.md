@@ -352,3 +352,24 @@ Completes the endpoint-direction feature: an on-canvas direction knob to set
   editor chrome, not in `AnnotationLayer`). Square-only.
 
 The endpoint-direction override is now complete (panel + on-canvas).
+
+## Amendment (2026-07-02): floating annotation palette — SP1 (palette + on-canvas creation)
+
+First slice of the hybrid inspector (`DESIGN.md` §7 / `PRD.md` P0). Annotation
+creation moves off the left panel onto a floating bottom-center tool palette over
+the page canvas; shapes are drawn directly on the page.
+
+- **Transient store state:** `activeTool` (`select | box | line | bracket | diamond |
+  text | connector`) + `drawColor` — editor-only, never persisted (no schema change).
+- **`AnnotationPalette.tsx`:** floating bar, fixed to the preview viewport; tool
+  buttons + one plain-hex current-color control (chip + presets + picker). The full
+  OKLCH swatch palette is the next slice; this control is its swap-in point.
+- **On-canvas drawing (`useAnnotationDraw` + `PreviewAnnotations.tsx`):** press→drag→
+  release creates a shape via the pure `boundsFromDrag` helper (`lib/annotations.ts`) —
+  rubber-band for box/diamond/text/bracket, signed start→end for line/connector; a
+  bare click drops a default-sized shape. One-shot tools (revert to Select + select
+  the new shape); `Esc` cancels. In grid mode the overlay captures pointer events only
+  while a tool is active, else it stays `pointer-events:none` for the grid overlays.
+- **Editor-only:** renderer + `/print` untouched; the palette/preview/handles never
+  render in export. The left-panel per-shape property cards remain (trimming them is a
+  later slice); only the six add-buttons were removed.

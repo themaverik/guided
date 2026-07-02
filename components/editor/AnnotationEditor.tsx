@@ -16,7 +16,6 @@ import type {
   Surface,
   TextFont,
 } from "@/lib/book-schema";
-import { newConnector, newSurface } from "@/lib/book-mutations";
 import { resolveEndpoint } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 
@@ -73,7 +72,6 @@ export default function AnnotationEditor({
   si: number;
   annotations: Annotation[];
 }) {
-  const addAnnotation = useEditor((s) => s.addAnnotation);
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
   const removeAnnotation = useEditor((s) => s.removeAnnotation);
   const selectAnnotation = useEditor((s) => s.selectAnnotation);
@@ -209,29 +207,9 @@ export default function AnnotationEditor({
   return (
     <div className="anno-editor">
       <p className="anno-hint">
-        Drag shapes and connector ends on the preview. Snap a connector end to a
-        box/line/bracket to anchor it.
+        Pick a tool from the palette on the canvas and draw directly on the page.
+        Snap a connector end to a box/line/bracket to anchor it.
       </p>
-      <div className="anno-toolbar">
-        <button onClick={() => addAnnotation(ci, si, newSurface("box"))}>
-          + Box
-        </button>
-        <button onClick={() => addAnnotation(ci, si, newSurface("line"))}>
-          + Line
-        </button>
-        <button onClick={() => addAnnotation(ci, si, newSurface("bracket"))}>
-          + Bracket
-        </button>
-        <button onClick={() => addAnnotation(ci, si, newSurface("diamond"))}>
-          + Diamond
-        </button>
-        <button onClick={() => addAnnotation(ci, si, newSurface("text"))}>
-          + Text
-        </button>
-        <button onClick={() => addAnnotation(ci, si, newConnector())}>
-          + Connector
-        </button>
-      </div>
 
       {annotations.map((a) => (
         <div

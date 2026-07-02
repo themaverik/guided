@@ -373,3 +373,19 @@ the page canvas; shapes are drawn directly on the page.
 - **Editor-only:** renderer + `/print` untouched; the palette/preview/handles never
   render in export. The left-panel per-shape property cards remain (trimming them is a
   later slice); only the six add-buttons were removed.
+
+## Amendment (2026-07-02): annotation delete key + confirm modal
+
+Adds a keyboard delete for annotations behind a styled confirmation.
+
+- **Keyboard (`useAnnotationDeleteKey`, mounted via `AnnotationDeleteController`
+  inside the store provider):** Delete/Backspace requests removal of the selected
+  annotation. A pure `shouldHandleDeleteKey(key, active, hasSelection)` guard
+  (`lib/keyboard.ts`, unit-tested) skips `<input>`/`<textarea>`/`<select>`/
+  `contenteditable`, so editing text is never hijacked.
+- **One confirm path:** the key and the left-panel `×` both call
+  `requestDeleteAnnotation` (transient store `pendingDelete`), opening a reusable
+  presentational `ConfirmDialog` (Esc / overlay / Cancel dismiss; focus on Cancel;
+  danger-toned Delete). Confirm → existing `removeAnnotation`.
+- **Editor-only:** transient state, no schema change; renderer/`/print` untouched
+  (the modal is editor chrome).

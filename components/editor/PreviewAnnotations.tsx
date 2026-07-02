@@ -35,6 +35,7 @@ import {
 } from "@/lib/annotations";
 import type { GuideLine, Point, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
+import { useAnnotationDraw } from "./use-annotation-draw";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 type Part = "move" | "resize" | "from" | "to" | "wp" | "seg" | "dir";
@@ -118,6 +119,7 @@ export default function PreviewAnnotations({
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
   const selectAnnotation = useEditor((s) => s.selectAnnotation);
   const svgRef = useRef<SVGSVGElement>(null);
+  const draw = useAnnotationDraw(ci, si);
   const drag = useRef<{
     id: string;
     part: Part;
@@ -334,6 +336,10 @@ export default function PreviewAnnotations({
   };
 
   const onMove = (e: React.PointerEvent) => {
+    if (draw.drawing()) {
+      draw.move(toN(e));
+      return;
+    }
     if (!drag.current) return;
     const p = toN(e);
     const shift = e.shiftKey;
@@ -343,6 +349,11 @@ export default function PreviewAnnotations({
   };
 
   const onUp = (e: React.PointerEvent) => {
+    if (draw.drawing()) {
+      draw.end(toN(e));
+      svgRef.current?.releasePointerCapture(e.pointerId);
+      return;
+    }
     drag.current = null;
     if (raf.current != null) cancelAnimationFrame(raf.current);
     svgRef.current?.releasePointerCapture(e.pointerId);
@@ -368,13 +379,19 @@ export default function PreviewAnnotations({
         position: "absolute",
         left: rect.l,
         top: rect.t,
-        pointerEvents: gridMode ? "none" : undefined,
+        pointerEvents: gridMode && draw.activeTool === "select" ? "none" : undefined,
+        cursor: draw.activeTool !== "select" ? "crosshair" : undefined,
       }}
       width={W}
       height={H}
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerDown={(e) => {
+        if (draw.activeTool !== "select" && e.target === svgRef.current) {
+          e.preventDefault();
+          if (draw.begin(toN(e))) svgRef.current?.setPointerCapture(e.pointerId);
+          return;
+        }
         // Click on empty canvas (the SVG itself, not a shape) clears focus.
         if (e.target === svgRef.current) selectAnnotation(null);
       }}
@@ -386,6 +403,25 @@ export default function PreviewAnnotations({
           <line key={`guide-${i}`} x1={0} y1={g.at * H} x2={W} y2={g.at * H} className="preview-anno-guide" />
         ),
       )}
+      {draw.preview ? (
+        draw.preview.kind === "rect" ? (
+          <rect
+            x={draw.preview.x * W}
+            y={draw.preview.y * H}
+            width={draw.preview.w * W}
+            height={draw.preview.h * H}
+            className="preview-anno-draft"
+          />
+        ) : (
+          <line
+            x1={draw.preview.x1 * W}
+            y1={draw.preview.y1 * H}
+            x2={draw.preview.x2 * W}
+            y2={draw.preview.y2 * H}
+            className="preview-anno-draft"
+          />
+        )
+      ) : null}
       {/* Transparent hit-areas: click any annotation to focus it. */}
       {annotations.map((a) => {
         const onDown = (e: React.PointerEvent) => {

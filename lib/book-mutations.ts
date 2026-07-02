@@ -331,7 +331,7 @@ export function moveCallout(
 
 // --- Annotations (ADR-004) ---
 
-const ANNO_STROKE = "#658995";
+export const ANNO_STROKE = "#658995";
 
 export function newSurface(kind: Surface["kind"]): Surface {
   const base = { id: annotationId(), stroke: ANNO_STROKE, width: 2 };

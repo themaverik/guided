@@ -1353,3 +1353,67 @@
 .ap-swatch.active {
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #024450;
 }
+
+/* Confirmation modal (reusable) */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 36, 43, 0.42);
+}
+.confirm-panel {
+  width: min(380px, calc(100vw - 40px));
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(2, 68, 80, 0.28);
+  padding: 22px 22px 18px;
+}
+.confirm-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #024450;
+}
+.confirm-message {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4a5b5b;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.confirm-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #d7dede;
+  background: #f2f4f4;
+  color: #024450;
+  font-size: 14px;
+  cursor: pointer;
+}
+.confirm-btn:hover {
+  background: #e6ecec;
+}
+.confirm-btn.primary {
+  background: #024450;
+  border-color: #024450;
+  color: #fff;
+}
+.confirm-btn.danger {
+  background: #d64545;
+  border-color: #d64545;
+  color: #fff;
+}
+.confirm-btn.danger:hover {
+  background: #c23b3b;
+}
+.confirm-btn:focus-visible {
+  outline: 2px solid #2f6df6;
+  outline-offset: 2px;
+}

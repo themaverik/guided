@@ -670,6 +670,46 @@ export function compassDir(dx: number, dy: number): "left" | "right" | "up" | "d
   return dy >= 0 ? "down" : "up";
 }
 
+/** Surface kinds that are created by a rubber-band / signed-vector drag. */
+export type DrawKind = "box" | "diamond" | "text" | "bracket" | "line";
+
+/** Minimum normalized extent below which a drag is treated as a bare click. */
+const MIN_DRAW = 0.015;
+
+/** Per-kind default size (normalized) used for a bare click, mirroring newSurface. */
+const DRAW_DEFAULTS: Record<DrawKind, { w: number; h: number }> = {
+  box: { w: 0.4, h: 0.3 },
+  diamond: { w: 0.3, h: 0.3 },
+  text: { w: 0.3, h: 0.1 },
+  bracket: { w: 0.05, h: 0.4 },
+  line: { w: 0.4, h: 0 },
+};
+
+/** Turn a press→release drag into shape geometry (normalized 0–1). Rubber-band
+ *  kinds return a direction-agnostic min/max rect; `line` keeps a signed vector
+ *  anchored at `start`. A sub-floor drag / bare click yields the kind's default
+ *  size anchored at `start`. */
+export function boundsFromDrag(
+  start: Point,
+  end: Point,
+  kind: DrawKind,
+): { x: number; y: number; w: number; h: number } {
+  if (kind === "line") {
+    const w = end.x - start.x;
+    const h = end.y - start.y;
+    if (Math.abs(w) < MIN_DRAW && Math.abs(h) < MIN_DRAW) {
+      return { x: start.x, y: start.y, ...DRAW_DEFAULTS.line };
+    }
+    return { x: start.x, y: start.y, w, h };
+  }
+  const w = Math.abs(end.x - start.x);
+  const h = Math.abs(end.y - start.y);
+  if (w < MIN_DRAW && h < MIN_DRAW) {
+    return { x: start.x, y: start.y, ...DRAW_DEFAULTS[kind] };
+  }
+  return { x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), w, h };
+}
+
 /** An axis-aligned rectangle in normalized 0–1 page coordinates. */
 export interface Rect { x: number; y: number; w: number; h: number }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -649,5 +649,41 @@ describe("compassDir", () => {
   });
   it("breaks an exact tie toward horizontal", () => {
     expect(compassDir(0.1, 0.1)).toBe("right");
+  });
+});
+
+describe("boundsFromDrag", () => {
+  it("normalizes a down-right rubber-band drag to a rect", () => {
+    const b = boundsFromDrag({ x: 0.2, y: 0.2 }, { x: 0.5, y: 0.6 }, "box");
+    expect(b.x).toBeCloseTo(0.2);
+    expect(b.y).toBeCloseTo(0.2);
+    expect(b.w).toBeCloseTo(0.3);
+    expect(b.h).toBeCloseTo(0.4);
+  });
+  it("gives the same rect for an up-left drag (direction-agnostic)", () => {
+    const b = boundsFromDrag({ x: 0.5, y: 0.6 }, { x: 0.2, y: 0.2 }, "box");
+    expect(b.x).toBeCloseTo(0.2);
+    expect(b.y).toBeCloseTo(0.2);
+    expect(b.w).toBeCloseTo(0.3);
+    expect(b.h).toBeCloseTo(0.4);
+  });
+  it("returns a per-kind default for a sub-floor drag / bare click", () => {
+    const b = boundsFromDrag({ x: 0.4, y: 0.4 }, { x: 0.404, y: 0.403 }, "box");
+    expect(b).toEqual({ x: 0.4, y: 0.4, w: 0.4, h: 0.3 });
+  });
+  it("keeps a signed vector for a line", () => {
+    const b = boundsFromDrag({ x: 0.2, y: 0.5 }, { x: 0.8, y: 0.5 }, "line");
+    expect(b.x).toBeCloseTo(0.2);
+    expect(b.y).toBeCloseTo(0.5);
+    expect(b.w).toBeCloseTo(0.6);
+    expect(b.h).toBeCloseTo(0);
+  });
+  it("preserves a negative line vector (drawn right→left)", () => {
+    const b = boundsFromDrag({ x: 0.8, y: 0.5 }, { x: 0.2, y: 0.5 }, "line");
+    expect(b.w).toBeCloseTo(-0.6);
+  });
+  it("returns the line default for a bare click", () => {
+    const b = boundsFromDrag({ x: 0.3, y: 0.5 }, { x: 0.305, y: 0.5 }, "line");
+    expect(b).toEqual({ x: 0.3, y: 0.5, w: 0.4, h: 0 });
   });
 });

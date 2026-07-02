@@ -268,10 +268,16 @@ stack). Decisions of record live in `PRD.md` (Decisions 1–14) and `ADR-006`.
 callout + rich-text content; overflow auto-shrinks to fit in both preview and print; callouts drag off
 the flow stack to float at absolute positions; text blocks carry headings/strike and per-block
 alignment; images take a per-cell border/shadow that hugs the screenshot; and a hide-grid toggle gives
-a clean preview. 117 unit tests, renderer/print zero-regression, editor-only affordances, additive
-schema (no migration). Remaining v3 work — annotation standardization (ISO 32000 vocabulary) and the
-OKLCH color system — plus the backlog below. (Note: plan numbering was re-sequenced during just-in-time
-brainstorming; annotation standardization and color moved later than the original 6–8 sketch.)
+a clean preview. Renderer/print zero-regression, editor-only affordances, additive schema (no migration).
+**Since then the backlog wave has shipped to `main` (`origin/main` = `2a1f8ca`, 192 unit tests):** callout
+lists; the connector square-routing + angle-smoothing bug fixes; the FigJam-elbow connector epic (orthogonal
+auto-routing + rounded corners + reflow-surviving segment-drag handles); annotation alignment snapping + smart
+guides; connector→grid-content snapping; connector endpoint direction override (panel + on-canvas knob); the
+floating annotation palette **SP1** (on-canvas drag-to-size creation + tool palette); and the annotation
+**delete key + confirm modal** — each detailed under the backlog below. Remaining v3 work — SP2 selection popover
++ SP3 left-panel cleanup, annotation standardization (ISO 32000 vocabulary), and the OKLCH color system. (Note:
+plan numbering was re-sequenced during just-in-time brainstorming; annotation standardization and color moved
+later than the original 6–8 sketch.)
 
 ## Plan 1 — Foundations  [done]
 

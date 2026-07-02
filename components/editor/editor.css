@@ -163,6 +163,7 @@
   flex-direction: column;
   height: 100%;
   min-width: 0;
+  position: relative;
 }
 .preview-toolbar {
   flex: 0 0 auto;
@@ -1267,4 +1268,81 @@
 }
 .cell-editor .cell-add-row .add-btn {
   flex: 1;
+}
+
+/* Floating annotation tool palette (SP1) — over the preview viewport. */
+.annotation-palette {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #d7dede;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(2, 68, 80, 0.18);
+}
+.ap-tool {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: #f2f4f4;
+  color: #024450;
+  cursor: pointer;
+}
+.ap-tool:hover {
+  background: #e6ecec;
+}
+.ap-tool.active {
+  background: #024450;
+  color: #fff;
+}
+.ap-div {
+  width: 1px;
+  height: 26px;
+  background: #dbe3e3;
+  margin: 0 2px;
+}
+.ap-color {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-flex;
+}
+.ap-color .ap-chip {
+  position: absolute;
+  inset: 6px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1.5px #cdd6d6 inset;
+}
+.ap-color input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.ap-swatch {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px #cdd6d6;
+  cursor: pointer;
+  padding: 0;
+}
+.ap-swatch.active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #024450;
 }

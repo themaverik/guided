@@ -8,6 +8,7 @@
 import { useRef, useState } from "react";
 import type { Book } from "@/lib/book-schema";
 import { EditorStoreProvider } from "@/lib/store";
+import AnnotationDeleteController from "./AnnotationDeleteController";
 import EphemeralNotice from "./EphemeralNotice";
 import LeftPane from "./LeftPane";
 import PreviewPane from "./PreviewPane";
@@ -58,6 +59,7 @@ export default function EditorApp({
           />
           <PreviewPane />
         </div>
+        <AnnotationDeleteController />
       </div>
     </EditorStoreProvider>
   );

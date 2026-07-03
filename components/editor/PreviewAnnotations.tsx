@@ -118,6 +118,7 @@ export default function PreviewAnnotations({
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
   const selectAnnotation = useEditor((s) => s.selectAnnotation);
+  const setAnnotationDragging = useEditor((s) => s.setAnnotationDragging);
   const svgRef = useRef<SVGSVGElement>(null);
   const draw = useAnnotationDraw(ci, si);
   const drag = useRef<{
@@ -218,6 +219,7 @@ export default function PreviewAnnotations({
       if (pageEl) targets = collectSnapTargets(pageEl, annotations, id);
     }
     drag.current = { id, part, grabX, grabY, targets };
+    setAnnotationDragging(true);
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
@@ -225,6 +227,7 @@ export default function PreviewAnnotations({
     e.preventDefault();
     e.stopPropagation();
     drag.current = { id, part: "wp", grabX: 0, grabY: 0, wp };
+    setAnnotationDragging(true);
     svgRef.current?.setPointerCapture(e.pointerId);
   };
 
@@ -233,6 +236,7 @@ export default function PreviewAnnotations({
       e.preventDefault();
       e.stopPropagation();
       drag.current = { id, part: "seg", grabX: 0, grabY: 0, baseSeg, axis };
+      setAnnotationDragging(true);
       svgRef.current?.setPointerCapture(e.pointerId);
     };
 
@@ -241,6 +245,7 @@ export default function PreviewAnnotations({
       e.preventDefault();
       e.stopPropagation();
       drag.current = { id, part: "dir", grabX: 0, grabY: 0, which };
+      setAnnotationDragging(true);
       svgRef.current?.setPointerCapture(e.pointerId);
     };
 
@@ -355,6 +360,7 @@ export default function PreviewAnnotations({
       return;
     }
     drag.current = null;
+    setAnnotationDragging(false);
     if (raf.current != null) cancelAnimationFrame(raf.current);
     svgRef.current?.releasePointerCapture(e.pointerId);
     setActiveGuides([]);
@@ -386,6 +392,7 @@ export default function PreviewAnnotations({
       height={H}
       onPointerMove={onMove}
       onPointerUp={onUp}
+      onPointerCancel={onUp}
       onPointerDown={(e) => {
         if (draw.activeTool !== "select" && e.target === svgRef.current) {
           e.preventDefault();

@@ -1285,13 +1285,52 @@
   transform: translateX(-50%);
   z-index: 30;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px 10px;
+  max-width: min(92%, 900px);
   background: #fff;
   border: 1px solid #d7dede;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(2, 68, 80, 0.18);
+}
+.ap-main-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.anno-context {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #e8eded;
+}
+.anno-context-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.anno-context input[type="color"] {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #dbe2e2;
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+}
+.anno-context select,
+.anno-context .anno-num input,
+.anno-context .anno-w {
+  height: 28px;
+  border: 1px solid #dbe2e2;
+  border-radius: 7px;
+  background: #fff;
+  color: #024450;
+  font-size: 12px;
+  padding: 0 4px;
 }
 .ap-tool {
   width: 40px;

@@ -33,7 +33,11 @@ import type {
 } from "./book-schema";
 import { DEFAULT_WATERMARK_OPACITY, DEFAULT_PAGE_CONFIG } from "./book-schema";
 import * as M from "./book-mutations";
-import { ANNO_STROKE } from "./book-mutations";
+import {
+  DEFAULT_STROKE,
+  DEFAULT_SWATCH_ID,
+  DEFAULT_WIDTH,
+} from "./annotation-palette";
 
 export interface Selection {
   chapterIndex: number;
@@ -71,6 +75,10 @@ export interface EditorState {
   activeTool: AnnotationTool;
   /** Transient: stroke color applied to newly-drawn shapes. */
   drawColor: string;
+  /** Transient: stroke width applied to newly-drawn shapes. */
+  drawWidth: number;
+  /** Transient: swatch id (palette token) applied to newly-drawn shapes. */
+  drawSwatch: string;
   /** Transient: the annotation queued for delete-confirmation, or null. */
   pendingDelete: { ci: number; si: number; id: string } | null;
 
@@ -185,6 +193,8 @@ export interface EditorState {
   selectAnnotation: (id: string | null) => void;
   setActiveTool: (tool: AnnotationTool) => void;
   setDrawColor: (color: string) => void;
+  setDrawWidth: (width: number) => void;
+  setDrawSwatch: (id: string) => void;
   requestDeleteAnnotation: (ci: number, si: number, id: string) => void;
   cancelDeleteAnnotation: () => void;
 }
@@ -236,7 +246,9 @@ export function createEditorStore(
     overflows: [],
     hideGridChrome: false,
     activeTool: "select",
-    drawColor: ANNO_STROKE,
+    drawColor: DEFAULT_STROKE,
+    drawWidth: DEFAULT_WIDTH,
+    drawSwatch: DEFAULT_SWATCH_ID,
     pendingDelete: null,
 
     // ── selection ──
@@ -478,6 +490,8 @@ export function createEditorStore(
     selectAnnotation: (id) => set({ selectedAnnotation: id }),
     setActiveTool: (tool) => set({ activeTool: tool }),
     setDrawColor: (color) => set({ drawColor: color }),
+    setDrawWidth: (width) => set({ drawWidth: width }),
+    setDrawSwatch: (id) => set({ drawSwatch: id }),
     requestDeleteAnnotation: (ci, si, id) => set({ pendingDelete: { ci, si, id } }),
     cancelDeleteAnnotation: () => set({ pendingDelete: null }),
   }));

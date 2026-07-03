@@ -424,8 +424,12 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     box/diamond/text/bracket, signed start→end for line/connector), bare click drops a default-sized shape,
     one-shot tools auto-revert to Select + select new shape, `Esc` cancels, grid-mode pointer-events toggle;
     left-panel add-buttons removed (property cards kept). Editor-only; renderer + print untouched. ADR-004
-    amended. **The full OKLCH swatch palette is the immediate next item** (swap-in point is the plain-hex
-    color chip in SP1).
+    amended.
+  - **SP1.1 — swatch palette + stroke-width presets** — [done] (`feat/annotation-swatch-width-palette`).
+    8 OKLCH paired-token swatches (DESIGN.md §2.2: Ink / Red / Orange / Amber / Green / Teal / Blue /
+    Violet) + 4 width presets (Thin 1 / Medium 2 / Thick 4 / Heavy 6); `swatchId` + `width` applied to
+    shapes; fill/tint deferred to the OKLCH color system slice. No schema change; editor-only. ADR-004
+    amended.
   - **SP2 — selection popover** — [todo]. Compact popover anchored to the selected shape for quick
     color/width/endpoint/direction edits without opening the left panel.
   - **SP3 — left-panel cleanup** — [todo]. Migrate or trim the per-shape property cards in the left panel

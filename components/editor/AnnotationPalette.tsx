@@ -1,13 +1,20 @@
 "use client";
 
 /*
- * Floating tool palette over the page canvas (SP1). Sets the active annotation
- * tool for on-canvas drawing and the current draw color. Editor-only; nothing
- * here persists to the Book. The per-shape numeric properties still live in the
- * left panel (AnnotationEditor) until a later slice.
+ * Floating tool palette over the page canvas (SP1 + swatch/width slice). Sets
+ * the active annotation tool, the current draw color (from the 8 OKLCH swatches)
+ * and the current stroke width (4 presets). Picking a swatch/width also patches
+ * the selected shape. Editor-only; nothing here persists derived output — only
+ * stroke/width/swatchId on the shape. Fill tint is a later color-system slice.
  */
 import { useEffect } from "react";
 import { useEditor, type AnnotationTool } from "@/lib/store";
+import {
+  SWATCHES,
+  WIDTH_PRESETS,
+  swatchByStroke,
+  type Swatch,
+} from "@/lib/annotation-palette";
 
 const TOOLS: { tool: AnnotationTool; label: string; icon: React.ReactNode }[] = [
   { tool: "select", label: "Select", icon: <path d="M3 2l8 4-3 1-1 3-4-8z" /> },
@@ -19,24 +26,46 @@ const TOOLS: { tool: AnnotationTool; label: string; icon: React.ReactNode }[] = 
   { tool: "connector", label: "Connector", icon: <path d="M3 3v6h6M7 9l2 0 0-2" /> },
 ];
 
-const PRESETS = ["#658995", "#024450", "#d64545", "#e08a00", "#2e7d46", "#2f6df6"];
-
 export default function AnnotationPalette({ ci, si }: { ci: number; si: number }) {
   const activeTool = useEditor((s) => s.activeTool);
   const setActiveTool = useEditor((s) => s.setActiveTool);
   const drawColor = useEditor((s) => s.drawColor);
   const setDrawColor = useEditor((s) => s.setDrawColor);
-  const selectedAnnotation = useEditor((s) => s.selectedAnnotation);
+  const drawWidth = useEditor((s) => s.drawWidth);
+  const setDrawWidth = useEditor((s) => s.setDrawWidth);
+  const setDrawSwatch = useEditor((s) => s.setDrawSwatch);
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
+  // The selected shape (or null) — needed to know a text shape's kind.
+  const selected = useEditor((s) => {
+    const id = s.selectedAnnotation;
+    if (!id) return null;
+    const anns = s.book.chapters[ci]?.steps[si]?.annotations ?? [];
+    return anns.find((a) => a.id === id) ?? null;
+  });
 
   // Switching steps starts fresh on Select.
   useEffect(() => {
     setActiveTool("select");
   }, [ci, si, setActiveTool]);
 
-  const applyColor = (c: string) => {
-    setDrawColor(c);
-    if (selectedAnnotation) updateAnnotation(ci, si, selectedAnnotation, { stroke: c });
+  const activeSwatchId = swatchByStroke(drawColor);
+
+  const applySwatch = (sw: Swatch) => {
+    setDrawColor(sw.stroke);
+    setDrawSwatch(sw.id);
+    if (selected) {
+      const patch: { stroke: string; swatchId: string; color?: string } = {
+        stroke: sw.stroke,
+        swatchId: sw.id,
+      };
+      if (selected.kind === "text") patch.color = sw.stroke;
+      updateAnnotation(ci, si, selected.id, patch);
+    }
+  };
+
+  const applyWidth = (value: number) => {
+    setDrawWidth(value);
+    if (selected) updateAnnotation(ci, si, selected.id, { width: value });
   };
 
   return (
@@ -56,25 +85,31 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
         </button>
       ))}
       <span className="ap-div" />
-      <label className="ap-color" title="Draw color">
-        <span className="ap-chip" style={{ background: drawColor }} />
-        <input
-          type="color"
-          value={drawColor}
-          onChange={(e) => applyColor(e.target.value)}
-          aria-label="Pick draw color"
-        />
-      </label>
-      {PRESETS.map((c) => (
+      {SWATCHES.map((sw) => (
         <button
-          key={c}
+          key={sw.id}
           type="button"
-          className={`ap-swatch${drawColor === c ? " active" : ""}`}
-          style={{ background: c }}
-          title={c}
-          aria-label={`Color ${c}`}
-          onClick={() => applyColor(c)}
+          className={`ap-swatch${activeSwatchId === sw.id ? " active" : ""}`}
+          style={{ background: sw.fill, borderColor: sw.stroke }}
+          title={sw.label}
+          aria-label={`Color ${sw.label}`}
+          aria-pressed={activeSwatchId === sw.id}
+          onClick={() => applySwatch(sw)}
         />
+      ))}
+      <span className="ap-div" />
+      {WIDTH_PRESETS.map((w) => (
+        <button
+          key={w.value}
+          type="button"
+          className={`ap-width${drawWidth === w.value ? " active" : ""}`}
+          title={`${w.label} (${w.value})`}
+          aria-label={`Width ${w.label}`}
+          aria-pressed={drawWidth === w.value}
+          onClick={() => applyWidth(w.value)}
+        >
+          <span className="ap-width-bar" style={{ height: w.value }} />
+        </button>
       ))}
     </div>
   );

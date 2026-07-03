@@ -11,4 +11,18 @@ describe("annotation options", () => {
   it("has auto + four directions, auto first with empty value", () => {
     expect(DIRECTION_OPTIONS.map((d) => d.value)).toEqual(["", "left", "right", "up", "down"]);
   });
+
+  it("routing labels are straight and rectangular", () => {
+    expect(ROUTINGS.map((r) => r.label)).toEqual(["straight", "rectangular"]);
+  });
+
+  it("direction labels carry the auto + arrow-prefixed set", () => {
+    expect(DIRECTION_OPTIONS.map((d) => d.label)).toEqual([
+      "auto dir",
+      "← left",
+      "→ right",
+      "↑ up",
+      "↓ down",
+    ]);
+  });
 });

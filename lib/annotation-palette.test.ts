@@ -5,6 +5,7 @@ import {
   DEFAULT_SWATCH_ID,
   DEFAULT_STROKE,
   swatchByStroke,
+  swatchPatch,
 } from "./annotation-palette";
 
 describe("annotation palette", () => {
@@ -39,5 +40,20 @@ describe("annotation palette", () => {
     expect(d).toBeDefined();
     expect(DEFAULT_STROKE).toBe(d!.stroke);
     expect(DEFAULT_STROKE).toBe("#024450");
+  });
+});
+
+describe("swatchPatch", () => {
+  const red = SWATCHES.find((s) => s.id === "red")!;
+
+  it("sets stroke + swatchId and no color for non-text shapes", () => {
+    const p = swatchPatch(red, "box");
+    expect(p).toEqual({ stroke: red.stroke, swatchId: "red" });
+    expect("color" in p).toBe(false);
+  });
+
+  it("adds color for text shapes", () => {
+    const p = swatchPatch(red, "text");
+    expect(p).toEqual({ stroke: red.stroke, swatchId: "red", color: red.stroke });
   });
 });

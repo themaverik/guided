@@ -13,6 +13,7 @@ import {
   SWATCHES,
   WIDTH_PRESETS,
   swatchByStroke,
+  swatchPatch,
   type Swatch,
 } from "@/lib/annotation-palette";
 
@@ -53,14 +54,7 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
   const applySwatch = (sw: Swatch) => {
     setDrawColor(sw.stroke);
     setDrawSwatch(sw.id);
-    if (selected) {
-      const patch: { stroke: string; swatchId: string; color?: string } = {
-        stroke: sw.stroke,
-        swatchId: sw.id,
-      };
-      if (selected.kind === "text") patch.color = sw.stroke;
-      updateAnnotation(ci, si, selected.id, patch);
-    }
+    if (selected) updateAnnotation(ci, si, selected.id, swatchPatch(sw, selected.kind));
   };
 
   const applyWidth = (value: number) => {

@@ -8,7 +8,6 @@
 import { rowsOf } from "@/lib/book-mutations";
 import { stepLayoutMode } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
-import AnnotationEditor from "./AnnotationEditor";
 import CellEditor from "./CellEditor";
 import GridStructure from "./GridStructure";
 import RichTextArea from "./RichTextArea";
@@ -97,11 +96,6 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
         </>
       )}
 
-      <h3 className="editor-subtitle">
-        Annotations
-        {step.annotations?.length ? ` (${step.annotations.length})` : ""}
-      </h3>
-      <AnnotationEditor ci={ci} si={si} annotations={step.annotations ?? []} />
     </section>
   );
 }

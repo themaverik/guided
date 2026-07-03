@@ -33,7 +33,11 @@ import type {
 } from "./book-schema";
 import { DEFAULT_WATERMARK_OPACITY, DEFAULT_PAGE_CONFIG } from "./book-schema";
 import * as M from "./book-mutations";
-import { DEFAULT_STROKE, DEFAULT_SWATCH_ID } from "./annotation-palette";
+import {
+  DEFAULT_STROKE,
+  DEFAULT_SWATCH_ID,
+  DEFAULT_WIDTH,
+} from "./annotation-palette";
 
 export interface Selection {
   chapterIndex: number;
@@ -243,7 +247,7 @@ export function createEditorStore(
     hideGridChrome: false,
     activeTool: "select",
     drawColor: DEFAULT_STROKE,
-    drawWidth: 2,
+    drawWidth: DEFAULT_WIDTH,
     drawSwatch: DEFAULT_SWATCH_ID,
     pendingDelete: null,
 

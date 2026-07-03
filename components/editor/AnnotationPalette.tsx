@@ -63,9 +63,9 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
     }
   };
 
-  const applyWidth = (w: number) => {
-    setDrawWidth(w);
-    if (selected) updateAnnotation(ci, si, selected.id, { width: w });
+  const applyWidth = (value: number) => {
+    setDrawWidth(value);
+    if (selected) updateAnnotation(ci, si, selected.id, { width: value });
   };
 
   return (

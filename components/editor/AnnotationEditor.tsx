@@ -18,40 +18,16 @@ import type {
 } from "@/lib/book-schema";
 import { resolveEndpoint } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
-import { ENDPOINT_STYLES, ROUTINGS, DIRECTION_OPTIONS } from "@/lib/annotation-options";
-
-const FONTS: TextFont[] = [
-  "sans",
-  "serif",
-  "mono",
-  "open-sans",
-  "montserrat",
-  "roboto",
-];
-const FONT_LABELS: Record<TextFont, string> = {
-  sans: "Sans",
-  serif: "Serif",
-  mono: "Mono",
-  "open-sans": "Open Sans",
-  montserrat: "Montserrat",
-  roboto: "Roboto",
-};
-const ALIGNS: NonNullable<Surface["align"]>[] = ["left", "center", "right"];
-const SIZES: EndpointSize[] = ["small", "medium", "large"];
-const ANCHORS: Anchor[] = [
-  "center",
-  "top",
-  "bottom",
-  "left",
-  "right",
-  "top-left",
-  "top-right",
-  "bottom-left",
-  "bottom-right",
-  "start",
-  "end",
-  "mid",
-];
+import {
+  ENDPOINT_STYLES,
+  ROUTINGS,
+  DIRECTION_OPTIONS,
+  SIZES,
+  ANCHORS,
+  FONTS,
+  FONT_LABELS,
+  ALIGNS,
+} from "@/lib/annotation-options";
 
 const toPct = (n: number) => Math.round((n ?? 0) * 100);
 const fromPct = (s: string) => Math.max(0, Math.min(100, Number(s) || 0)) / 100;

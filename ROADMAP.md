@@ -450,9 +450,10 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
 
 - **Bug — endpoint marker-size consistency** — [done] (`fix/annotation-endpoint-marker-size`).
   Endpoint arrowhead / circle / point markers were rendered at inconsistent sizes across styles.
-  Fix: per-style marker geometry constants in `ConnectorLine.tsx` so each style renders at a
-  visually consistent weight regardless of stroke width. Renderer change only; editor + print
-  identical; no schema change.
+  Fix: retune the per-style marker geometry in `AnnotationLayer.tsx`'s `endpointMarker` so every
+  style (arrow / circle / diamond / point / bar) renders at a visually consistent size for a given
+  endpoint size (small/medium/large). Renderer change only; editor + print identical; no schema
+  change. (Stroke-width-relative marker scaling was deliberately left out of scope.)
 
 - **Annotation delete key + confirm modal** — [done] (`feat/annotation-delete-confirm`).
   Delete/Backspace removes the selected annotation; the left-panel `×` uses the same path — both

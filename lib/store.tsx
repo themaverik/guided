@@ -79,6 +79,8 @@ export interface EditorState {
   drawWidth: number;
   /** Transient: swatch id (palette token) applied to newly-drawn shapes. */
   drawSwatch: string;
+  /** Transient: an annotation drag/resize is in progress (hides the popover). */
+  annotationDragging: boolean;
   /** Transient: the annotation queued for delete-confirmation, or null. */
   pendingDelete: { ci: number; si: number; id: string } | null;
 
@@ -195,6 +197,7 @@ export interface EditorState {
   setDrawColor: (color: string) => void;
   setDrawWidth: (width: number) => void;
   setDrawSwatch: (id: string) => void;
+  setAnnotationDragging: (v: boolean) => void;
   requestDeleteAnnotation: (ci: number, si: number, id: string) => void;
   cancelDeleteAnnotation: () => void;
 }
@@ -249,6 +252,7 @@ export function createEditorStore(
     drawColor: DEFAULT_STROKE,
     drawWidth: DEFAULT_WIDTH,
     drawSwatch: DEFAULT_SWATCH_ID,
+    annotationDragging: false,
     pendingDelete: null,
 
     // ── selection ──
@@ -492,6 +496,7 @@ export function createEditorStore(
     setDrawColor: (color) => set({ drawColor: color }),
     setDrawWidth: (width) => set({ drawWidth: width }),
     setDrawSwatch: (id) => set({ drawSwatch: id }),
+    setAnnotationDragging: (v) => set({ annotationDragging: v }),
     requestDeleteAnnotation: (ci, si, id) => set({ pendingDelete: { ci, si, id } }),
     cancelDeleteAnnotation: () => set({ pendingDelete: null }),
   }));

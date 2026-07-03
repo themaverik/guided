@@ -389,3 +389,25 @@ Adds a keyboard delete for annotations behind a styled confirmation.
   danger-toned Delete). Confirm → existing `removeAnnotation`.
 - **Editor-only:** transient state, no schema change; renderer/`/print` untouched
   (the modal is editor chrome).
+
+## Amendment (2026-07-03): swatch palette + stroke-width presets
+
+Replaces the plain-hex color control in `AnnotationPalette` with the DESIGN.md §2.2
+8-swatch paired-token set and adds four stroke-width presets.
+
+- **`lib/annotation-palette.ts`:** defines `Swatch[]` (8 OKLCH tokens: Ink / Red /
+  Orange / Amber / Green / Teal / Blue / Violet; fill + stroke pairs) and `WidthPreset[]`
+  (Thin 1 / Medium 2 / Thick 4 / Heavy 6), `swatchByStroke` lookup, `DEFAULT_STROKE`
+  (`#024450` Ink), and `DEFAULT_SWATCH_ID`. Pure `buildDrawnShape` helper extracted to
+  `lib/annotation-draw.ts`.
+- **Store:** transient `drawSwatch` / `drawWidth` (no persistence, no schema change);
+  `swatchId` + `width` written to shapes on draw and applied to selection on pick.
+  Default draw color changed to Ink (`#024450`).
+- **`AnnotationPalette.tsx`:** 8-swatch chip row + 4-width chip row replace the
+  freeform chip and arbitrary hex presets; picking either applies to the current
+  selection and sets the next-draw default.
+- **Scope (deferred):** paired fill tint, Fill/No-fill toggle, editor-tint-vs-export
+  opacity split, callout unification, and `@theme` CSS token registration are deferred
+  to the full OKLCH color system slice.
+- **Editor-only:** no schema migration (`swatchId?`/`fill?` already existed in schema);
+  renderer and `/print` route untouched.

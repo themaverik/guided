@@ -1,0 +1,278 @@
+"use client";
+
+/*
+ * Context-aware annotation detail controls (bottom-palette context row). Given
+ * the selected shape, renders its full editable properties: freeform color +
+ * width for every shape, plus connector routing/waypoints/endpoints, text
+ * font/size/align/color, and bracket orientation/flip. Position and size are
+ * edited by dragging on the canvas — there are no numeric coordinate fields
+ * here. Editor-only; writes via updateAnnotation.
+ */
+import type {
+  Anchor,
+  Annotation,
+  Connector,
+  Endpoint,
+  EndpointSize,
+  EndpointStyle,
+  Surface,
+  TextFont,
+} from "@/lib/book-schema";
+import { resolveEndpoint } from "@/lib/annotations";
+import { useEditor } from "@/lib/store";
+import {
+  ENDPOINT_STYLES,
+  ROUTINGS,
+  DIRECTION_OPTIONS,
+  SIZES,
+  ANCHORS,
+  FONTS,
+  FONT_LABELS,
+  ALIGNS,
+} from "@/lib/annotation-options";
+
+export default function AnnotationContext({
+  ci,
+  si,
+  shape,
+  annotations,
+}: {
+  ci: number;
+  si: number;
+  shape: Annotation;
+  annotations: Annotation[];
+}) {
+  const updateAnnotation = useEditor((s) => s.updateAnnotation);
+
+  const surfaces = annotations.filter(
+    (a): a is Surface => a.kind !== "connector",
+  );
+
+  const setWaypointCount = (c: Connector, n: number) => {
+    const count = Math.max(0, Math.min(6, n));
+    const cur = c.waypoints ?? [];
+    let wps: { x: number; y: number }[];
+    if (count <= cur.length) {
+      wps = cur.slice(0, count);
+    } else {
+      wps = [...cur];
+      const a = resolveEndpoint(annotations, c.from);
+      const b = resolveEndpoint(annotations, c.to);
+      while (wps.length < count) {
+        const prev = wps.length ? wps[wps.length - 1] : a;
+        wps.push({ x: (prev.x + b.x) / 2, y: (prev.y + b.y) / 2 });
+      }
+    }
+    updateAnnotation(ci, si, c.id, { waypoints: wps.length ? wps : undefined });
+  };
+
+  const EndpointFields = ({ c, which }: { c: Connector; which: "from" | "to" }) => {
+    const ep = c[which];
+    const set = (patch: Partial<Endpoint>) =>
+      updateAnnotation(ci, si, c.id, { [which]: { ...ep, ...patch } });
+    return (
+      <div className="anno-endpoint">
+        <span className="anno-eplabel">{which}</span>
+        <select
+          value={ep.ref ?? ""}
+          aria-label={`${which} binding`}
+          onChange={(e) => set({ ref: e.target.value || undefined })}
+        >
+          <option value="">free point</option>
+          {surfaces.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.kind} {s.id}
+            </option>
+          ))}
+        </select>
+        {ep.ref ? (
+          <select
+            value={ep.anchor ?? "center"}
+            aria-label={`${which} anchor`}
+            onChange={(e) => set({ anchor: e.target.value as Anchor })}
+          >
+            {ANCHORS.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        <select
+          value={ep.style}
+          aria-label={`${which} style`}
+          onChange={(e) => set({ style: e.target.value as EndpointStyle })}
+        >
+          {ENDPOINT_STYLES.map((st) => (
+            <option key={st} value={st}>
+              {st}
+            </option>
+          ))}
+        </select>
+        {ep.style !== "none" ? (
+          <select
+            value={ep.size ?? "medium"}
+            aria-label={`${which} size`}
+            onChange={(e) => set({ size: e.target.value as EndpointSize })}
+          >
+            {SIZES.map((sz) => (
+              <option key={sz} value={sz}>
+                {sz}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {c.routing === "square" ? (
+          <select
+            value={ep.dir ?? ""}
+            aria-label={`${which} direction`}
+            title="Direction the connector runs at this end"
+            onChange={(e) => set({ dir: (e.target.value || undefined) as Endpoint["dir"] })}
+          >
+            {DIRECTION_OPTIONS.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        ) : null}
+      </div>
+    );
+  };
+
+  const c: Connector | null = shape.kind === "connector" ? (shape as Connector) : null;
+
+  return (
+    <div className="anno-context">
+      <div className="anno-context-row">
+        <input
+          type="color"
+          value={shape.stroke}
+          onChange={(e) => updateAnnotation(ci, si, shape.id, { stroke: e.target.value })}
+          title="Custom color"
+          aria-label="Custom color"
+        />
+        <input
+          className="anno-w"
+          type="number"
+          min={1}
+          max={12}
+          value={shape.width}
+          onChange={(e) =>
+            updateAnnotation(ci, si, shape.id, { width: Number(e.target.value) || 1 })
+          }
+          title="Custom width"
+          aria-label="Custom width"
+        />
+      </div>
+
+      {c ? (
+        <div className="anno-context-row">
+          <select
+            value={c.routing ?? "straight"}
+            aria-label="Routing"
+            onChange={(e) =>
+              updateAnnotation(ci, si, c.id, {
+                routing: e.target.value as Connector["routing"],
+              })
+            }
+          >
+            {ROUTINGS.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <div className="stepper" title="Waypoints (drag on canvas)">
+            <button onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) - 1)}>
+              −
+            </button>
+            <span>{c.waypoints?.length ?? 0}</span>
+            <button onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) + 1)}>
+              +
+            </button>
+          </div>
+          <EndpointFields c={c} which="from" />
+          <EndpointFields c={c} which="to" />
+        </div>
+      ) : null}
+
+      {shape.kind === "text" ? (
+        <div className="anno-context-row anno-text-ctrls">
+          <label className="anno-num">
+            size
+            <input
+              type="number"
+              min={6}
+              max={120}
+              value={shape.fontSize ?? 16}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, {
+                  fontSize: Math.max(6, Number(e.target.value) || 16),
+                })
+              }
+            />
+          </label>
+          <select
+            value={shape.fontFamily ?? "sans"}
+            aria-label="Font"
+            onChange={(e) =>
+              updateAnnotation(ci, si, shape.id, { fontFamily: e.target.value as TextFont })
+            }
+          >
+            {FONTS.map((f) => (
+              <option key={f} value={f}>
+                {FONT_LABELS[f]}
+              </option>
+            ))}
+          </select>
+          <select
+            value={shape.align ?? "left"}
+            aria-label="Align"
+            onChange={(e) =>
+              updateAnnotation(ci, si, shape.id, { align: e.target.value as Surface["align"] })
+            }
+          >
+            {ALIGNS.map((al) => (
+              <option key={al} value={al}>
+                {al}
+              </option>
+            ))}
+          </select>
+          <input
+            type="color"
+            value={shape.color ?? shape.stroke}
+            onChange={(e) => updateAnnotation(ci, si, shape.id, { color: e.target.value })}
+            title="Text color"
+            aria-label="Text color"
+          />
+        </div>
+      ) : null}
+
+      {shape.kind === "bracket" ? (
+        <div className="anno-context-row">
+          <select
+            value={shape.orientation ?? "horizontal"}
+            aria-label="Orientation"
+            onChange={(e) =>
+              updateAnnotation(ci, si, shape.id, {
+                orientation: e.target.value as Surface["orientation"],
+              })
+            }
+          >
+            <option value="horizontal">horizontal</option>
+            <option value="vertical">vertical</option>
+          </select>
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={shape.flip ?? false}
+              onChange={(e) => updateAnnotation(ci, si, shape.id, { flip: e.target.checked })}
+            />
+            Invert
+          </label>
+        </div>
+      ) : null}
+    </div>
+  );
+}

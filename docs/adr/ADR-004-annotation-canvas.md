@@ -440,12 +440,16 @@ in view.
 
 ## Amendment (2026-07-03): endpoint marker-size consistency
 
-Endpoint markers (arrowhead / circle / point) were rendered at inconsistent sizes across
-styles. Fix: per-style marker geometry constants in `ConnectorLine.tsx` ensure each
-endpoint style renders at a consistent visual weight regardless of stroke width.
+Endpoint markers were rendered at inconsistent sizes across styles — the filled arrow
+occupied the whole marker box while circle / diamond / point occupied 0.4–0.68 of it, so
+the arrow looked ~2× the others at the same `EndpointSize`. Fix: retune the per-style
+geometry in `AnnotationLayer.tsx`'s `endpointMarker` so every style (arrow / circle /
+diamond / point / bar) renders at a shared ~0.7·s visual extent for a given size. Stroke-
+width-relative marker scaling was deliberately left out of scope.
 
-- **Scope:** renderer change only (`components/renderer/ConnectorLine.tsx`); editor and
-  `/print` are identical (the same renderer runs in both).
+- **Scope:** renderer change only (`components/renderer/AnnotationLayer.tsx`,
+  `endpointMarker`); editor preview and `/print` are identical (the same renderer runs in
+  both). `MARKER_PX` size keywords and marker `refX` are unchanged.
 - **No schema change:** `Endpoint.style` values are unchanged; no migration required.
 
 ## Amendment (2026-07-03): annotation inspector redistribution

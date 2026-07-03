@@ -274,8 +274,8 @@ lists; the connector square-routing + angle-smoothing bug fixes; the FigJam-elbo
 auto-routing + rounded corners + reflow-surviving segment-drag handles); annotation alignment snapping + smart
 guides; connector→grid-content snapping; connector endpoint direction override (panel + on-canvas knob); the
 floating annotation palette **SP1** (on-canvas drag-to-size creation + tool palette); and the annotation
-**delete key + confirm modal** — each detailed under the backlog below. Remaining v3 work — SP2 selection popover
-+ SP3 left-panel cleanup, annotation standardization (ISO 32000 vocabulary), and the OKLCH color system. (Note:
+**delete key + confirm modal** — each detailed under the backlog below. Remaining v3 work — annotation
+standardization (ISO 32000 vocabulary) and the OKLCH color system. (Note:
 plan numbering was re-sequenced during just-in-time brainstorming; annotation standardization and color moved
 later than the original 6–8 sketch.)
 
@@ -413,7 +413,7 @@ dev-only dependency advisories (esbuild / js-yaml) via `pnpm.overrides`.
 Captured from review + smoke testing; sequenced just-in-time into plans (brainstorm → spec → plan →
 subagent-driven execution), each with its own ADR if it touches the schema or annotation model.
 
-- **Floating annotation palette (per DESIGN.md / PRD.md)** — [in progress]. Annotation authoring moves
+- **Floating annotation palette (per DESIGN.md / PRD.md)** — [done]. Annotation authoring moves
   off the left panel onto the canvas, per the design's **hybrid inspector** (`DESIGN.md:170-179`,
   `PRD.md:95`): a floating tool palette over the page canvas + a compact selection popover + full left-panel
   properties. Decomposed into slices:
@@ -435,8 +435,24 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     for all shapes; connector row adds `from`/`to` endpoint style, routing, and (square-only)
     direction; reuses `swatchPatch` and the shared option lists; hides during drag/resize via
     transient `annotationDragging` store flag; editor-only, no schema change.
-  - **SP3 — left-panel cleanup** — [todo]. Migrate or trim the per-shape property cards in the left panel
-    now that the primary authoring flow lives on-canvas.
+  - **SP3 — annotation inspector redistribution** — [done] (`feat/annotation-inspector-redistribution`).
+    Supersedes the SP3 "trim the panel" draft. The per-shape detail controls moved entirely out of the left
+    sidebar: `AnnotationEditor` component deleted; a new **context row** in the bottom `AnnotationPalette`
+    (`components/editor/AnnotationContext.tsx`) surfaces per-shape detail when a shape is selected —
+    freeform color + width (all shapes); connector routing / waypoint stepper / from+to endpoint
+    (style / size / direction[square] / binding ref+anchor); text font/size/align/color; bracket
+    orientation/flip. The selection popover trimmed to color + width chips + delete `×` only (connector
+    detail moved to the palette). Option lists fully consolidated in `lib/annotation-options.ts`
+    (`SIZES`/`ANCHORS`/`FONTS`/`FONT_LABELS`/`ALIGNS` joined the existing
+    `ENDPOINT_STYLES`/`ROUTINGS`/`DIRECTION_OPTIONS`). Intentionally dropped: numeric coords x/y/w/h,
+    endpoint free-point x/y, the shape list (all canvas-reachable). Editor-only; renderer/print untouched;
+    no schema change. Suite 219/219.
+
+- **Bug — endpoint marker-size consistency** — [done] (`fix/annotation-endpoint-marker-size`).
+  Endpoint arrowhead / circle / point markers were rendered at inconsistent sizes across styles.
+  Fix: per-style marker geometry constants in `ConnectorLine.tsx` so each style renders at a
+  visually consistent weight regardless of stroke width. Renderer change only; editor + print
+  identical; no schema change.
 
 - **Annotation delete key + confirm modal** — [done] (`feat/annotation-delete-confirm`).
   Delete/Backspace removes the selected annotation; the left-panel `×` uses the same path — both

@@ -20,6 +20,13 @@ describe("popoverPlacement", () => {
     expect(p.side).toBe("below");
     // top = box.y + box.h + gap = 20 + 50 + 10
     expect(p.top).toBe(80);
+    expect(p.left).toBe(250); // 300 + 50 - 100, centered
+  });
+
+  it("uses the default gap of 8 when omitted", () => {
+    const p = popoverPlacement({ x: 300, y: 200, w: 100, h: 50 }, size, vp);
+    expect(p.side).toBe("above");
+    expect(p.top).toBe(152); // 200 - 40 - 8
   });
 
   it("clamps left within the viewport", () => {

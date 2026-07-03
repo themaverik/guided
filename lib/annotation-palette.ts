@@ -49,3 +49,17 @@ export function swatchByStroke(hex: string): string | undefined {
   const h = hex.toLowerCase();
   return SWATCHES.find((s) => s.stroke.toLowerCase() === h)?.id;
 }
+
+/** The immutable patch a swatch applies to a shape: stroke + swatchId, plus
+ *  `color` for text (whose visible color is `color`, not `stroke`). */
+export function swatchPatch(
+  sw: Swatch,
+  kind: string,
+): { stroke: string; swatchId: string; color?: string } {
+  const patch: { stroke: string; swatchId: string; color?: string } = {
+    stroke: sw.stroke,
+    swatchId: sw.id,
+  };
+  if (kind === "text") patch.color = sw.stroke;
+  return patch;
+}

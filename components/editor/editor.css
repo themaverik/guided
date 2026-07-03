@@ -1378,6 +1378,34 @@
   border-radius: 2px;
 }
 
+.anno-popover {
+  position: absolute;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #e8eded;
+  border-radius: 9px;
+  box-shadow: 0 1px 3px rgba(2, 68, 80, 0.06), 0 8px 32px rgba(2, 68, 80, 0.12);
+}
+.anno-popover-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.anno-popover select {
+  height: 28px;
+  border: 1px solid #dbe2e2;
+  border-radius: 7px;
+  background: #fff;
+  color: #024450;
+  font-size: 12px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
 /* Confirmation modal (reusable) */
 .confirm-overlay {
   position: fixed;

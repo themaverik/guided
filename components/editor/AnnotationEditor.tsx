@@ -18,15 +18,8 @@ import type {
 } from "@/lib/book-schema";
 import { resolveEndpoint } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
+import { ENDPOINT_STYLES, ROUTINGS, DIRECTION_OPTIONS } from "@/lib/annotation-options";
 
-const STYLES: EndpointStyle[] = [
-  "none",
-  "arrow",
-  "circle",
-  "diamond",
-  "point",
-  "bar",
-];
 const FONTS: TextFont[] = [
   "sans",
   "serif",
@@ -167,7 +160,7 @@ export default function AnnotationEditor({
           value={ep.style}
           onChange={(e) => set({ style: e.target.value as EndpointStyle })}
         >
-          {STYLES.map((st) => (
+          {ENDPOINT_STYLES.map((st) => (
             <option key={st} value={st}>
               {st}
             </option>
@@ -193,11 +186,11 @@ export default function AnnotationEditor({
             }
             title="Direction the connector runs at this end (arrow direction for the To end)"
           >
-            <option value="">auto dir</option>
-            <option value="left">← left</option>
-            <option value="right">→ right</option>
-            <option value="up">↑ up</option>
-            <option value="down">↓ down</option>
+            {DIRECTION_OPTIONS.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
           </select>
         ) : null}
       </div>
@@ -365,8 +358,11 @@ export default function AnnotationEditor({
                     })
                   }
                 >
-                  <option value="straight">straight</option>
-                  <option value="square">rectangular</option>
+                  {ROUTINGS.map((r) => (
+                    <option key={r.value} value={r.value}>
+                      {r.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="ctrl-row">

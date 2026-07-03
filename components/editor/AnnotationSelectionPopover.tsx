@@ -92,7 +92,8 @@ export default function AnnotationSelectionPopover({
     };
   }, [shape, annotations, dragging, scale, fitKey, pageIndex, scalerRef, containerRef, scrollRef]);
 
-  if (!shape || dragging || !pos) return null;
+  if (!shape) return null;
+  const visible = !!pos && !dragging;
 
   const activeSwatchId = swatchByStroke(shape.stroke);
   const c: Connector | null = shape.kind === "connector" ? (shape as Connector) : null;
@@ -108,7 +109,7 @@ export default function AnnotationSelectionPopover({
     <div
       ref={popRef}
       className="anno-popover"
-      style={{ top: pos.top, left: pos.left }}
+      style={{ top: pos?.top ?? 0, left: pos?.left ?? 0, visibility: visible ? "visible" : "hidden" }}
       role="toolbar"
       aria-label="Selection"
     >
@@ -179,7 +180,7 @@ export default function AnnotationSelectionPopover({
             value={c.routing ?? "straight"}
             aria-label="Routing"
             onChange={(e) =>
-              updateAnnotation(ci, si, c.id, {
+              updateAnnotation(ci, si, shape.id, {
                 routing: e.target.value as Connector["routing"],
               })
             }

@@ -392,6 +392,7 @@ export default function PreviewAnnotations({
       height={H}
       onPointerMove={onMove}
       onPointerUp={onUp}
+      onPointerCancel={onUp}
       onPointerDown={(e) => {
         if (draw.activeTool !== "select" && e.target === svgRef.current) {
           e.preventDefault();

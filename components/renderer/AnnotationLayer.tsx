@@ -138,8 +138,11 @@ function endpointMarker(
 ) {
   if (style === "none") return null;
   const s = MARKER_PX[size ?? "medium"];
-  const r = s * 0.26;
-  const dot = s * 0.2;
+  // Per-style geometry retuned to a shared ~0.7·s visual extent so every style
+  // reads at a consistent size for a given EndpointSize (a filled shape reads
+  // larger than a hollow one at equal bounds, so the filled dot stays smaller).
+  const r = s * 0.35;
+  const dot = s * 0.24;
   const common = {
     id,
     markerUnits: "userSpaceOnUse" as const,
@@ -150,7 +153,7 @@ function endpointMarker(
     case "arrow":
       return (
         <marker {...common} refX={s * 0.85} refY={s / 2} orient="auto-start-reverse">
-          <path d={`M0,0 L${s},${s / 2} L0,${s} z`} fill={color} />
+          <path d={`M${s * 0.15},${s * 0.15} L${s * 0.85},${s / 2} L${s * 0.15},${s * 0.85} z`} fill={color} />
         </marker>
       );
     case "circle":
@@ -164,7 +167,7 @@ function endpointMarker(
     case "diamond": {
       // Hollow rhombus centered on the endpoint — reads as a flowchart node
       // terminus, like the circle cap.
-      const dd = s * 0.34;
+      const dd = s * 0.38;
       const cx = s / 2;
       const cy = s / 2;
       return (
@@ -188,7 +191,7 @@ function endpointMarker(
     case "bar":
       return (
         <marker {...common} refX={s / 2} refY={s / 2} orient="auto">
-          <line x1={s / 2} y1={0} x2={s / 2} y2={s} stroke={color} strokeWidth={1.5} />
+          <line x1={s / 2} y1={s * 0.1} x2={s / 2} y2={s * 0.9} stroke={color} strokeWidth={1.5} />
         </marker>
       );
     default:

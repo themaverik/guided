@@ -31,6 +31,101 @@ import {
   ALIGNS,
 } from "@/lib/annotation-options";
 
+function EndpointFields({
+  c,
+  which,
+  ci,
+  si,
+  surfaces,
+  updateAnnotation,
+}: {
+  c: Connector;
+  which: "from" | "to";
+  ci: number;
+  si: number;
+  surfaces: Surface[];
+  updateAnnotation: (
+    ci: number,
+    si: number,
+    id: string,
+    patch: Partial<Surface> & Partial<Connector>,
+  ) => void;
+}) {
+  const ep = c[which];
+  const set = (patch: Partial<Endpoint>) =>
+    updateAnnotation(ci, si, c.id, { [which]: { ...ep, ...patch } });
+  return (
+    <div className="anno-endpoint">
+      <span className="anno-eplabel">{which}</span>
+      <select
+        value={ep.ref ?? ""}
+        aria-label={`${which} binding`}
+        onChange={(e) => set({ ref: e.target.value || undefined })}
+      >
+        <option value="">free point</option>
+        {surfaces.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.kind} {s.id}
+          </option>
+        ))}
+      </select>
+      {ep.ref ? (
+        <select
+          value={ep.anchor ?? "center"}
+          aria-label={`${which} anchor`}
+          onChange={(e) => set({ anchor: e.target.value as Anchor })}
+        >
+          {ANCHORS.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      <select
+        value={ep.style}
+        aria-label={`${which} style`}
+        onChange={(e) => set({ style: e.target.value as EndpointStyle })}
+      >
+        {ENDPOINT_STYLES.map((st) => (
+          <option key={st} value={st}>
+            {st}
+          </option>
+        ))}
+      </select>
+      {ep.style !== "none" ? (
+        <select
+          value={ep.size ?? "medium"}
+          aria-label={`${which} size`}
+          onChange={(e) => set({ size: e.target.value as EndpointSize })}
+        >
+          {SIZES.map((sz) => (
+            <option key={sz} value={sz}>
+              {sz}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      {c.routing === "square" ? (
+        <select
+          value={ep.dir ?? ""}
+          aria-label={`${which} direction`}
+          title="Direction the connector runs at this end"
+          onChange={(e) =>
+            set({ dir: (e.target.value || undefined) as Endpoint["dir"] })
+          }
+        >
+          {DIRECTION_OPTIONS.map((d) => (
+            <option key={d.value} value={d.value}>
+              {d.label}
+            </option>
+          ))}
+        </select>
+      ) : null}
+    </div>
+  );
+}
+
 export default function AnnotationContext({
   ci,
   si,
@@ -64,80 +159,6 @@ export default function AnnotationContext({
       }
     }
     updateAnnotation(ci, si, c.id, { waypoints: wps.length ? wps : undefined });
-  };
-
-  const EndpointFields = ({ c, which }: { c: Connector; which: "from" | "to" }) => {
-    const ep = c[which];
-    const set = (patch: Partial<Endpoint>) =>
-      updateAnnotation(ci, si, c.id, { [which]: { ...ep, ...patch } });
-    return (
-      <div className="anno-endpoint">
-        <span className="anno-eplabel">{which}</span>
-        <select
-          value={ep.ref ?? ""}
-          aria-label={`${which} binding`}
-          onChange={(e) => set({ ref: e.target.value || undefined })}
-        >
-          <option value="">free point</option>
-          {surfaces.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.kind} {s.id}
-            </option>
-          ))}
-        </select>
-        {ep.ref ? (
-          <select
-            value={ep.anchor ?? "center"}
-            aria-label={`${which} anchor`}
-            onChange={(e) => set({ anchor: e.target.value as Anchor })}
-          >
-            {ANCHORS.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
-        ) : null}
-        <select
-          value={ep.style}
-          aria-label={`${which} style`}
-          onChange={(e) => set({ style: e.target.value as EndpointStyle })}
-        >
-          {ENDPOINT_STYLES.map((st) => (
-            <option key={st} value={st}>
-              {st}
-            </option>
-          ))}
-        </select>
-        {ep.style !== "none" ? (
-          <select
-            value={ep.size ?? "medium"}
-            aria-label={`${which} size`}
-            onChange={(e) => set({ size: e.target.value as EndpointSize })}
-          >
-            {SIZES.map((sz) => (
-              <option key={sz} value={sz}>
-                {sz}
-              </option>
-            ))}
-          </select>
-        ) : null}
-        {c.routing === "square" ? (
-          <select
-            value={ep.dir ?? ""}
-            aria-label={`${which} direction`}
-            title="Direction the connector runs at this end"
-            onChange={(e) => set({ dir: (e.target.value || undefined) as Endpoint["dir"] })}
-          >
-            {DIRECTION_OPTIONS.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-        ) : null}
-      </div>
-    );
   };
 
   const c: Connector | null = shape.kind === "connector" ? (shape as Connector) : null;
@@ -184,16 +205,16 @@ export default function AnnotationContext({
             ))}
           </select>
           <div className="stepper" title="Waypoints (drag on canvas)">
-            <button onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) - 1)}>
+            <button type="button" onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) - 1)}>
               −
             </button>
             <span>{c.waypoints?.length ?? 0}</span>
-            <button onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) + 1)}>
+            <button type="button" onClick={() => setWaypointCount(c, (c.waypoints?.length ?? 0) + 1)}>
               +
             </button>
           </div>
-          <EndpointFields c={c} which="from" />
-          <EndpointFields c={c} which="to" />
+          <EndpointFields c={c} which="from" ci={ci} si={si} surfaces={surfaces} updateAnnotation={updateAnnotation} />
+          <EndpointFields c={c} which="to" ci={ci} si={si} surfaces={surfaces} updateAnnotation={updateAnnotation} />
         </div>
       ) : null}
 

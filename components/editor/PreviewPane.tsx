@@ -15,6 +15,7 @@ import { useEditor } from "@/lib/store";
 import { useAutosave } from "@/lib/use-autosave";
 import { DEFAULT_PAGE_CONFIG, stepLayoutMode } from "@/lib/book-schema";
 import AnnotationPalette from "./AnnotationPalette";
+import AnnotationSelectionPopover from "./AnnotationSelectionPopover";
 import PreviewAnnotations from "./PreviewAnnotations";
 import PreviewCellFloat from "./PreviewCellFloat";
 import PreviewGridResize from "./PreviewGridResize";
@@ -43,6 +44,7 @@ export default function PreviewPane() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const scalerRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
 
   const [scale, setScale] = useState(0.5);
   const [naturalH, setNaturalH] = useState(0);
@@ -110,7 +112,7 @@ export default function PreviewPane() {
   const isGridStep = selStep ? stepLayoutMode(selStep) === "grid" : false;
 
   return (
-    <div className="editor-right">
+    <div className="editor-right" ref={rightRef}>
       <div className="preview-toolbar">
         <button onClick={() => go(-1)} disabled={currentPage <= 0}>
           ‹ Prev
@@ -257,6 +259,23 @@ export default function PreviewPane() {
       </div>
       {selection.stepIndex != null ? (
         <AnnotationPalette ci={selection.chapterIndex} si={selection.stepIndex} />
+      ) : null}
+      {selection.stepIndex != null ? (
+        <AnnotationSelectionPopover
+          ci={selection.chapterIndex}
+          si={selection.stepIndex}
+          scalerRef={scalerRef}
+          containerRef={rightRef}
+          scrollRef={scrollRef}
+          pageIndex={currentPage}
+          annotations={
+            book.chapters[selection.chapterIndex]?.steps[selection.stepIndex]
+              ?.annotations ?? []
+          }
+          selectedId={selectedAnnotation}
+          scale={scale}
+          fitKey={bookFitKey(book)}
+        />
       ) : null}
     </div>
   );

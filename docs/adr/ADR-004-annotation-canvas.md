@@ -411,3 +411,29 @@ Replaces the plain-hex color control in `AnnotationPalette` with the DESIGN.md �
   to the full OKLCH color system slice.
 - **Editor-only:** no schema migration (`swatchId?`/`fill?` already existed in schema);
   renderer and `/print` route untouched.
+
+## Amendment (2026-07-03): selection popover (SP2)
+
+The hybrid inspector gains its middle piece — a compact `AnnotationSelectionPopover`
+component (sibling of `AnnotationPalette` in `.editor-right`) that anchors above the
+selected shape and flips below near the top edge, with horizontal clamping to keep it
+in view.
+
+- **Placement:** pure `popoverPlacement(box, size, viewport)` + `shapeBounds(annotation)`
+  helpers in `lib/annotation-popover.ts` compute the anchor position from normalized
+  annotation coordinates; unscaled overlay so the popover renders at 1:1 regardless of
+  canvas zoom.
+- **Common row (all shapes):** 8 OKLCH swatch chips + 4 stroke-width presets (reused from
+  SP1.1 via `swatchPatch` helper) + a danger `×` button routed through the existing
+  `requestDeleteAnnotation` → `ConfirmDialog` flow.
+- **Connector row:** `from`/`to` endpoint style selectors, routing toggle
+  (straight / rectangular), and — for `square` connectors only — a direction selector
+  written to the `to` endpoint.
+- **Shared option lists:** `ENDPOINT_STYLES`, `ROUTINGS`, and `DIRECTION_OPTIONS`
+  extracted to `lib/annotation-options.ts`; consumed by both the popover and the
+  left-panel `AnnotationEditor` (DRY).
+- **Hide-during-drag:** transient `annotationDragging` / `setAnnotationDragging` store
+  flag set by `PreviewAnnotations` on pointer-down/up; the popover reads this flag and
+  hides while a drag or resize is in progress, re-appearing once released.
+- **Editor-only:** no schema change, no migration; `components/renderer/**` and the
+  `/print` route are untouched.

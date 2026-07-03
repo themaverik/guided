@@ -430,8 +430,11 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
     Violet) + 4 width presets (Thin 1 / Medium 2 / Thick 4 / Heavy 6); `swatchId` + `width` applied to
     shapes; fill/tint deferred to the OKLCH color system slice. No schema change; editor-only. ADR-004
     amended.
-  - **SP2 — selection popover** — [todo]. Compact popover anchored to the selected shape for quick
-    color/width/endpoint/direction edits without opening the left panel.
+  - **SP2 — selection popover** — [done] (`feat/annotation-selection-popover`). Compact popover
+    anchored to the selected shape: color (8 OKLCH swatches) + width presets + confirm-routed delete
+    for all shapes; connector row adds `from`/`to` endpoint style, routing, and (square-only)
+    direction; reuses `swatchPatch` and the shared option lists; hides during drag/resize via
+    transient `annotationDragging` store flag; editor-only, no schema change.
   - **SP3 — left-panel cleanup** — [todo]. Migrate or trim the per-shape property cards in the left panel
     now that the primary authoring flow lives on-canvas.
 

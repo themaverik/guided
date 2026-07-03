@@ -51,4 +51,19 @@ describe("shapeBounds", () => {
     expect(b.w).toBeCloseTo(0.5);
     expect(b.h).toBeCloseTo(0.3);
   });
+
+  it("includes waypoints in connector extent", () => {
+    const c = {
+      id: "c", kind: "connector",
+      from: { x: 0.2, y: 0.3, style: "none" },
+      to: { x: 0.7, y: 0.6, style: "arrow" },
+      waypoints: [{ x: 0.1, y: 0.8 }],
+      stroke: "#000", width: 2, routing: "square",
+    } as Annotation;
+    const b = shapeBounds(c, [c]);
+    expect(b.x).toBeCloseTo(0.1); // waypoint pulls the left edge out
+    expect(b.y).toBeCloseTo(0.3);
+    expect(b.w).toBeCloseTo(0.6); // 0.7 - 0.1
+    expect(b.h).toBeCloseTo(0.5); // 0.8 - 0.3
+  });
 });

@@ -2,8 +2,9 @@
 
 /*
  * On-canvas annotation drawing (SP1). Turns a press→drag→release on the page
- * into a new shape, driven by the store's activeTool + drawColor. Pure geometry
- * lives in lib/annotations (boundsFromDrag); this hook owns the transient draw
+ * into a new shape, driven by the store's activeTool + draw state (drawColor,
+ * drawWidth, drawSwatch). Pure geometry lives in lib/annotations (boundsFromDrag)
+ * and the shape build in lib/annotation-draw; this hook owns the transient draw
  * state and commits the finished shape via addAnnotation. Editor-only.
  */
 import { useEffect, useRef, useState } from "react";

@@ -11,7 +11,7 @@ export interface Swatch {
   stroke: string;
 }
 
-export const SWATCHES: Swatch[] = [
+export const SWATCHES: readonly Swatch[] = [
   { id: "ink", label: "Ink", fill: "#e6f1f2", stroke: "#024450" },
   { id: "red", label: "Red", fill: "#ffe8e4", stroke: "#cb4a47" },
   { id: "orange", label: "Orange", fill: "#ffecd8", stroke: "#b56410" },
@@ -27,7 +27,7 @@ export interface WidthPreset {
   value: number;
 }
 
-export const WIDTH_PRESETS: WidthPreset[] = [
+export const WIDTH_PRESETS: readonly WidthPreset[] = [
   { label: "Thin", value: 1 },
   { label: "Medium", value: 2 },
   { label: "Thick", value: 4 },
@@ -35,6 +35,9 @@ export const WIDTH_PRESETS: WidthPreset[] = [
 ];
 
 export const DEFAULT_SWATCH_ID = "ink";
+
+/** Default stroke width for new draws — the Medium preset. */
+export const DEFAULT_WIDTH = 2;
 
 /** Stroke hex of the default swatch — the initial on-canvas draw color. */
 export const DEFAULT_STROKE = SWATCHES.find(

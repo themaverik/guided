@@ -44,8 +44,12 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
     const anns = s.book.chapters[ci]?.steps[si]?.annotations ?? [];
     return anns.find((a) => a.id === id) ?? null;
   });
+  // Return the raw array (or undefined) — a `?? []` here would mint a fresh
+  // array every render, breaking useSyncExternalStore's snapshot caching
+  // ("getSnapshot should be cached to avoid an infinite loop"). Default at the
+  // use site instead.
   const annotations = useEditor(
-    (s) => s.book.chapters[ci]?.steps[si]?.annotations ?? [],
+    (s) => s.book.chapters[ci]?.steps[si]?.annotations,
   );
 
   // Switching steps starts fresh on Select.
@@ -112,7 +116,7 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
         ))}
       </div>
       {selected ? (
-        <AnnotationContext ci={ci} si={si} shape={selected} annotations={annotations} />
+        <AnnotationContext ci={ci} si={si} shape={selected} annotations={annotations ?? []} />
       ) : null}
     </div>
   );

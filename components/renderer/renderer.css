@@ -581,19 +581,12 @@
 .callout--warning .callout-title {
   color: var(--color-warning-title);
 }
-.callout--warn .callout-body,
-.callout--warning .callout-body {
-  color: var(--color-warning-body);
-}
 .callout--success {
   background: var(--color-success-bg);
   border-color: var(--color-success-border);
 }
 .callout--success .callout-title {
   color: var(--color-success-title);
-}
-.callout--success .callout-body {
-  color: var(--color-success-body);
 }
 .callout--danger {
   background: var(--color-danger-bg);
@@ -602,10 +595,6 @@
 .callout--danger .callout-title {
   color: var(--color-danger-title);
 }
-.callout--danger .callout-body {
-  color: var(--color-danger-body);
-}
-
 /* Leading type icon in the callout title */
 .callout-icon {
   display: inline-flex;
@@ -680,6 +669,12 @@
   font-size: 8pt;
   margin-right: 2mm;
   vertical-align: -1mm;
+}
+.callout--info .callout-marker {
+  background: var(--color-info-marker);
+}
+.callout--note .callout-marker {
+  background: var(--color-note-marker);
 }
 .callout--warn .callout-marker,
 .callout--warning .callout-marker {

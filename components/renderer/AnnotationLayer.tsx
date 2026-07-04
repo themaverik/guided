@@ -14,6 +14,7 @@ import type {
   EndpointStyle,
   Surface,
 } from "@/lib/book-schema";
+import { DEFAULT_TEXT_SIZE } from "@/lib/book-schema";
 import {
   CORNER_RADIUS,
   FONT_STACKS,
@@ -51,7 +52,7 @@ function ShapeLabel({ s }: { s: Surface }) {
         <span
           style={{
             fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
-            fontSize: s.fontSize ?? 16,
+            fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "center",
           }}
@@ -167,7 +168,7 @@ function SurfaceShape({ s }: { s: Surface }) {
           className="anno-text"
           style={{
             fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
-            fontSize: s.fontSize ?? 16,
+            fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "left",
             background: s.fill ?? undefined,

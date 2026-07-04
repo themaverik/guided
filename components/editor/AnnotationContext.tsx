@@ -18,6 +18,7 @@ import type {
   TextFont,
 } from "@/lib/book-schema";
 import { resolveEndpoint } from "@/lib/annotations";
+import { fillForStroke } from "@/lib/annotation-palette";
 import { useEditor } from "@/lib/store";
 import {
   ENDPOINT_STYLES,
@@ -138,7 +139,17 @@ export default function AnnotationContext({
         <input
           type="color"
           value={shape.stroke}
-          onChange={(e) => updateAnnotation(ci, si, shape.id, { stroke: e.target.value })}
+          onChange={(e) => {
+            const stroke = e.target.value;
+            updateAnnotation(
+              ci,
+              si,
+              shape.id,
+              shape.kind !== "connector" && shape.fill != null
+                ? { stroke, fill: fillForStroke(stroke) }
+                : { stroke },
+            );
+          }}
           title="Custom color"
           aria-label="Custom color"
         />
@@ -154,6 +165,20 @@ export default function AnnotationContext({
           title="Custom width"
           aria-label="Custom width"
         />
+        {shape.kind === "box" || shape.kind === "diamond" || shape.kind === "ellipse" ? (
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={shape.fill != null}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, {
+                  fill: e.target.checked ? fillForStroke(shape.stroke) : undefined,
+                })
+              }
+            />
+            Fill
+          </label>
+        ) : null}
       </div>
 
       {c ? (

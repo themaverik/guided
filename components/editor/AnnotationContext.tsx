@@ -17,6 +17,7 @@ import type {
   Surface,
   TextFont,
 } from "@/lib/book-schema";
+import { DEFAULT_TEXT_SIZE } from "@/lib/book-schema";
 import { resolveEndpoint } from "@/lib/annotations";
 import { fillForStroke } from "@/lib/annotation-palette";
 import { useEditor } from "@/lib/store";
@@ -145,7 +146,7 @@ export default function AnnotationContext({
               ci,
               si,
               shape.id,
-              shape.kind !== "connector" && shape.fill != null
+              shape.kind !== "connector" && shape.kind !== "text" && shape.fill != null
                 ? { stroke, fill: fillForStroke(stroke) }
                 : { stroke },
             );
@@ -212,55 +213,93 @@ export default function AnnotationContext({
         </div>
       ) : null}
 
-      {shape.kind === "text" ? (
+      {shape.kind === "text" || shape.text != null ? (
         <div className="anno-context-row anno-text-ctrls">
-          <label className="anno-num">
-            size
+          <>
+            <label className="anno-num">
+              size
+              <input
+                type="number"
+                min={6}
+                max={120}
+                value={shape.fontSize ?? DEFAULT_TEXT_SIZE}
+                onChange={(e) =>
+                  updateAnnotation(ci, si, shape.id, {
+                    fontSize: Math.max(6, Number(e.target.value) || DEFAULT_TEXT_SIZE),
+                  })
+                }
+              />
+            </label>
+            <select
+              value={shape.fontFamily ?? "sans"}
+              aria-label="Font"
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, { fontFamily: e.target.value as TextFont })
+              }
+            >
+              {FONTS.map((f) => (
+                <option key={f} value={f}>
+                  {FONT_LABELS[f]}
+                </option>
+              ))}
+            </select>
+            <select
+              value={shape.align ?? "left"}
+              aria-label="Align"
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, { align: e.target.value as Surface["align"] })
+              }
+            >
+              {ALIGNS.map((al) => (
+                <option key={al} value={al}>
+                  {al}
+                </option>
+              ))}
+            </select>
             <input
-              type="number"
-              min={6}
-              max={120}
-              value={shape.fontSize ?? 16}
+              type="color"
+              value={shape.color ?? shape.stroke}
+              onChange={(e) => updateAnnotation(ci, si, shape.id, { color: e.target.value })}
+              title="Text color"
+              aria-label="Text color"
+            />
+          </>
+        </div>
+      ) : null}
+
+      {shape.kind === "text" ? (
+        <div className="anno-context-row">
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={(shape.width ?? 0) > 0}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, { width: e.target.checked ? 2 : 0 })
+              }
+            />
+            Border
+          </label>
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={shape.fill != null}
               onChange={(e) =>
                 updateAnnotation(ci, si, shape.id, {
-                  fontSize: Math.max(6, Number(e.target.value) || 16),
+                  fill: e.target.checked ? "#ffffff" : undefined,
                 })
               }
             />
+            Fill
           </label>
-          <select
-            value={shape.fontFamily ?? "sans"}
-            aria-label="Font"
-            onChange={(e) =>
-              updateAnnotation(ci, si, shape.id, { fontFamily: e.target.value as TextFont })
-            }
-          >
-            {FONTS.map((f) => (
-              <option key={f} value={f}>
-                {FONT_LABELS[f]}
-              </option>
-            ))}
-          </select>
-          <select
-            value={shape.align ?? "left"}
-            aria-label="Align"
-            onChange={(e) =>
-              updateAnnotation(ci, si, shape.id, { align: e.target.value as Surface["align"] })
-            }
-          >
-            {ALIGNS.map((al) => (
-              <option key={al} value={al}>
-                {al}
-              </option>
-            ))}
-          </select>
-          <input
-            type="color"
-            value={shape.color ?? shape.stroke}
-            onChange={(e) => updateAnnotation(ci, si, shape.id, { color: e.target.value })}
-            title="Text color"
-            aria-label="Text color"
-          />
+          {shape.fill != null ? (
+            <input
+              type="color"
+              value={shape.fill}
+              onChange={(e) => updateAnnotation(ci, si, shape.id, { fill: e.target.value })}
+              title="Fill (background) color"
+              aria-label="Fill color"
+            />
+          ) : null}
         </div>
       ) : null}
 

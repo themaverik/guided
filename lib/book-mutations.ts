@@ -25,6 +25,7 @@ import {
   type Step,
   type Surface,
   DEFAULT_PAGE_CONFIG,
+  DEFAULT_TEXT_SIZE,
   stepLayoutMode,
 } from "./book-schema";
 import { annotationId } from "./annotations";
@@ -348,7 +349,7 @@ export function newSurface(kind: Surface["kind"]): Surface {
       h: 0.1,
       width: 0,
       text: "Text",
-      fontSize: 16,
+      fontSize: DEFAULT_TEXT_SIZE,
       fontFamily: "sans",
       color: "#555555",
       align: "left",

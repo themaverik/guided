@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -713,5 +713,56 @@ describe("boundsFromDrag", () => {
   it("returns the line default for a bare click", () => {
     const b = boundsFromDrag({ x: 0.3, y: 0.5 }, { x: 0.305, y: 0.5 }, "line");
     expect(b).toEqual({ x: 0.3, y: 0.5, w: 0.4, h: 0 });
+  });
+});
+
+describe("labelRect", () => {
+  const base = { id: "s", stroke: "#000", width: 2 };
+  it("returns the bounds unchanged for closed shapes", () => {
+    for (const kind of ["box", "diamond", "ellipse"] as const) {
+      const s = { ...base, kind, x: 0.2, y: 0.2, w: 0.4, h: 0.3 } as Surface;
+      expect(labelRect(s)).toEqual({ x: 0.2, y: 0.2, w: 0.4, h: 0.3 });
+    }
+  });
+  it("centers a box on the midpoint for a line", () => {
+    const s = { ...base, kind: "line", x: 0.2, y: 0.4, w: 0.6, h: 0 } as Surface;
+    const r = labelRect(s);
+    expect(r.w).toBeCloseTo(LABEL_W);
+    expect(r.h).toBeCloseTo(LABEL_H);
+    expect(r.x + r.w / 2).toBeCloseTo(0.5); // midpoint x
+    expect(r.y + r.h / 2).toBeCloseTo(0.4); // midpoint y
+  });
+  it("centers on the bbox center for a bracket", () => {
+    const s = { ...base, kind: "bracket", x: 0.5, y: 0.3, w: 0.05, h: 0.4 } as Surface;
+    const r = labelRect(s);
+    expect(r.x + r.w / 2).toBeCloseTo(0.525);
+    expect(r.y + r.h / 2).toBeCloseTo(0.5);
+  });
+  it("clamps the label box inside [0,1]", () => {
+    const s = { ...base, kind: "line", x: 0.9, y: 0.0, w: 0.1, h: 0 } as Surface;
+    const r = labelRect(s); // midpoint 0.95,0 → clamp
+    expect(r.x).toBeCloseTo(1 - LABEL_W); // clamped to right edge
+    expect(r.y).toBeCloseTo(0);
+  });
+});
+
+describe("connector label placement", () => {
+  it("labelRectAt centers a LABEL_W×LABEL_H box on a point, clamped", () => {
+    const r = labelRectAt(0.5, 0.4);
+    expect(r.w).toBeCloseTo(LABEL_W);
+    expect(r.h).toBeCloseTo(LABEL_H);
+    expect(r.x + r.w / 2).toBeCloseTo(0.5);
+    expect(r.y + r.h / 2).toBeCloseTo(0.4);
+    expect(labelRectAt(0.99, 0.99).x).toBeCloseTo(1 - LABEL_W);
+  });
+  it("connectorMidpoint is the midpoint of the resolved endpoints", () => {
+    const c = {
+      id: "c", kind: "connector", stroke: "#000", width: 2,
+      from: { x: 0.2, y: 0.2, style: "none" },
+      to: { x: 0.6, y: 0.4, style: "arrow" },
+    } as Connector;
+    const m = connectorMidpoint([c], c);
+    expect(m.x).toBeCloseTo(0.4);
+    expect(m.y).toBeCloseTo(0.3);
   });
 });

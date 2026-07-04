@@ -778,6 +778,26 @@
   overflow-wrap: break-word;
   box-sizing: border-box;
 }
+.anno-shape-label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  line-height: 1.2;
+  overflow: hidden;
+}
+.anno-shape-label > span {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+/* Open-shape (line/bracket) label: an opaque pill that masks the stroke beneath. */
+.anno-shape-label.masked > span {
+  background: #ffffff;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
 .img-slot-meta {
   position: relative;
   z-index: 1;

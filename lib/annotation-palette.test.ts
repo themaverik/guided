@@ -6,6 +6,8 @@ import {
   DEFAULT_STROKE,
   swatchByStroke,
   swatchPatch,
+  fillForStroke,
+  mixToWhite,
 } from "./annotation-palette";
 
 describe("annotation palette", () => {
@@ -40,6 +42,43 @@ describe("annotation palette", () => {
     expect(d).toBeDefined();
     expect(DEFAULT_STROKE).toBe(d!.stroke);
     expect(DEFAULT_STROKE).toBe("#024450");
+  });
+});
+
+describe("fill tint", () => {
+  it("mixToWhite lightens each channel toward white by amount", () => {
+    expect(mixToWhite("#000000", 1)).toBe("#ffffff");
+    expect(mixToWhite("#000000", 0)).toBe("#000000");
+    expect(mixToWhite("#ffffff", 0.5)).toBe("#ffffff");
+    expect(mixToWhite("not-a-hex", 0.5)).toBe("not-a-hex");
+  });
+
+  it("fillForStroke returns the exact paired fill for every swatch stroke", () => {
+    for (const s of SWATCHES) {
+      expect(fillForStroke(s.stroke)).toBe(s.fill);
+      expect(fillForStroke(s.stroke.toUpperCase())).toBe(s.fill);
+    }
+  });
+
+  it("fillForStroke lightens an off-palette stroke", () => {
+    const out = fillForStroke("#123456");
+    expect(out).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(out).not.toBe("#123456");
+    // each channel is lighter than (or equal to) the source
+    const src = [0x12, 0x34, 0x56];
+    const got = [1, 3, 5].map((i) => parseInt(out.slice(i, i + 2), 16));
+    got.forEach((c, i) => expect(c).toBeGreaterThan(src[i]));
+  });
+
+  it("swatchPatch adds fill only for filled closed shapes", () => {
+    const sw = SWATCHES[1]; // red
+    expect(swatchPatch(sw, "box", true).fill).toBe(sw.fill);
+    expect(swatchPatch(sw, "diamond", true).fill).toBe(sw.fill);
+    expect(swatchPatch(sw, "ellipse", true).fill).toBe(sw.fill);
+    expect(swatchPatch(sw, "box", false).fill).toBeUndefined();
+    expect(swatchPatch(sw, "line", true).fill).toBeUndefined();
+    expect(swatchPatch(sw, "text", true).fill).toBeUndefined();
+    expect(swatchPatch(sw, "box").fill).toBeUndefined(); // default filled=false
   });
 });
 

@@ -437,3 +437,44 @@ in view.
   hides while a drag or resize is in progress, re-appearing once released.
 - **Editor-only:** no schema change, no migration; `components/renderer/**` and the
   `/print` route are untouched.
+
+## Amendment (2026-07-03): endpoint marker-size consistency
+
+Endpoint markers were rendered at inconsistent sizes across styles — the filled arrow
+occupied the whole marker box while circle / diamond / point occupied 0.4–0.68 of it, so
+the arrow looked ~2× the others at the same `EndpointSize`. Fix: retune the per-style
+geometry in `AnnotationLayer.tsx`'s `endpointMarker` so every style (arrow / circle /
+diamond / point / bar) renders at a shared ~0.7·s visual extent for a given size. Stroke-
+width-relative marker scaling was deliberately left out of scope.
+
+- **Scope:** renderer change only (`components/renderer/AnnotationLayer.tsx`,
+  `endpointMarker`); editor preview and `/print` are identical (the same renderer runs in
+  both). `MARKER_PX` size keywords and marker `refX` are unchanged.
+- **No schema change:** `Endpoint.style` values are unchanged; no migration required.
+
+## Amendment (2026-07-03): annotation inspector redistribution
+
+Annotation editing is now consolidated onto exactly two floating surfaces plus the canvas,
+replacing the left-sidebar `AnnotationEditor` entirely.
+
+- **Context-aware bottom palette (`AnnotationContext.tsx`):** when a shape is selected the
+  bottom `AnnotationPalette` grows a context row with per-shape detail controls — freeform
+  color + width (all shapes); connector routing, waypoint stepper, and from/to endpoint
+  (style / size / direction[square] / binding ref+anchor); text font/size/align/color;
+  bracket orientation/flip. Implemented in `components/editor/AnnotationContext.tsx`,
+  mounted inside the existing `AnnotationPalette`.
+- **Minimal popover:** `AnnotationSelectionPopover` trimmed to color swatches, stroke-width
+  chips, and delete `×` only. The connector detail row (routing/endpoints) moved to the
+  bottom palette context row.
+- **`AnnotationEditor` removed:** `components/editor/AnnotationEditor.tsx` deleted; the
+  "Annotations" section in `StepEditor` removed; associated dead CSS pruned.
+- **Option lists consolidated:** `SIZES`, `ANCHORS`, `FONTS`, `FONT_LABELS`, and `ALIGNS`
+  joined the existing `ENDPOINT_STYLES`, `ROUTINGS`, and `DIRECTION_OPTIONS` in
+  `lib/annotation-options.ts` (single source of truth for all annotation option sets).
+- **Intentionally dropped:** numeric coordinate fields (x/y/w/h), endpoint free-point x/y,
+  and the shape list — all are canvas-reachable via direct manipulation.
+- **Canvas direct manipulation unchanged:** move/resize/endpoint drag in
+  `PreviewAnnotations.tsx` is untouched.
+- **Editor-only:** no schema change, no migration; `components/renderer/**` and the
+  `/print` route are untouched. Branch `feat/annotation-inspector-redistribution`;
+  suite 219/219.

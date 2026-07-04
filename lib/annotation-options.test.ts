@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ENDPOINT_STYLES, ROUTINGS, DIRECTION_OPTIONS } from "./annotation-options";
+import { ENDPOINT_STYLES, ROUTINGS, DIRECTION_OPTIONS, SIZES, ANCHORS, FONTS, FONT_LABELS, ALIGNS } from "./annotation-options";
 
 describe("annotation options", () => {
   it("lists the six endpoint styles", () => {
@@ -24,5 +24,25 @@ describe("annotation options", () => {
       "↑ up",
       "↓ down",
     ]);
+  });
+});
+
+describe("annotation options — sizes/anchors/fonts/aligns", () => {
+  it("endpoint sizes are small/medium/large", () => {
+    expect(SIZES).toEqual(["small", "medium", "large"]);
+  });
+  it("anchors include center + edges + connector ends", () => {
+    expect(ANCHORS).toEqual([
+      "center", "top", "bottom", "left", "right",
+      "top-left", "top-right", "bottom-left", "bottom-right",
+      "start", "end", "mid",
+    ]);
+  });
+  it("fonts each have a label", () => {
+    expect(FONTS).toEqual(["sans", "serif", "mono", "open-sans", "montserrat", "roboto"]);
+    for (const f of FONTS) expect(FONT_LABELS[f].length).toBeGreaterThan(0);
+  });
+  it("aligns are left/center/right", () => {
+    expect(ALIGNS).toEqual(["left", "center", "right"]);
   });
 });

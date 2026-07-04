@@ -9,6 +9,7 @@
  */
 import { useEffect } from "react";
 import { useEditor, type AnnotationTool } from "@/lib/store";
+import AnnotationContext from "./AnnotationContext";
 import {
   SWATCHES,
   WIDTH_PRESETS,
@@ -43,6 +44,9 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
     const anns = s.book.chapters[ci]?.steps[si]?.annotations ?? [];
     return anns.find((a) => a.id === id) ?? null;
   });
+  const annotations = useEditor(
+    (s) => s.book.chapters[ci]?.steps[si]?.annotations ?? [],
+  );
 
   // Switching steps starts fresh on Select.
   useEffect(() => {
@@ -64,47 +68,52 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
 
   return (
     <div className="annotation-palette" role="toolbar" aria-label="Annotation tools">
-      {TOOLS.map(({ tool, label, icon }) => (
-        <button
-          key={tool}
-          type="button"
-          className={`ap-tool${activeTool === tool ? " active" : ""}`}
-          aria-pressed={activeTool === tool}
-          title={label}
-          onClick={() => setActiveTool(tool)}
-        >
-          <svg viewBox="0 0 14 14" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
-            {icon}
-          </svg>
-        </button>
-      ))}
-      <span className="ap-div" />
-      {SWATCHES.map((sw) => (
-        <button
-          key={sw.id}
-          type="button"
-          className={`ap-swatch${activeSwatchId === sw.id ? " active" : ""}`}
-          style={{ background: sw.fill, borderColor: sw.stroke }}
-          title={sw.label}
-          aria-label={`Color ${sw.label}`}
-          aria-pressed={activeSwatchId === sw.id}
-          onClick={() => applySwatch(sw)}
-        />
-      ))}
-      <span className="ap-div" />
-      {WIDTH_PRESETS.map((w) => (
-        <button
-          key={w.value}
-          type="button"
-          className={`ap-width${drawWidth === w.value ? " active" : ""}`}
-          title={`${w.label} (${w.value})`}
-          aria-label={`Width ${w.label}`}
-          aria-pressed={drawWidth === w.value}
-          onClick={() => applyWidth(w.value)}
-        >
-          <span className="ap-width-bar" style={{ height: w.value }} />
-        </button>
-      ))}
+      <div className="ap-main-row">
+        {TOOLS.map(({ tool, label, icon }) => (
+          <button
+            key={tool}
+            type="button"
+            className={`ap-tool${activeTool === tool ? " active" : ""}`}
+            aria-pressed={activeTool === tool}
+            title={label}
+            onClick={() => setActiveTool(tool)}
+          >
+            <svg viewBox="0 0 14 14" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
+              {icon}
+            </svg>
+          </button>
+        ))}
+        <span className="ap-div" />
+        {SWATCHES.map((sw) => (
+          <button
+            key={sw.id}
+            type="button"
+            className={`ap-swatch${activeSwatchId === sw.id ? " active" : ""}`}
+            style={{ background: sw.fill, borderColor: sw.stroke }}
+            title={sw.label}
+            aria-label={`Color ${sw.label}`}
+            aria-pressed={activeSwatchId === sw.id}
+            onClick={() => applySwatch(sw)}
+          />
+        ))}
+        <span className="ap-div" />
+        {WIDTH_PRESETS.map((w) => (
+          <button
+            key={w.value}
+            type="button"
+            className={`ap-width${drawWidth === w.value ? " active" : ""}`}
+            title={`${w.label} (${w.value})`}
+            aria-label={`Width ${w.label}`}
+            aria-pressed={drawWidth === w.value}
+            onClick={() => applyWidth(w.value)}
+          >
+            <span className="ap-width-bar" style={{ height: w.value }} />
+          </button>
+        ))}
+      </div>
+      {selected ? (
+        <AnnotationContext ci={ci} si={si} shape={selected} annotations={annotations} />
+      ) : null}
     </div>
   );
 }

@@ -2,13 +2,13 @@
 
 /*
  * Compact popover anchored to the selected annotation (SP2). Reflects the
- * selected shape's color + width (+ connector endpoint/routing/direction) and
- * writes edits through updateAnnotation. Mounted unscaled as a sibling of
- * AnnotationPalette in .editor-right; positioned from the shape's measured
- * screen bounds. Editor-only; hides during an active drag. Nothing prints.
+ * selected shape's color + width + delete, and writes edits through updateAnnotation.
+ * Mounted unscaled as a sibling of AnnotationPalette in .editor-right; positioned
+ * from the shape's measured screen bounds. Editor-only; hides during an active drag.
+ * Nothing prints.
  */
 import { useLayoutEffect, useRef, useState } from "react";
-import type { Annotation, Connector, Endpoint, EndpointStyle } from "@/lib/book-schema";
+import type { Annotation } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
 import {
   SWATCHES,
@@ -17,7 +17,6 @@ import {
   swatchPatch,
   type Swatch,
 } from "@/lib/annotation-palette";
-import { ENDPOINT_STYLES, ROUTINGS, DIRECTION_OPTIONS } from "@/lib/annotation-options";
 import { popoverPlacement, shapeBounds } from "@/lib/annotation-popover";
 
 const POPOVER_GAP = 10;
@@ -96,14 +95,11 @@ export default function AnnotationSelectionPopover({
   const visible = !!pos && !dragging;
 
   const activeSwatchId = swatchByStroke(shape.stroke);
-  const c: Connector | null = shape.kind === "connector" ? (shape as Connector) : null;
 
   const applySwatch = (sw: Swatch) =>
     updateAnnotation(ci, si, shape.id, swatchPatch(sw, shape.kind));
   const applyWidth = (value: number) =>
     updateAnnotation(ci, si, shape.id, { width: value });
-  const setEndpoint = (which: "from" | "to", patch: Partial<Endpoint>) =>
-    updateAnnotation(ci, si, shape.id, { [which]: { ...(c as Connector)[which], ...patch } });
 
   return (
     <div
@@ -151,63 +147,6 @@ export default function AnnotationSelectionPopover({
           ×
         </button>
       </div>
-
-      {c ? (
-        <div className="anno-popover-row">
-          <select
-            value={c.from.style}
-            aria-label="From endpoint style"
-            onChange={(e) => setEndpoint("from", { style: e.target.value as EndpointStyle })}
-          >
-            {ENDPOINT_STYLES.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-          <select
-            value={c.to.style}
-            aria-label="To endpoint style"
-            onChange={(e) => setEndpoint("to", { style: e.target.value as EndpointStyle })}
-          >
-            {ENDPOINT_STYLES.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-          <select
-            value={c.routing ?? "straight"}
-            aria-label="Routing"
-            onChange={(e) =>
-              updateAnnotation(ci, si, shape.id, {
-                routing: e.target.value as Connector["routing"],
-              })
-            }
-          >
-            {ROUTINGS.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-          {c.routing === "square" ? (
-            <select
-              value={c.to.dir ?? ""}
-              aria-label="Direction"
-              onChange={(e) =>
-                setEndpoint("to", { dir: (e.target.value || undefined) as Endpoint["dir"] })
-              }
-            >
-              {DIRECTION_OPTIONS.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-          ) : null}
-        </div>
-      ) : null}
     </div>
   );
 }

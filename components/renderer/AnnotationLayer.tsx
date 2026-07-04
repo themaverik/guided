@@ -21,11 +21,47 @@ import {
   bracketSegments,
   buildRoundedConnector,
   connectorPoints,
+  labelRect,
   pct,
 } from "@/lib/annotations";
 
 /** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
 const CORNER = 10;
+
+/** A centered text label for a shape (box/diamond/ellipse fill their bounds; open
+ *  shapes get a midpoint pill that masks the stroke). Renders nothing when empty. */
+function ShapeLabel({ s }: { s: Surface }) {
+  if (!s.text || !s.text.trim()) return null;
+  const r = labelRect(s);
+  const open = s.kind === "line" || s.kind === "bracket";
+  const justify =
+    s.align === "left" ? "flex-start" : s.align === "right" ? "flex-end" : "center";
+  return (
+    <foreignObject
+      x={pct(r.x)}
+      y={pct(r.y)}
+      width={pct(r.w)}
+      height={pct(r.h)}
+      overflow="visible"
+    >
+      <div
+        className={`anno-shape-label${open ? " masked" : ""}`}
+        style={{ justifyContent: justify }}
+      >
+        <span
+          style={{
+            fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
+            fontSize: s.fontSize ?? 16,
+            color: s.color ?? s.stroke,
+            textAlign: s.align ?? "center",
+          }}
+        >
+          {s.text}
+        </span>
+      </div>
+    </foreignObject>
+  );
+}
 
 function SurfaceShape({ s }: { s: Surface }) {
   const common = {
@@ -33,8 +69,17 @@ function SurfaceShape({ s }: { s: Surface }) {
     strokeWidth: s.width,
     fill: "none" as const,
   };
+  const withLabel = (el: React.ReactNode) =>
+    s.text && s.text.trim() ? (
+      <g>
+        {el}
+        <ShapeLabel s={s} />
+      </g>
+    ) : (
+      el
+    );
   if (s.kind === "box") {
-    return (
+    return withLabel(
       <rect
         x={pct(s.x)}
         y={pct(s.y)}
@@ -44,11 +89,11 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={6}
         {...common}
         fill={s.fill ?? "none"}
-      />
+      />,
     );
   }
   if (s.kind === "ellipse") {
-    return (
+    return withLabel(
       <ellipse
         cx={pct(s.x + s.w / 2)}
         cy={pct(s.y + s.h / 2)}
@@ -56,18 +101,18 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={pct(s.h / 2)}
         {...common}
         fill={s.fill ?? "none"}
-      />
+      />,
     );
   }
   if (s.kind === "line") {
-    return (
+    return withLabel(
       <line
         x1={pct(s.x)}
         y1={pct(s.y)}
         x2={pct(s.x + s.w)}
         y2={pct(s.y + s.h)}
         {...common}
-      />
+      />,
     );
   }
   if (s.kind === "diamond") {
@@ -86,7 +131,7 @@ function SurfaceShape({ s }: { s: Surface }) {
       `Q 0 50 ${k} ${50 - k}`,
       "Z",
     ].join(" ");
-    return (
+    return withLabel(
       <svg
         x={pct(s.x)}
         y={pct(s.y)}
@@ -104,7 +149,7 @@ function SurfaceShape({ s }: { s: Surface }) {
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
-      </svg>
+      </svg>,
     );
   }
   if (s.kind === "text") {
@@ -135,12 +180,12 @@ function SurfaceShape({ s }: { s: Surface }) {
       </foreignObject>
     );
   }
-  return (
+  return withLabel(
     <g {...common}>
       {bracketSegments(s).map(([x1, y1, x2, y2], i) => (
         <line key={i} x1={pct(x1)} y1={pct(y1)} x2={pct(x2)} y2={pct(y2)} />
       ))}
-    </g>
+    </g>,
   );
 }
 

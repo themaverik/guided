@@ -64,7 +64,7 @@ describe("fill tint", () => {
     const out = fillForStroke("#123456");
     expect(out).toMatch(/^#[0-9a-f]{6}$/i);
     expect(out).not.toBe("#123456");
-    // each channel is lighter than (or equal to) the source
+    // all channels strictly lightened (none is 255 in #123456)
     const src = [0x12, 0x34, 0x56];
     const got = [1, 3, 5].map((i) => parseInt(out.slice(i, i + 2), 16));
     got.forEach((c, i) => expect(c).toBeGreaterThan(src[i]));

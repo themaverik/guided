@@ -128,7 +128,7 @@ export type TextFont =
 
 /**
  * A snap-target shape that is also drawn: box, line, square bracket, diamond,
- * polygon, or a free-floating text label.
+ * ellipse, polygon, or a free-floating text label.
  */
 export interface Surface {
   id: string;

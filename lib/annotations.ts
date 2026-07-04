@@ -91,7 +91,7 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
   const { x, y, w, h, kind } = surface;
   // A diamond's vertices coincide with the box edge midpoints, so the box
   // anchor math gives the correct on-shape points (top/right/bottom/left tips).
-  // A text box shares the same rectangular anchors.
+  // A text box and an ellipse share the same rectangular bounding-box anchors.
   if (kind === "box" || kind === "diamond" || kind === "text" || kind === "ellipse") {
     switch (anchor) {
       case "top":

@@ -1,8 +1,8 @@
 /*
  * Shared option lists for annotation endpoint style / connector routing /
- * direction / size / anchor / font / align, used by both the left-panel
- * AnnotationEditor and the on-canvas selection popover so the option sets
- * cannot drift. Editor-only.
+ * direction / size / anchor / font / align, consumed by AnnotationContext
+ * (the bottom-palette per-shape detail row) so the option sets cannot drift.
+ * Editor-only.
  */
 import type {
   EndpointStyle,

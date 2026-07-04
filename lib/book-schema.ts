@@ -117,6 +117,9 @@ export interface Endpoint {
   dir?: "left" | "right" | "up" | "down";
 }
 
+/** Default font size (px at natural page scale) for text annotations + labels. */
+export const DEFAULT_TEXT_SIZE = 12;
+
 /** Font families offered for text annotations (CSS font-family stacks). */
 export type TextFont =
   | "sans"

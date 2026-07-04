@@ -17,6 +17,7 @@ import type {
   Surface,
   TextFont,
 } from "@/lib/book-schema";
+import { DEFAULT_TEXT_SIZE } from "@/lib/book-schema";
 import { resolveEndpoint } from "@/lib/annotations";
 import { fillForStroke } from "@/lib/annotation-palette";
 import { useEditor } from "@/lib/store";
@@ -224,10 +225,10 @@ export default function AnnotationContext({
                     type="number"
                     min={6}
                     max={120}
-                    value={surf.fontSize ?? 16}
+                    value={surf.fontSize ?? DEFAULT_TEXT_SIZE}
                     onChange={(e) =>
                       updateAnnotation(ci, si, surf.id, {
-                        fontSize: Math.max(6, Number(e.target.value) || 16),
+                        fontSize: Math.max(6, Number(e.target.value) || DEFAULT_TEXT_SIZE),
                       })
                     }
                   />

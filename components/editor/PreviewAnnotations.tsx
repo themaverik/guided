@@ -24,6 +24,7 @@ import {
   connectorPoints,
   connectorRoute,
   diamondSegments,
+  labelRect,
   nearestPoint,
   rectAnchors,
   resolveEndpoint,
@@ -184,8 +185,7 @@ export default function PreviewAnnotations({
   const surfaces = annotations.filter(
     (a): a is Surface => a.kind !== "connector",
   );
-  const editTarget =
-    surfaces.find((s) => s.id === editingId && s.kind === "text") ?? null;
+  const editTarget = surfaces.find((s) => s.id === editingId) ?? null;
 
   const toN = (e: React.PointerEvent) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -360,6 +360,11 @@ export default function PreviewAnnotations({
     force((n) => n + 1);
   };
 
+  const startTextEdit = (id: string) => {
+    selectAnnotation(id);
+    setEditingId(id);
+  };
+
   const showSnap = focused?.kind === "connector";
 
   const fc = focused?.kind === "connector" ? (focused as Connector) : null;
@@ -455,6 +460,7 @@ export default function PreviewAnnotations({
               className="preview-anno-hit"
               pointerEvents="all"
               onPointerDown={onDown}
+              onDoubleClick={() => startTextEdit(a.id)}
             />
           );
         }
@@ -469,6 +475,7 @@ export default function PreviewAnnotations({
               className="preview-anno-hit"
               pointerEvents="all"
               onPointerDown={onDown}
+              onDoubleClick={() => startTextEdit(a.id)}
             />
           );
         }
@@ -486,8 +493,7 @@ export default function PreviewAnnotations({
               onPointerDown={onDown}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                selectAnnotation(a.id);
-                setEditingId(a.id);
+                startTextEdit(a.id);
               }}
             />
           );
@@ -504,6 +510,7 @@ export default function PreviewAnnotations({
               strokeWidth={14}
               pointerEvents="stroke"
               onPointerDown={onDown}
+              onDoubleClick={() => startTextEdit(a.id)}
             />
           );
         }
@@ -518,12 +525,13 @@ export default function PreviewAnnotations({
               className="preview-anno-hit"
               pointerEvents="all"
               onPointerDown={onDown}
+              onDoubleClick={() => startTextEdit(a.id)}
             />
           );
         }
         // bracket — its three segments
         return (
-          <g key={`hit-${a.id}`} onPointerDown={onDown}>
+          <g key={`hit-${a.id}`} onPointerDown={onDown} onDoubleClick={() => startTextEdit(a.id)}>
             {bracketSegments(a).map(([x1, y1, x2, y2], i) => (
               <line
                 key={i}
@@ -715,6 +723,8 @@ function TextEditor({
   onDone: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const r = labelRect(s);
+  const centered = s.kind !== "text";
 
   useEffect(() => {
     const el = ref.current;
@@ -734,22 +744,22 @@ function TextEditor({
 
   return (
     <foreignObject
-      x={s.x * W}
-      y={s.y * H}
-      width={s.w * W}
-      height={s.h * H}
+      x={r.x * W}
+      y={r.y * H}
+      width={r.w * W}
+      height={r.h * H}
       overflow="visible"
     >
       <div
         ref={ref}
-        className="anno-text editing"
+        className={`anno-text editing${centered ? " centered" : ""}`}
         contentEditable
         suppressContentEditableWarning
         style={{
           fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
           fontSize: s.fontSize ?? 16,
           color: s.color ?? s.stroke,
-          textAlign: s.align ?? "left",
+          textAlign: s.align ?? (centered ? "center" : "left"),
         }}
         onPointerDown={(e) => e.stopPropagation()}
         // Persist on every keystroke so the text is never lost if the editor

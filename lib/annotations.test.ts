@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -743,5 +743,26 @@ describe("labelRect", () => {
     const r = labelRect(s); // midpoint 0.95,0 → clamp
     expect(r.x).toBeCloseTo(1 - LABEL_W); // clamped to right edge
     expect(r.y).toBeCloseTo(0);
+  });
+});
+
+describe("connector label placement", () => {
+  it("labelRectAt centers a LABEL_W×LABEL_H box on a point, clamped", () => {
+    const r = labelRectAt(0.5, 0.4);
+    expect(r.w).toBeCloseTo(LABEL_W);
+    expect(r.h).toBeCloseTo(LABEL_H);
+    expect(r.x + r.w / 2).toBeCloseTo(0.5);
+    expect(r.y + r.h / 2).toBeCloseTo(0.4);
+    expect(labelRectAt(0.99, 0.99).x).toBeCloseTo(1 - LABEL_W);
+  });
+  it("connectorMidpoint is the midpoint of the resolved endpoints", () => {
+    const c = {
+      id: "c", kind: "connector", stroke: "#000", width: 2,
+      from: { x: 0.2, y: 0.2, style: "none" },
+      to: { x: 0.6, y: 0.4, style: "arrow" },
+    } as Connector;
+    const m = connectorMidpoint([c], c);
+    expect(m.x).toBeCloseTo(0.4);
+    expect(m.y).toBeCloseTo(0.3);
   });
 });

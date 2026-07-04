@@ -129,11 +129,23 @@ export type TextFont =
   | "montserrat"
   | "roboto";
 
+/** The optional text-label role shared by every annotation (Surface + Connector). */
+export interface TextLabel {
+  /** Label / content text. */
+  text?: string;
+  /** Font size in px at natural page scale (default DEFAULT_TEXT_SIZE). */
+  fontSize?: number;
+  fontFamily?: TextFont;
+  /** Text color (defaults to `stroke` when unset). */
+  color?: string;
+  align?: "left" | "center" | "right";
+}
+
 /**
  * A snap-target shape that is also drawn: box, line, square bracket, diamond,
  * ellipse, polygon, or a free-floating text label.
  */
-export interface Surface {
+export interface Surface extends TextLabel {
   id: string;
   kind: "box" | "line" | "bracket" | "diamond" | "text" | "polygon" | "ellipse";
   /** Normalized 0–1 bounds relative to the image slot. */
@@ -147,16 +159,6 @@ export interface Surface {
   stroke: string;
   width: number;
   fill?: string;
-  /** text only: the label content. */
-  text?: string;
-  /** text only: font size in px (at natural page scale). */
-  fontSize?: number;
-  /** text only: font family. */
-  fontFamily?: TextFont;
-  /** text only: text color (defaults to `stroke` when unset). */
-  color?: string;
-  /** text only: horizontal text alignment. */
-  align?: "left" | "center" | "right";
   /** polygon only: closed-shape vertices, normalized 0–1. */
   vertices?: { x: number; y: number }[];
   /** polygon only: preset that constrains authoring (e.g. a decision diamond). */
@@ -181,7 +183,7 @@ export interface ConnectorBend {
 }
 
 /** An arrow/line drawn between two endpoints (each free or surface-bound). */
-export interface Connector {
+export interface Connector extends TextLabel {
   id: string;
   kind: "connector";
   from: Endpoint;

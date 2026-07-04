@@ -212,55 +212,62 @@ export default function AnnotationContext({
         </div>
       ) : null}
 
-      {shape.kind === "text" ? (
+      {shape.kind === "text" || (shape.kind !== "connector" && shape.text != null) ? (
         <div className="anno-context-row anno-text-ctrls">
-          <label className="anno-num">
-            size
-            <input
-              type="number"
-              min={6}
-              max={120}
-              value={shape.fontSize ?? 16}
-              onChange={(e) =>
-                updateAnnotation(ci, si, shape.id, {
-                  fontSize: Math.max(6, Number(e.target.value) || 16),
-                })
-              }
-            />
-          </label>
-          <select
-            value={shape.fontFamily ?? "sans"}
-            aria-label="Font"
-            onChange={(e) =>
-              updateAnnotation(ci, si, shape.id, { fontFamily: e.target.value as TextFont })
-            }
-          >
-            {FONTS.map((f) => (
-              <option key={f} value={f}>
-                {FONT_LABELS[f]}
-              </option>
-            ))}
-          </select>
-          <select
-            value={shape.align ?? "left"}
-            aria-label="Align"
-            onChange={(e) =>
-              updateAnnotation(ci, si, shape.id, { align: e.target.value as Surface["align"] })
-            }
-          >
-            {ALIGNS.map((al) => (
-              <option key={al} value={al}>
-                {al}
-              </option>
-            ))}
-          </select>
-          <input
-            type="color"
-            value={shape.color ?? shape.stroke}
-            onChange={(e) => updateAnnotation(ci, si, shape.id, { color: e.target.value })}
-            title="Text color"
-            aria-label="Text color"
-          />
+          {(() => {
+            const surf = shape as Surface;
+            return (
+              <>
+                <label className="anno-num">
+                  size
+                  <input
+                    type="number"
+                    min={6}
+                    max={120}
+                    value={surf.fontSize ?? 16}
+                    onChange={(e) =>
+                      updateAnnotation(ci, si, surf.id, {
+                        fontSize: Math.max(6, Number(e.target.value) || 16),
+                      })
+                    }
+                  />
+                </label>
+                <select
+                  value={surf.fontFamily ?? "sans"}
+                  aria-label="Font"
+                  onChange={(e) =>
+                    updateAnnotation(ci, si, surf.id, { fontFamily: e.target.value as TextFont })
+                  }
+                >
+                  {FONTS.map((f) => (
+                    <option key={f} value={f}>
+                      {FONT_LABELS[f]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={surf.align ?? "left"}
+                  aria-label="Align"
+                  onChange={(e) =>
+                    updateAnnotation(ci, si, surf.id, { align: e.target.value as Surface["align"] })
+                  }
+                >
+                  {ALIGNS.map((al) => (
+                    <option key={al} value={al}>
+                      {al}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="color"
+                  value={surf.color ?? surf.stroke}
+                  onChange={(e) => updateAnnotation(ci, si, surf.id, { color: e.target.value })}
+                  title="Text color"
+                  aria-label="Text color"
+                />
+              </>
+            );
+          })()}
         </div>
       ) : null}
 

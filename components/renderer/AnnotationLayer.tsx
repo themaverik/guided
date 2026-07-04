@@ -47,6 +47,18 @@ function SurfaceShape({ s }: { s: Surface }) {
       />
     );
   }
+  if (s.kind === "ellipse") {
+    return (
+      <ellipse
+        cx={pct(s.x + s.w / 2)}
+        cy={pct(s.y + s.h / 2)}
+        rx={pct(s.w / 2)}
+        ry={pct(s.h / 2)}
+        {...common}
+        fill={s.fill ?? "none"}
+      />
+    );
+  }
   if (s.kind === "line") {
     return (
       <line

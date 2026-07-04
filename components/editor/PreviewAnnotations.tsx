@@ -65,7 +65,7 @@ function collectSnapTargets(
   const rects: Rect[] = [{ x: 0, y: 0, w: 1, h: 1 }]; // the page
   for (const an of annotations) {
     if (an.id === excludeId) continue;
-    if (an.kind === "box" || an.kind === "diamond" || an.kind === "text" || an.kind === "bracket") {
+    if (an.kind === "box" || an.kind === "diamond" || an.kind === "text" || an.kind === "bracket" || an.kind === "ellipse") {
       rects.push({ x: an.x, y: an.y, w: an.w, h: an.h });
     }
   }
@@ -78,17 +78,10 @@ function collectSnapTargets(
 const surfaceAnchors = (s: Surface): Anchor[] =>
   s.kind === "box" || s.kind === "text"
     ? [
-        "center",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "top-left",
-        "top-right",
-        "bottom-left",
-        "bottom-right",
+        "center", "top", "bottom", "left", "right",
+        "top-left", "top-right", "bottom-left", "bottom-right",
       ]
-    : s.kind === "diamond"
+    : s.kind === "diamond" || s.kind === "ellipse"
       ? ["center", "top", "bottom", "left", "right"]
       : ["start", "mid", "end"];
 
@@ -459,6 +452,20 @@ export default function PreviewAnnotations({
               y={a.y * H}
               width={a.w * W}
               height={a.h * H}
+              className="preview-anno-hit"
+              pointerEvents="all"
+              onPointerDown={onDown}
+            />
+          );
+        }
+        if (a.kind === "ellipse") {
+          return (
+            <ellipse
+              key={`hit-${a.id}`}
+              cx={(a.x + a.w / 2) * W}
+              cy={(a.y + a.h / 2) * H}
+              rx={(a.w / 2) * W}
+              ry={(a.h / 2) * H}
               className="preview-anno-hit"
               pointerEvents="all"
               onPointerDown={onDown}

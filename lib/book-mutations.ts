@@ -337,6 +337,7 @@ export function newSurface(kind: Surface["kind"]): Surface {
   const base = { id: annotationId(), stroke: ANNO_STROKE, width: 2 };
   if (kind === "box") return { ...base, kind, x: 0.3, y: 0.3, w: 0.4, h: 0.3 };
   if (kind === "diamond") return { ...base, kind, x: 0.35, y: 0.3, w: 0.3, h: 0.3 };
+  if (kind === "ellipse") return { ...base, kind, x: 0.35, y: 0.3, w: 0.3, h: 0.3 };
   if (kind === "text")
     return {
       ...base,

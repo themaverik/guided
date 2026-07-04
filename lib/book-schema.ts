@@ -132,7 +132,7 @@ export type TextFont =
  */
 export interface Surface {
   id: string;
-  kind: "box" | "line" | "bracket" | "diamond" | "text" | "polygon";
+  kind: "box" | "line" | "bracket" | "diamond" | "text" | "polygon" | "ellipse";
   /** Normalized 0–1 bounds relative to the image slot. */
   x: number;
   y: number;

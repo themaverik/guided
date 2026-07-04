@@ -427,3 +427,241 @@ git commit -m "feat: double-click shapes to add centered text labels; show text 
 ## Execution note
 
 Order respects dependencies: T1 (ADR) → T2 (`labelRect`) → T3 (text-box frame, independent) → T4 (in-shape render, needs `labelRect`) → T5 (editing, needs `labelRect` + T4's render for WYSIWYG). T3 is independent of T2/T4.
+
+---
+
+# Revision (post-smoke-test, 2026-07-04)
+
+Three follow-ups from the user's smoke-test, added to the same branch before merge:
+(6) default text size 12; (7) connector text labels — schema + render; (8) connector
+label editing + the `contentEditable` caret fix. Tasks 7–8 extend the label to
+`Connector` (a schema change → ADR touch), positioned at the connector midpoint and
+masked like an open-shape label.
+
+### Task 6: Default text font size 12
+
+**Files:**
+- Modify: `lib/book-schema.ts` (add `DEFAULT_TEXT_SIZE`)
+- Modify: `lib/book-mutations.ts` (`newSurface("text")` fontSize)
+- Modify: `components/renderer/AnnotationLayer.tsx` (text-case + `ShapeLabel` fontSize fallbacks)
+- Modify: `components/editor/PreviewAnnotations.tsx` (`TextEditor` fontSize fallback)
+- Modify: `components/editor/AnnotationContext.tsx` (size input default)
+
+**Interfaces:** Produces `export const DEFAULT_TEXT_SIZE = 12`.
+
+- [ ] **Step 1: Add the constant** — in `lib/book-schema.ts` (near `TextFont`):
+```ts
+/** Default font size (px at natural page scale) for text annotations + labels. */
+export const DEFAULT_TEXT_SIZE = 12;
+```
+- [ ] **Step 2: Use it everywhere the old default `16` was hardcoded.** `newSurface("text")` currently sets `fontSize: 16` → `fontSize: DEFAULT_TEXT_SIZE`. Replace every `s.fontSize ?? 16` / `shape.fontSize ?? 16` fallback with `?? DEFAULT_TEXT_SIZE` in `AnnotationLayer.tsx` (the text `<div>` and the `ShapeLabel` `<span>`), `PreviewAnnotations.tsx` (`TextEditor`), and `AnnotationContext.tsx` (the size `<input value={...}>`). Import `DEFAULT_TEXT_SIZE` from `@/lib/book-schema` where needed. Run `grep -rn "?? 16" components lib` to confirm none of the fontSize ones remain.
+- [ ] **Step 3: Update any test asserting the old default.** Run `grep -rn "fontSize" lib/*.test.ts`; if a test expects `16` for a new text surface, change it to `12` (or `DEFAULT_TEXT_SIZE`).
+- [ ] **Step 4: Gates + commit**
+```bash
+pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build
+git add lib/book-schema.ts lib/book-mutations.ts components/renderer/AnnotationLayer.tsx components/editor/PreviewAnnotations.tsx components/editor/AnnotationContext.tsx
+git commit -m "feat: default text/label font size 12 (DEFAULT_TEXT_SIZE)"
+```
+
+### Task 7: Connector text labels — schema + render
+
+Give `Connector` a text label, positioned at its midpoint and masked like an open-shape label. Extract the shared text fields + label renderer so `Surface` and `Connector` share them.
+
+**Files:**
+- Modify: `lib/book-schema.ts` (extract `TextLabel`; `Surface` + `Connector` extend it)
+- Modify: `lib/annotations.ts` (`connectorMidpoint`, `labelRectAt`)
+- Modify: `components/renderer/AnnotationLayer.tsx` (extract `LabelBox`; render a connector label)
+- Modify: `docs/adr/ADR-004-annotation-canvas.md` (amendment)
+- Test: `lib/annotations.test.ts`
+
+**Interfaces:** Produces `interface TextLabel`; `connectorMidpoint(annotations, c): Point`; `labelRectAt(cx, cy): {x,y,w,h}`.
+
+- [ ] **Step 1: Extract `TextLabel` and share it (schema).** In `lib/book-schema.ts`:
+```ts
+/** The optional text-label role shared by every annotation (Surface + Connector). */
+export interface TextLabel {
+  /** Label / content text. */
+  text?: string;
+  /** Font size in px at natural page scale (default DEFAULT_TEXT_SIZE). */
+  fontSize?: number;
+  fontFamily?: TextFont;
+  /** Text color (defaults to `stroke` when unset). */
+  color?: string;
+  align?: "left" | "center" | "right";
+}
+```
+Change `Surface` to `export interface Surface extends TextLabel {` and REMOVE its now-duplicated inline `text?`/`fontSize?`/`fontFamily?`/`color?`/`align?` fields (they move to `TextLabel` — behavior-identical). Change `Connector` to `export interface Connector extends TextLabel {` (purely additive — connectors gain the optional fields). Keep all other fields on both.
+
+- [ ] **Step 2: Add `connectorMidpoint` + `labelRectAt` (pure) with failing tests first.** In `lib/annotations.test.ts` add:
+```ts
+describe("connector label placement", () => {
+  it("labelRectAt centers a LABEL_W×LABEL_H box on a point, clamped", () => {
+    const r = labelRectAt(0.5, 0.4);
+    expect(r.w).toBeCloseTo(LABEL_W);
+    expect(r.h).toBeCloseTo(LABEL_H);
+    expect(r.x + r.w / 2).toBeCloseTo(0.5);
+    expect(r.y + r.h / 2).toBeCloseTo(0.4);
+    expect(labelRectAt(0.99, 0.99).x).toBeCloseTo(1 - LABEL_W);
+  });
+  it("connectorMidpoint is the midpoint of the resolved endpoints", () => {
+    const c = {
+      id: "c", kind: "connector", stroke: "#000", width: 2,
+      from: { x: 0.2, y: 0.2, style: "none" },
+      to: { x: 0.6, y: 0.4, style: "arrow" },
+    } as Connector;
+    const m = connectorMidpoint([c], c);
+    expect(m.x).toBeCloseTo(0.4);
+    expect(m.y).toBeCloseTo(0.3);
+  });
+});
+```
+Add `labelRectAt`, `connectorMidpoint` (and `Connector` type) to the imports at the top of the test. Run `pnpm test -- --run lib/annotations.test.ts` → FAIL.
+
+- [ ] **Step 3: Implement them.** In `lib/annotations.ts`, refactor `labelRect`'s open-shape branch to use a new exported `labelRectAt`, and add `connectorMidpoint` (reuse the existing `resolveEndpoint`):
+```ts
+/** A LABEL_W×LABEL_H label box centered on (cx,cy), clamped inside the page. */
+export function labelRectAt(cx: number, cy: number): { x: number; y: number; w: number; h: number } {
+  const clamp = (v: number, size: number) => Math.max(0, Math.min(1 - size, v));
+  return { x: clamp(cx - LABEL_W / 2, LABEL_W), y: clamp(cy - LABEL_H / 2, LABEL_H), w: LABEL_W, h: LABEL_H };
+}
+
+/** Midpoint of a connector's resolved endpoints (normalized). */
+export function connectorMidpoint(annotations: Annotation[], c: Connector): Point {
+  const a = resolveEndpoint(annotations, c.from);
+  const b = resolveEndpoint(annotations, c.to);
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+```
+Then in `labelRect`, replace the open-shape body with `return labelRectAt(s.x + s.w / 2, s.y + s.h / 2);`. Run the tests → PASS.
+
+- [ ] **Step 4: Extract `LabelBox` + render a connector label (`AnnotationLayer.tsx`).** Pull the `ShapeLabel` body into a reusable component keyed on explicit props (so a connector — not a `Surface` — can use it):
+```tsx
+function LabelBox({
+  rect, text, fontSize, fontFamily, color, align, masked,
+}: {
+  rect: { x: number; y: number; w: number; h: number };
+  text: string; fontSize?: number; fontFamily?: TextFont; color: string;
+  align?: "left" | "center" | "right"; masked: boolean;
+}) {
+  const justify = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
+  return (
+    <foreignObject x={pct(rect.x)} y={pct(rect.y)} width={pct(rect.w)} height={pct(rect.h)} overflow="visible">
+      <div className={`anno-shape-label${masked ? " masked" : ""}`} style={{ justifyContent: justify }}>
+        <span style={{ fontFamily: FONT_STACKS[fontFamily ?? "sans"], fontSize: fontSize ?? DEFAULT_TEXT_SIZE, color, textAlign: align ?? "center" }}>
+          {text}
+        </span>
+      </div>
+    </foreignObject>
+  );
+}
+```
+Refactor `ShapeLabel` to delegate: `return <LabelBox rect={labelRect(s)} text={s.text} fontSize={s.fontSize} fontFamily={s.fontFamily} color={s.color ?? s.stroke} align={s.align} masked={s.kind === "line" || s.kind === "bracket"} />;` (keep its empty-text guard). Import `labelRectAt`, `connectorMidpoint`, `DEFAULT_TEXT_SIZE`. In `ConnectorLine`, before the closing tag, add a masked label when the connector has text:
+```tsx
+      {c.text && c.text.trim() ? (
+        <LabelBox
+          rect={labelRectAt(connectorMidpoint(annotations, c).x, connectorMidpoint(annotations, c).y)}
+          text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+          color={c.color ?? c.stroke} align={c.align} masked
+        />
+      ) : null}
+```
+(`ConnectorLine` already receives `annotations`.)
+
+- [ ] **Step 5: ADR amendment** — append to `docs/adr/ADR-004-annotation-canvas.md` a short note: the text-label role is now a shared `TextLabel` interface on both `Surface` and `Connector`; connectors render a masked label at their midpoint (`connectorMidpoint`). Additive (no schemaVersion bump / migration). No emojis.
+
+- [ ] **Step 6: Gates + commit**
+```bash
+pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build
+git add lib/book-schema.ts lib/annotations.ts lib/annotations.test.ts components/renderer/AnnotationLayer.tsx docs/adr/ADR-004-annotation-canvas.md
+git commit -m "feat: connector text labels (shared TextLabel) + masked midpoint render"
+```
+
+### Task 8: Connector label editing + caret wrapper fix
+
+Let double-click edit a connector's label, and fix the `contentEditable`+flex caret bug for all centered editing. No unit tests (editor/store wiring — **run the app**).
+
+**Files:**
+- Modify: `components/editor/PreviewAnnotations.tsx` (`editTarget` → any annotation; `TextEditor` rect-based + wrapper; double-click connector hit region)
+- Modify: `components/editor/AnnotationContext.tsx` (text controls include connectors)
+- Modify: `components/editor/editor.css` (wrapper classes; drop the old centered rule)
+
+**Interfaces:** Consumes `labelRectAt`, `connectorMidpoint`, `labelRect` (Tasks 2/7).
+
+- [ ] **Step 1: `editTarget` → any editable annotation.** Change `const editTarget = surfaces.find((s) => s.id === editingId) ?? null;` to search all annotations (so a connector can edit):
+```tsx
+  const editTarget = annotations.find((a) => a.id === editingId) ?? null;
+```
+(`editTarget` is now `Annotation | null`.)
+
+- [ ] **Step 2: Double-click the connector hit region.** In the hit-region map, the `a.kind === "connector"` branch (the connector `<path>`/hit element) — add `onDoubleClick={() => startTextEdit(a.id)}` (same handler used by the shapes).
+
+- [ ] **Step 3: `TextEditor` rect-based + connector rect + caret wrapper.** Change `TextEditor` to accept `a: Annotation` and `annotations: Annotation[]`, compute the rect per kind, wrap the `contentEditable` in a flex-centering DIV (the caret fix — never put `display:flex` on the `contentEditable` itself):
+```tsx
+  const r = a.kind === "connector"
+    ? labelRectAt(connectorMidpoint(annotations, a).x, connectorMidpoint(annotations, a).y)
+    : labelRect(a);
+  const centered = a.kind !== "text";
+  ...
+    <foreignObject x={r.x * W} y={r.y * H} width={r.w * W} height={r.h * H} overflow="visible">
+      <div className={`anno-editwrap${centered ? " centered" : ""}`}>
+        <div
+          ref={ref}
+          className="anno-text editing"
+          contentEditable
+          suppressContentEditableWarning
+          style={{
+            fontFamily: FONT_STACKS[a.fontFamily ?? "sans"],
+            fontSize: a.fontSize ?? DEFAULT_TEXT_SIZE,
+            color: a.color ?? a.stroke,
+            textAlign: a.align ?? (centered ? "center" : "left"),
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onInput={(e) => onChange(e.currentTarget.textContent ?? "")}
+          onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.currentTarget.blur(); } }}
+          onBlur={(e) => { onChange(e.currentTarget.textContent ?? ""); onDone(); }}
+        />
+      </div>
+    </foreignObject>
+```
+Update the `<TextEditor .../>` call site to pass `a={editTarget}` and `annotations={annotations}` (rename the `s` prop to `a`; `editTarget` is now an `Annotation`). Import `labelRectAt`, `connectorMidpoint`, `DEFAULT_TEXT_SIZE`.
+
+- [ ] **Step 4: CSS — wrapper + drop the old rule (`editor.css`).** Remove the `.anno-text.editing.centered { display:flex; ... }` rule added in Task 5. Add:
+```css
+.anno-editwrap {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+.anno-editwrap.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.anno-editwrap.centered > .anno-text.editing {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+```
+
+- [ ] **Step 5: Text controls include connectors (`AnnotationContext.tsx`).** Now that `Connector` has the `TextLabel` fields, the text-controls gate can read `text` off the union directly. Change the gate to:
+```tsx
+      {shape.kind === "text" || shape.text != null ? (
+```
+and remove the `surf = shape as Surface` alias — read `shape.fontSize`/`shape.fontFamily`/`shape.align`/`shape.color`/`shape.stroke` directly (all exist on both `Surface` and `Connector` now). Verify with `pnpm typecheck`. (The `kind:"text"`-only frame row from Task 3 stays gated to `shape.kind === "text"`.)
+
+- [ ] **Step 6: Gates + manual verification (run the app)**
+```bash
+pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build
+```
+Manual (`pnpm dev`):
+- Double-click a connector → type → the label appears at its midpoint, masking the line; the text controls (size/font/align/color) show for the selected connector.
+- The caret now sits ON the text line (not above it) when editing a centered label in a box/circle/diamond/line/bracket/connector.
+- Existing shape/text-box editing still works; no console crash.
+- Export PDF → connector labels render identically.
+
+- [ ] **Step 7: Commit**
+```bash
+git add components/editor/PreviewAnnotations.tsx components/editor/AnnotationContext.tsx components/editor/editor.css
+git commit -m "feat: edit connector labels via double-click; fix centered contentEditable caret"
+```

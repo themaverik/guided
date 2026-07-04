@@ -318,13 +318,16 @@ function ConnectorLine({
         strokeWidth={c.width}
         markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
       />
-      {c.text && c.text.trim() ? (
-        <LabelBox
-          rect={labelRectAt(connectorMidpoint(annotations, c).x, connectorMidpoint(annotations, c).y)}
-          text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
-          color={c.color ?? c.stroke} align={c.align} masked
-        />
-      ) : null}
+      {c.text && c.text.trim() ? (() => {
+        const mid = connectorMidpoint(annotations, c);
+        return (
+          <LabelBox
+            rect={labelRectAt(mid.x, mid.y)}
+            text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+            color={c.color ?? c.stroke} align={c.align} masked
+          />
+        );
+      })() : null}
     </g>
   );
 }

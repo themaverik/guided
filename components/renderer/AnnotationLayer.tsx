@@ -13,6 +13,7 @@ import type {
   EndpointSize,
   EndpointStyle,
   Surface,
+  TextFont,
 } from "@/lib/book-schema";
 import { DEFAULT_TEXT_SIZE } from "@/lib/book-schema";
 import {
@@ -21,46 +22,51 @@ import {
   MARKER_PX,
   bracketSegments,
   buildRoundedConnector,
+  connectorMidpoint,
   connectorPoints,
   labelRect,
+  labelRectAt,
   pct,
 } from "@/lib/annotations";
 
 /** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
 const CORNER = 10;
 
+/** Reusable text label box rendered inside a foreignObject. Used by both
+ *  ShapeLabel (open/closed surfaces) and ConnectorLine (masked midpoint label). */
+function LabelBox({
+  rect, text, fontSize, fontFamily, color, align, masked,
+}: {
+  rect: { x: number; y: number; w: number; h: number };
+  text: string; fontSize?: number; fontFamily?: TextFont; color: string;
+  align?: "left" | "center" | "right"; masked: boolean;
+}) {
+  const justify = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
+  return (
+    <foreignObject x={pct(rect.x)} y={pct(rect.y)} width={pct(rect.w)} height={pct(rect.h)} overflow="visible">
+      <div className={`anno-shape-label${masked ? " masked" : ""}`} style={{ justifyContent: justify }}>
+        <span style={{ fontFamily: FONT_STACKS[fontFamily ?? "sans"], fontSize: fontSize ?? DEFAULT_TEXT_SIZE, color, textAlign: align ?? "center" }}>
+          {text}
+        </span>
+      </div>
+    </foreignObject>
+  );
+}
+
 /** A centered text label for a shape (box/diamond/ellipse fill their bounds; open
  *  shapes get a midpoint pill that masks the stroke). Renders nothing when empty. */
 function ShapeLabel({ s }: { s: Surface }) {
   if (!s.text || !s.text.trim()) return null;
-  const r = labelRect(s);
-  const open = s.kind === "line" || s.kind === "bracket";
-  const justify =
-    s.align === "left" ? "flex-start" : s.align === "right" ? "flex-end" : "center";
   return (
-    <foreignObject
-      x={pct(r.x)}
-      y={pct(r.y)}
-      width={pct(r.w)}
-      height={pct(r.h)}
-      overflow="visible"
-    >
-      <div
-        className={`anno-shape-label${open ? " masked" : ""}`}
-        style={{ justifyContent: justify }}
-      >
-        <span
-          style={{
-            fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
-            fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
-            color: s.color ?? s.stroke,
-            textAlign: s.align ?? "center",
-          }}
-        >
-          {s.text}
-        </span>
-      </div>
-    </foreignObject>
+    <LabelBox
+      rect={labelRect(s)}
+      text={s.text}
+      fontSize={s.fontSize}
+      fontFamily={s.fontFamily}
+      color={s.color ?? s.stroke}
+      align={s.align}
+      masked={s.kind === "line" || s.kind === "bracket"}
+    />
   );
 }
 
@@ -312,6 +318,13 @@ function ConnectorLine({
         strokeWidth={c.width}
         markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
       />
+      {c.text && c.text.trim() ? (
+        <LabelBox
+          rect={labelRectAt(connectorMidpoint(annotations, c).x, connectorMidpoint(annotations, c).y)}
+          text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+          color={c.color ?? c.stroke} align={c.align} masked
+        />
+      ) : null}
     </g>
   );
 }

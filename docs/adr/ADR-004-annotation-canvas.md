@@ -595,3 +595,29 @@ No `schemaVersion` bump; no migration. All fields consumed (`text`, `color`,
 `fontSize`, `fontFamily`, `align`, `stroke`, `width`, `fill`) were already present in
 the `Surface` schema. The three-role interpretation is a rendering and editing
 convention, not a structural change.
+
+## Amendment (2026-07-04): connector text labels (shared TextLabel interface)
+
+The text-label role (`text`, `fontSize`, `fontFamily`, `color`, `align`) is extracted
+from `Surface` into a shared `TextLabel` interface so `Connector` can reuse it without
+duplicating fields.
+
+- **Schema (`lib/book-schema.ts`, additive, no version bump, no migration):**
+  `export interface TextLabel` carries the five optional fields. `Surface extends
+  TextLabel` — the fields move from inline to the inherited interface, behavior-identical
+  for all existing Surface readers. `Connector extends TextLabel` is purely additive;
+  existing connectors without these fields are unchanged.
+- **Pure helpers (`lib/annotations.ts`):** `labelRectAt(cx, cy)` is extracted from
+  `labelRect`'s open-shape branch (returns a `LABEL_W x LABEL_H` box centered on a
+  point, clamped to `[0, 1]`). `connectorMidpoint(annotations, c)` computes the midpoint
+  of a connector's resolved endpoints via the existing `resolveEndpoint`. Both are
+  unit-tested (`lib/annotations.test.ts`).
+- **Rendering (`AnnotationLayer.tsx`):** `ShapeLabel`'s body is extracted into a
+  reusable `LabelBox` component (explicit props — not a `Surface`) so a connector can
+  call it. `ShapeLabel` delegates to `LabelBox`. `ConnectorLine` renders a masked
+  `LabelBox` at `labelRectAt(connectorMidpoint(...))` when the connector has non-empty
+  text; `color` defaults to `c.color ?? c.stroke`. Masked label matches the open-shape
+  pill style (opaque white background, masking the line). Renders identically in the
+  editor canvas and the Playwright PDF export.
+- **Editor-only controls:** connector label editing (text/font/size/align/color) wires
+  into the existing text controls row in `AnnotationContext`; no new UI primitives.

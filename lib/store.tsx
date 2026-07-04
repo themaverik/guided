@@ -57,6 +57,7 @@ export type AnnotationTool =
   | "line"
   | "bracket"
   | "diamond"
+  | "ellipse"
   | "text"
   | "connector";
 

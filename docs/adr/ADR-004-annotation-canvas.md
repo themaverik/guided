@@ -515,3 +515,83 @@ for closed shapes (`box` / `diamond` / `ellipse`). Both are additive — no
   `fill?` in the schema but it was never set. Adding `ellipse` and wiring the Fill toggle
   is purely additive; the renderer's existing `fill={s.fill ?? "none"}` pattern on box
   and diamond is the model the ellipse case follows.
+
+## Amendment (2026-07-04): text labels + text-box frame
+
+Adds two coupled text capabilities to the annotation canvas: an opt-in border and
+independent background for the standalone `text` box (Piece A), and a double-click
+in-shape text label for any shape kind (Piece B). Both are additive — no
+`schemaVersion` bump, no migration; existing books are unaffected.
+
+### Three-role model (no new schema fields)
+
+Every `Surface` already carries all required fields; this amendment formalizes their
+widened roles:
+
+- **Text:** `text`, `color`, `fontSize`, `fontFamily`, `align` — `color` is the text
+  color (defaults to the value of `stroke` on existing shapes).
+- **Border:** `stroke`, `width` — `width: 0` means no border (the text box default
+  today).
+- **Background:** `fill` — on a `text` box this is an independent background color,
+  chosen freely and not paired with `stroke`. On other closed shapes it remains the
+  stroke-paired tint introduced by the ellipse/fill amendment.
+
+### Piece A: text-box frame (opt-in)
+
+The `kind:"text"` renderer case gains inline border and background driven by the
+existing fields: `background: s.fill` when `fill` is set; `border: ${s.width}px solid
+${s.stroke}` when `width > 0`; padding added when either is present so text is not
+flush. Both are off by default — existing text boxes are visually unchanged.
+
+The editor (`AnnotationContext.tsx`, text branch) gains:
+
+- A **Border** checkbox that toggles `width` between `0` and a default of `2`; the
+  existing width input activates only while the checkbox is on.
+- A **Fill** checkbox (background on/off) plus an independent fill color input bound
+  directly to `fill`. Toggling on seeds `fill` to `#ffffff`; the color is then set
+  freely, independent of `stroke`.
+
+Result: three independent color controls for a text box — text color (`color`), border
+color (`stroke`), background color (`fill`). Renders identically in the editor canvas
+and the Playwright PDF export (WYSIWYG; no `@media print` split).
+
+### Piece B: in-shape text labels
+
+**`labelRect(s)` pure helper (`lib/annotations.ts`, unit-tested):** returns the
+normalized rect the label occupies:
+
+- **Closed shapes** (`box` / `diamond` / `ellipse`): the shape's own `{x, y, w, h}`
+  bounds — the label fills the shape.
+- **Open shapes** (`line` / `bracket`): a `LABEL_W × LABEL_H` (0.3 × 0.1 normalized)
+  box centered on the shape's midpoint `(x + w/2, y + h/2)`, clamped to `[0, 1]`.
+- **`text`**: returns the box's own bounds unchanged (no-op; text positions itself).
+
+**Rendering (`AnnotationLayer.tsx`):** a shared `<foreignObject>` at `labelRect(s)` is
+emitted when `s.text` is non-empty:
+
+- Closed shape labels use a flex inner div (`align-items:center;
+  justify-content:<align>`) so the text is centered vertically and horizontally over
+  any fill.
+- Open shape labels use an inline-block inner div with an opaque white background,
+  padding, and rounded corners — a pill that masks the underlying stroke so the text
+  never visually crosses the line or bracket spine. (A true stroke-gap is deferred.)
+
+New CSS class `.anno-shape-label` (renderer.css) covers both variants; `.anno-text` is
+unchanged except for the new inline border/fill styles.
+
+**Editing (`PreviewAnnotations.tsx`):** double-clicking any surface hit region (not just
+`kind:"text"`) calls `selectAnnotation` + `setEditingId`. The `TextEditor` positions at
+`labelRect(s)` so the inline editor overlays the rendered label position. Clearing the
+text field removes the label (an empty `text` renders nothing).
+
+**Controls (`AnnotationContext.tsx`):** the text controls row (size / font / align /
+text color) is shown whenever the selected shape has a non-null `text` field or is
+`kind:"text"` — so text controls appear for a non-text shape as soon as a label is
+added, alongside the shape's existing stroke/width/fill controls.
+
+### Additive
+
+No `schemaVersion` bump; no migration. All fields consumed (`text`, `color`,
+`fontSize`, `fontFamily`, `align`, `stroke`, `width`, `fill`) were already present in
+the `Surface` schema. The three-role interpretation is a rendering and editing
+convention, not a structural change.

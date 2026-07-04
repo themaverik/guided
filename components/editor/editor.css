@@ -780,15 +780,23 @@
 .anno-endpoint {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end; /* labelled x/y inputs line up with the selects */
+  align-items: center; /* keep the FROM/TO label centered with the selects */
   gap: 4px;
+  /* Box each endpoint (FROM / TO) as a tinted pill so the two groups read as
+     distinct units in the context row. */
+  padding: 3px 7px;
+  border: 1px solid #dbe2e2;
+  border-radius: 8px;
+  background: #f7fafa;
 }
 .anno-eplabel {
   font-family: var(--font-mono);
   font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  width: 34px;
+  color: #3f6168;
+  margin-right: 2px;
 }
 .anno-endpoint select {
   font-size: 11px;

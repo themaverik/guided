@@ -9,7 +9,6 @@
  * here. Editor-only; writes via updateAnnotation.
  */
 import type {
-  Anchor,
   Annotation,
   Connector,
   Endpoint,
@@ -25,7 +24,6 @@ import {
   ROUTINGS,
   DIRECTION_OPTIONS,
   SIZES,
-  ANCHORS,
   FONTS,
   FONT_LABELS,
   ALIGNS,
@@ -36,14 +34,12 @@ function EndpointFields({
   which,
   ci,
   si,
-  surfaces,
   updateAnnotation,
 }: {
   c: Connector;
   which: "from" | "to";
   ci: number;
   si: number;
-  surfaces: Surface[];
   updateAnnotation: (
     ci: number,
     si: number,
@@ -54,34 +50,11 @@ function EndpointFields({
   const ep = c[which];
   const set = (patch: Partial<Endpoint>) =>
     updateAnnotation(ci, si, c.id, { [which]: { ...ep, ...patch } });
+  // Binding (ref/anchor) is done by dragging the endpoint onto a shape on the
+  // canvas (snapPoint); the panel only carries the discrete style/size/dir.
   return (
     <div className="anno-endpoint">
       <span className="anno-eplabel">{which}</span>
-      <select
-        value={ep.ref ?? ""}
-        aria-label={`${which} binding`}
-        onChange={(e) => set({ ref: e.target.value || undefined })}
-      >
-        <option value="">free point</option>
-        {surfaces.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.kind} {s.id}
-          </option>
-        ))}
-      </select>
-      {ep.ref ? (
-        <select
-          value={ep.anchor ?? "center"}
-          aria-label={`${which} anchor`}
-          onChange={(e) => set({ anchor: e.target.value as Anchor })}
-        >
-          {ANCHORS.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
-      ) : null}
       <select
         value={ep.style}
         aria-label={`${which} style`}
@@ -138,10 +111,6 @@ export default function AnnotationContext({
   annotations: Annotation[];
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
-
-  const surfaces = annotations.filter(
-    (a): a is Surface => a.kind !== "connector",
-  );
 
   const setWaypointCount = (c: Connector, n: number) => {
     const count = Math.max(0, Math.min(6, n));
@@ -213,8 +182,8 @@ export default function AnnotationContext({
               +
             </button>
           </div>
-          <EndpointFields c={c} which="from" ci={ci} si={si} surfaces={surfaces} updateAnnotation={updateAnnotation} />
-          <EndpointFields c={c} which="to" ci={ci} si={si} surfaces={surfaces} updateAnnotation={updateAnnotation} />
+          <EndpointFields c={c} which="from" ci={ci} si={si} updateAnnotation={updateAnnotation} />
+          <EndpointFields c={c} which="to" ci={ci} si={si} updateAnnotation={updateAnnotation} />
         </div>
       ) : null}
 

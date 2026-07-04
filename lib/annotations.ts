@@ -91,8 +91,8 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
   const { x, y, w, h, kind } = surface;
   // A diamond's vertices coincide with the box edge midpoints, so the box
   // anchor math gives the correct on-shape points (top/right/bottom/left tips).
-  // A text box shares the same rectangular anchors.
-  if (kind === "box" || kind === "diamond" || kind === "text") {
+  // A text box and an ellipse share the same rectangular bounding-box anchors.
+  if (kind === "box" || kind === "diamond" || kind === "text" || kind === "ellipse") {
     switch (anchor) {
       case "top":
         return { x: x + w / 2, y };
@@ -577,7 +577,7 @@ export function resolveEndpoint(
 }
 
 /** Anchors offered as snap targets per surface kind. */
-function snapAnchors(kind: Surface["kind"]): Anchor[] {
+export function snapAnchors(kind: Surface["kind"]): Anchor[] {
   if (kind === "box" || kind === "text") {
     return [
       "center",
@@ -591,9 +591,9 @@ function snapAnchors(kind: Surface["kind"]): Anchor[] {
       "bottom-right",
     ];
   }
-  // Diamond: only the four vertices + center are on the shape (corners are
-  // empty space), so those are the useful flowchart snap targets.
-  if (kind === "diamond") {
+  // Diamond + ellipse: only the four edge points + center sit on the shape
+  // (corners are empty space), so those are the useful snap targets.
+  if (kind === "diamond" || kind === "ellipse") {
     return ["center", "top", "bottom", "left", "right"];
   }
   return ["start", "mid", "end"];
@@ -671,7 +671,7 @@ export function compassDir(dx: number, dy: number): "left" | "right" | "up" | "d
 }
 
 /** Surface kinds that are created by a rubber-band / signed-vector drag. */
-export type DrawKind = "box" | "diamond" | "text" | "bracket" | "line";
+export type DrawKind = "box" | "diamond" | "text" | "bracket" | "line" | "ellipse";
 
 /** Minimum normalized extent below which a drag is treated as a bare click. */
 const MIN_DRAW = 0.015;
@@ -683,6 +683,7 @@ const DRAW_DEFAULTS: Record<DrawKind, { w: number; h: number }> = {
   text: { w: 0.3, h: 0.1 },
   bracket: { w: 0.05, h: 0.4 },
   line: { w: 0.4, h: 0 },
+  ellipse: { w: 0.3, h: 0.3 },
 };
 
 /** Turn a press→release drag into shape geometry (normalized 0–1). Rubber-band

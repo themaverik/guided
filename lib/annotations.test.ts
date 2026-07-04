@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -649,6 +649,34 @@ describe("compassDir", () => {
   });
   it("breaks an exact tie toward horizontal", () => {
     expect(compassDir(0.1, 0.1)).toBe("right");
+  });
+});
+
+describe("ellipse geometry", () => {
+  const e: Surface = {
+    id: "e", kind: "ellipse", x: 0.2, y: 0.2, w: 0.4, h: 0.2,
+    stroke: "#024450", width: 2,
+  };
+  it("anchorPoint gives bounding-box edge midpoints", () => {
+    const right = anchorPoint(e, "right");
+    expect(right.x).toBeCloseTo(0.6);
+    expect(right.y).toBeCloseTo(0.3);
+    const top = anchorPoint(e, "top");
+    expect(top.x).toBeCloseTo(0.4);
+    expect(top.y).toBeCloseTo(0.2);
+    const center = anchorPoint(e, "center");
+    expect(center.x).toBeCloseTo(0.4);
+    expect(center.y).toBeCloseTo(0.3);
+  });
+  it("snapAnchors offers center + four edges (no corners)", () => {
+    expect(snapAnchors("ellipse")).toEqual(["center", "top", "bottom", "left", "right"]);
+  });
+  it("boundsFromDrag treats ellipse like a rubber-band rect", () => {
+    const b = boundsFromDrag({ x: 0.2, y: 0.2 }, { x: 0.5, y: 0.6 }, "ellipse");
+    expect(b.x).toBeCloseTo(0.2);
+    expect(b.y).toBeCloseTo(0.2);
+    expect(b.w).toBeCloseTo(0.3);
+    expect(b.h).toBeCloseTo(0.4);
   });
 });
 

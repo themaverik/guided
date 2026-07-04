@@ -40,4 +40,18 @@ describe("buildDrawnShape", () => {
     expect(conn.to.x).toBeCloseTo(0.6);
     expect(conn.to.y).toBeCloseTo(0.5);
   });
+
+  it("builds an ellipse from the drag bounds with no fill by default", () => {
+    const s = buildDrawnShape("ellipse", A, B, style);
+    expect(s!.kind).toBe("ellipse");
+    expect(s!.stroke).toBe("#cb4a47");
+    expect(s!.width).toBe(4);
+    expect(s!.swatchId).toBe("red");
+    const r = s as { x: number; y: number; w: number; h: number; fill?: string };
+    expect(r.x).toBeCloseTo(0.2);
+    expect(r.y).toBeCloseTo(0.2);
+    expect(r.w).toBeCloseTo(0.4);
+    expect(r.h).toBeCloseTo(0.3);
+    expect(r.fill).toBeUndefined();
+  });
 });

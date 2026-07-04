@@ -50,16 +50,45 @@ export function swatchByStroke(hex: string): string | undefined {
   return SWATCHES.find((s) => s.stroke.toLowerCase() === h)?.id;
 }
 
+/** Blend a `#rrggbb` hex toward white by `amount` (0–1). A malformed hex is
+ *  returned unchanged. */
+export function mixToWhite(hex: string, amount: number): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const mix = (c: number) => Math.round(c + (255 - c) * amount);
+  const r = mix((n >> 16) & 0xff);
+  const g = mix((n >> 8) & 0xff);
+  const b = mix(n & 0xff);
+  const h = (v: number) => v.toString(16).padStart(2, "0");
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+/** The light interior tint paired with a stroke: the exact swatch fill when the
+ *  stroke is a swatch stroke, else a lightened tint of the stroke (so custom
+ *  colors still get a sensible fill). */
+export function fillForStroke(stroke: string): string {
+  const id = swatchByStroke(stroke);
+  if (id) return SWATCHES.find((s) => s.id === id)!.fill;
+  return mixToWhite(stroke, 0.85);
+}
+
 /** The immutable patch a swatch applies to a shape: stroke + swatchId, plus
- *  `color` for text (whose visible color is `color`, not `stroke`). */
+ *  `color` for text (whose visible color is `color`, not `stroke`), plus the
+ *  paired `fill` when `filled` and the kind is a closed shape. */
 export function swatchPatch(
   sw: Swatch,
   kind: string,
-): { stroke: string; swatchId: string; color?: string } {
-  const patch: { stroke: string; swatchId: string; color?: string } = {
-    stroke: sw.stroke,
-    swatchId: sw.id,
-  };
+  filled = false,
+): { stroke: string; swatchId: string; color?: string; fill?: string } {
+  const patch: {
+    stroke: string;
+    swatchId: string;
+    color?: string;
+    fill?: string;
+  } = { stroke: sw.stroke, swatchId: sw.id };
   if (kind === "text") patch.color = sw.stroke;
+  if (filled && (kind === "box" || kind === "diamond" || kind === "ellipse"))
+    patch.fill = sw.fill;
   return patch;
 }

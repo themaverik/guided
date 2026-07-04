@@ -478,3 +478,40 @@ replacing the left-sidebar `AnnotationEditor` entirely.
 - **Editor-only:** no schema change, no migration; `components/renderer/**` and the
   `/print` route are untouched. Branch `feat/annotation-inspector-redistribution`;
   suite 219/219.
+
+## Amendment (2026-07-04): ellipse primitive + opt-in closed-shape fill
+
+Adds the `ellipse` shape kind ("Circle" in the UI) and an opt-in interior fill tint
+for closed shapes (`box` / `diamond` / `ellipse`). Both are additive — no
+`schemaVersion` bump, no migration; existing books are unaffected.
+
+- **New primitive `ellipse` (schema and renderer):** `"ellipse"` is added to the
+  `Surface.kind` union in `lib/book-schema.ts`. It is a free ellipse inscribed in the
+  shape's normalized `x/y/w/h` bounds — no new fields; `cx`/`cy`/`rx`/`ry` are derived
+  at render time (`cx = x + w/2`, etc.). In the UI the tool label is "Circle"; in the
+  ISO-32000 vocabulary this corresponds to `/Circle` (an ellipse in a Rect). The ellipse
+  mirrors the diamond: edge-midpoint + center anchors only (`center`, `top`, `bottom`,
+  `left`, `right`) — no corner anchors (corners are empty space on a curve). The renderer
+  (`AnnotationLayer.tsx`) emits `<ellipse>` with percentage `cx/cy/rx/ry` (the
+  `preserveAspectRatio="none"` overlay scales correctly at any aspect). Move, resize, and
+  connector-snap all derive from the bounding rect and are inherited for free.
+- **Opt-in closed-shape fill:** the existing `Surface.fill?: string` field is now set
+  via a per-shape Fill checkbox in `AnnotationContext.tsx` (shown only for `box`,
+  `diamond`, and `ellipse`). New shapes remain outline-only by default (no fill on
+  draw). Toggling Fill on writes `fill = fillForStroke(shape.stroke)` — the swatch's
+  paired light token (`Swatch.fill`, L≈0.96) when the stroke is one of the 8 OKLCH
+  swatches, or an sRGB tint mixed ~85% toward white for custom strokes (`mixToWhite` in
+  `lib/annotation-palette.ts`). Both helpers are pure and unit-tested. Fill re-pairs
+  automatically when the stroke changes — via a `filled` flag added to `swatchPatch`, and
+  via the custom-color `onChange` in `AnnotationContext`.
+- **WYSIWYG rendering decision (amends `DESIGN.md §2.2`):** fill is painted at full
+  opacity in both the editor canvas and the Playwright-generated PDF. There is no
+  `@media print` opacity split, and no separate prop threading for export. The L≈0.96
+  token already reads as a subtle tint at full opacity, making the split unnecessary.
+  This intentionally supersedes `DESIGN.md §2.2`'s "~50% on canvas" wording. The
+  project's "renderer print-accurate to preview" guardrail is upheld — fill is
+  data-driven, so `AnnotationLayer` renders identically in both routes unchanged.
+- **Additive:** no `schemaVersion` bump; no migration. `box` and `diamond` already had
+  `fill?` in the schema but it was never set. Adding `ellipse` and wiring the Fill toggle
+  is purely additive; the renderer's existing `fill={s.fill ?? "none"}` pattern on box
+  and diamond is the model the ellipse case follows.

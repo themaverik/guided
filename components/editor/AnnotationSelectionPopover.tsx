@@ -97,7 +97,12 @@ export default function AnnotationSelectionPopover({
   const activeSwatchId = swatchByStroke(shape.stroke);
 
   const applySwatch = (sw: Swatch) =>
-    updateAnnotation(ci, si, shape.id, swatchPatch(sw, shape.kind));
+    updateAnnotation(
+      ci,
+      si,
+      shape.id,
+      swatchPatch(sw, shape.kind, shape.kind !== "connector" && shape.fill != null),
+    );
   const applyWidth = (value: number) =>
     updateAnnotation(ci, si, shape.id, { width: value });
 

@@ -24,6 +24,7 @@ const TOOLS: { tool: AnnotationTool; label: string; icon: React.ReactNode }[] = 
   { tool: "line", label: "Line", icon: <line x1="3" y1="11" x2="11" y2="3" /> },
   { tool: "bracket", label: "Bracket", icon: <path d="M9 2H5v10h4" /> },
   { tool: "diamond", label: "Diamond", icon: <path d="M7 2l5 5-5 5-5-5z" /> },
+  { tool: "ellipse", label: "Circle", icon: <circle cx="7" cy="7" r="4.5" /> },
   { tool: "text", label: "Text", icon: <path d="M3 3h8M7 3v9" /> },
   { tool: "connector", label: "Connector", icon: <path d="M3 3v6h6M7 9l2 0 0-2" /> },
 ];
@@ -62,7 +63,13 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
   const applySwatch = (sw: Swatch) => {
     setDrawColor(sw.stroke);
     setDrawSwatch(sw.id);
-    if (selected) updateAnnotation(ci, si, selected.id, swatchPatch(sw, selected.kind));
+    if (selected)
+      updateAnnotation(
+        ci,
+        si,
+        selected.id,
+        swatchPatch(sw, selected.kind, selected.kind !== "connector" && selected.fill != null),
+      );
   };
 
   const applyWidth = (value: number) => {

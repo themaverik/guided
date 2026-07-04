@@ -144,6 +144,28 @@ export function anchorPoint(surface: Surface, anchor: Anchor): Point {
   }
 }
 
+/** Normalized default box for an open-shape (line/bracket) text label. */
+export const LABEL_W = 0.3;
+export const LABEL_H = 0.1;
+
+/** The normalized rect an in-shape text label occupies. Closed shapes fill their
+ *  bounds; open shapes (line/bracket) get a fixed box centered on the midpoint,
+ *  clamped inside the page. */
+export function labelRect(s: Surface): { x: number; y: number; w: number; h: number } {
+  if (s.kind === "line" || s.kind === "bracket") {
+    const cx = s.x + s.w / 2;
+    const cy = s.y + s.h / 2;
+    const clamp = (v: number, size: number) => Math.max(0, Math.min(1 - size, v));
+    return {
+      x: clamp(cx - LABEL_W / 2, LABEL_W),
+      y: clamp(cy - LABEL_H / 2, LABEL_H),
+      w: LABEL_W,
+      h: LABEL_H,
+    };
+  }
+  return { x: s.x, y: s.y, w: s.w, h: s.h };
+}
+
 /**
  * The segment axis a square route must use at an anchored endpoint, or null for
  * free points and non-edge anchors (corners/center). A left/right edge needs a

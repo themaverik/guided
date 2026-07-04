@@ -125,6 +125,9 @@ function SurfaceShape({ s }: { s: Surface }) {
             fontSize: s.fontSize ?? 16,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "left",
+            background: s.fill ?? undefined,
+            border: s.width ? `${s.width}px solid ${s.stroke}` : undefined,
+            padding: s.fill != null || s.width ? "2px 4px" : undefined,
           }}
         >
           {s.text ?? ""}

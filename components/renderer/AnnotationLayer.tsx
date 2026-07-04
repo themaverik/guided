@@ -13,19 +13,62 @@ import type {
   EndpointSize,
   EndpointStyle,
   Surface,
+  TextFont,
 } from "@/lib/book-schema";
+import { DEFAULT_TEXT_SIZE } from "@/lib/book-schema";
 import {
   CORNER_RADIUS,
   FONT_STACKS,
   MARKER_PX,
   bracketSegments,
   buildRoundedConnector,
+  connectorMidpoint,
   connectorPoints,
+  labelRect,
+  labelRectAt,
   pct,
 } from "@/lib/annotations";
 
 /** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
 const CORNER = 10;
+
+/** Reusable text label box rendered inside a foreignObject. Used by both
+ *  ShapeLabel (open/closed surfaces) and ConnectorLine (masked midpoint label). */
+function LabelBox({
+  rect, text, fontSize, fontFamily, color, align, masked,
+}: {
+  rect: { x: number; y: number; w: number; h: number };
+  text: string; fontSize?: number; fontFamily?: TextFont; color: string;
+  align?: "left" | "center" | "right"; masked: boolean;
+}) {
+  const justify = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
+  return (
+    <foreignObject x={pct(rect.x)} y={pct(rect.y)} width={pct(rect.w)} height={pct(rect.h)} overflow="visible">
+      <div className={`anno-shape-label${masked ? " masked" : ""}`} style={{ justifyContent: justify }}>
+        <span style={{ fontFamily: FONT_STACKS[fontFamily ?? "sans"], fontSize: fontSize ?? DEFAULT_TEXT_SIZE, color, textAlign: align ?? "center" }}>
+          {text}
+        </span>
+      </div>
+    </foreignObject>
+  );
+}
+
+/** A centered text label for a shape (box/diamond/ellipse fill their bounds; open
+ *  shapes get a midpoint pill that masks the stroke). Renders nothing when empty. */
+function ShapeLabel({ s }: { s: Surface }) {
+  if (!s.text || !s.text.trim()) return null;
+  return (
+    <LabelBox
+      rect={labelRect(s)}
+      text={s.text}
+      fontSize={s.fontSize}
+      fontFamily={s.fontFamily}
+      color={s.color ?? s.stroke}
+      align={s.align}
+      masked={s.kind === "line" || s.kind === "bracket"}
+    />
+  );
+}
 
 function SurfaceShape({ s }: { s: Surface }) {
   const common = {
@@ -33,8 +76,17 @@ function SurfaceShape({ s }: { s: Surface }) {
     strokeWidth: s.width,
     fill: "none" as const,
   };
+  const withLabel = (el: React.ReactNode) =>
+    s.text && s.text.trim() ? (
+      <g>
+        {el}
+        <ShapeLabel s={s} />
+      </g>
+    ) : (
+      el
+    );
   if (s.kind === "box") {
-    return (
+    return withLabel(
       <rect
         x={pct(s.x)}
         y={pct(s.y)}
@@ -44,11 +96,11 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={6}
         {...common}
         fill={s.fill ?? "none"}
-      />
+      />,
     );
   }
   if (s.kind === "ellipse") {
-    return (
+    return withLabel(
       <ellipse
         cx={pct(s.x + s.w / 2)}
         cy={pct(s.y + s.h / 2)}
@@ -56,18 +108,18 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={pct(s.h / 2)}
         {...common}
         fill={s.fill ?? "none"}
-      />
+      />,
     );
   }
   if (s.kind === "line") {
-    return (
+    return withLabel(
       <line
         x1={pct(s.x)}
         y1={pct(s.y)}
         x2={pct(s.x + s.w)}
         y2={pct(s.y + s.h)}
         {...common}
-      />
+      />,
     );
   }
   if (s.kind === "diamond") {
@@ -86,7 +138,7 @@ function SurfaceShape({ s }: { s: Surface }) {
       `Q 0 50 ${k} ${50 - k}`,
       "Z",
     ].join(" ");
-    return (
+    return withLabel(
       <svg
         x={pct(s.x)}
         y={pct(s.y)}
@@ -104,7 +156,7 @@ function SurfaceShape({ s }: { s: Surface }) {
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
-      </svg>
+      </svg>,
     );
   }
   if (s.kind === "text") {
@@ -122,9 +174,12 @@ function SurfaceShape({ s }: { s: Surface }) {
           className="anno-text"
           style={{
             fontFamily: FONT_STACKS[s.fontFamily ?? "sans"],
-            fontSize: s.fontSize ?? 16,
+            fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "left",
+            background: s.fill ?? undefined,
+            border: s.width ? `${s.width}px solid ${s.stroke}` : undefined,
+            padding: s.fill != null || s.width ? "2px 4px" : undefined,
           }}
         >
           {s.text ?? ""}
@@ -132,12 +187,12 @@ function SurfaceShape({ s }: { s: Surface }) {
       </foreignObject>
     );
   }
-  return (
+  return withLabel(
     <g {...common}>
       {bracketSegments(s).map(([x1, y1, x2, y2], i) => (
         <line key={i} x1={pct(x1)} y1={pct(y1)} x2={pct(x2)} y2={pct(y2)} />
       ))}
-    </g>
+    </g>,
   );
 }
 
@@ -263,6 +318,16 @@ function ConnectorLine({
         strokeWidth={c.width}
         markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
       />
+      {c.text && c.text.trim() ? (() => {
+        const mid = connectorMidpoint(annotations, c);
+        return (
+          <LabelBox
+            rect={labelRectAt(mid.x, mid.y)}
+            text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+            color={c.color ?? c.stroke} align={c.align} masked
+          />
+        );
+      })() : null}
     </g>
   );
 }

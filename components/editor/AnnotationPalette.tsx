@@ -63,7 +63,13 @@ export default function AnnotationPalette({ ci, si }: { ci: number; si: number }
   const applySwatch = (sw: Swatch) => {
     setDrawColor(sw.stroke);
     setDrawSwatch(sw.id);
-    if (selected) updateAnnotation(ci, si, selected.id, swatchPatch(sw, selected.kind));
+    if (selected)
+      updateAnnotation(
+        ci,
+        si,
+        selected.id,
+        swatchPatch(sw, selected.kind, selected.kind !== "connector" && selected.fill != null),
+      );
   };
 
   const applyWidth = (value: number) => {

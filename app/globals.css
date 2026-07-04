@@ -24,34 +24,57 @@
   --color-rule: #02445026;
   --color-rule-strong: #02445040;
 
-  /* Callout palettes */
-  --color-info-bg: #f0f5f6;
-  --color-info-border: #02445033;
-  --color-info-title: #024450;
-  --color-note-bg: #f7f9fa;
-  --color-note-border: #02445020;
-  --color-note-title: #1a232799;
-  --color-warn-bg: #fdf5dc;
-  --color-warn-border: #c89a1e55;
-  --color-warn-title: #7a5a08;
-  --color-warn-body: #4a3a0a;
-  --color-warn-marker: #b88812;
-  /* warning is the canonical name for the legacy `warn` palette */
-  --color-warning-bg: #fdf5dc;
-  --color-warning-border: #c89a1e55;
-  --color-warning-title: #7a5a08;
-  --color-warning-body: #4a3a0a;
-  --color-warning-marker: #b88812;
-  --color-success-bg: #eef7f0;
-  --color-success-border: #2e7d4d40;
-  --color-success-title: #1d6b3a;
-  --color-success-body: #173f25;
-  --color-success-marker: #2e7d4d;
-  --color-danger-bg: #fdeeee;
-  --color-danger-border: #c0392b40;
-  --color-danger-title: #a32b1e;
-  --color-danger-body: #5a1e16;
-  --color-danger-marker: #c0392b;
+  /* Annotation swatch palette (DESIGN §2.2). SINGLE CSS SOURCE — mirrors
+     lib/annotation-palette.ts SWATCHES; kept in sync by lib/swatch-tokens.test.ts. */
+  --swatch-ink-fill: #e6f1f2;
+  --swatch-ink-stroke: #024450;
+  --swatch-red-fill: #ffe8e4;
+  --swatch-red-stroke: #cb4a47;
+  --swatch-orange-fill: #ffecd8;
+  --swatch-orange-stroke: #b56410;
+  --swatch-amber-fill: #fef3d2;
+  --swatch-amber-stroke: #957800;
+  --swatch-green-fill: #e0f7e4;
+  --swatch-green-stroke: #369150;
+  --swatch-teal-fill: #daf7f6;
+  --swatch-teal-stroke: #188d8d;
+  --swatch-blue-fill: #e2f2ff;
+  --swatch-blue-stroke: #217fd0;
+  --swatch-violet-fill: #f1edff;
+  --swatch-violet-stroke: #8464cf;
+
+  /* Callout palettes — derived from the swatch tokens (see ADR-007).
+     Recipe: bg=fill, title=stroke, marker=stroke, border=stroke@33%; body is
+     the neutral --ink-text (renderer default). Map: info→Blue, note→Ink,
+     success→Green, warning→Amber, danger→Red. */
+  --color-info-bg: var(--swatch-blue-fill);
+  --color-info-border: color-mix(in srgb, var(--swatch-blue-stroke) 33%, transparent);
+  --color-info-title: var(--swatch-blue-stroke);
+  --color-info-marker: var(--swatch-blue-stroke);
+
+  --color-note-bg: var(--swatch-ink-fill);
+  --color-note-border: color-mix(in srgb, var(--swatch-ink-stroke) 33%, transparent);
+  --color-note-title: var(--swatch-ink-stroke);
+  --color-note-marker: var(--swatch-ink-stroke);
+
+  --color-warning-bg: var(--swatch-amber-fill);
+  --color-warning-border: color-mix(in srgb, var(--swatch-amber-stroke) 33%, transparent);
+  --color-warning-title: var(--swatch-amber-stroke);
+  --color-warning-marker: var(--swatch-amber-stroke);
+  /* warn = legacy alias for warning (consumed by editor.css) */
+  --color-warn-bg: var(--swatch-amber-fill);
+  --color-warn-border: color-mix(in srgb, var(--swatch-amber-stroke) 33%, transparent);
+  --color-warn-title: var(--swatch-amber-stroke);
+
+  --color-success-bg: var(--swatch-green-fill);
+  --color-success-border: color-mix(in srgb, var(--swatch-green-stroke) 33%, transparent);
+  --color-success-title: var(--swatch-green-stroke);
+  --color-success-marker: var(--swatch-green-stroke);
+
+  --color-danger-bg: var(--swatch-red-fill);
+  --color-danger-border: color-mix(in srgb, var(--swatch-red-stroke) 33%, transparent);
+  --color-danger-title: var(--swatch-red-stroke);
+  --color-danger-marker: var(--swatch-red-stroke);
 }
 
 /*

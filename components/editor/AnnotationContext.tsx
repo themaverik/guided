@@ -264,6 +264,42 @@ export default function AnnotationContext({
         </div>
       ) : null}
 
+      {shape.kind === "text" ? (
+        <div className="anno-context-row">
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={(shape.width ?? 0) > 0}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, { width: e.target.checked ? 2 : 0 })
+              }
+            />
+            Border
+          </label>
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={shape.fill != null}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, {
+                  fill: e.target.checked ? "#ffffff" : undefined,
+                })
+              }
+            />
+            Fill
+          </label>
+          {shape.fill != null ? (
+            <input
+              type="color"
+              value={shape.fill}
+              onChange={(e) => updateAnnotation(ci, si, shape.id, { fill: e.target.value })}
+              title="Fill (background) color"
+              aria-label="Fill color"
+            />
+          ) : null}
+        </div>
+      ) : null}
+
       {shape.kind === "bracket" ? (
         <div className="anno-context-row">
           <select

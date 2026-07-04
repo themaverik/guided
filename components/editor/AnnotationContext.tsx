@@ -145,7 +145,7 @@ export default function AnnotationContext({
               ci,
               si,
               shape.id,
-              shape.kind !== "connector" && shape.fill != null
+              shape.kind !== "connector" && shape.kind !== "text" && shape.fill != null
                 ? { stroke, fill: fillForStroke(stroke) }
                 : { stroke },
             );

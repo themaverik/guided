@@ -647,7 +647,6 @@
 .anno-editwrap.centered {
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 .anno-editwrap.centered > .anno-text.editing {
   width: auto;

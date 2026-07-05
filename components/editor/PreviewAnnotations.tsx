@@ -735,6 +735,8 @@ function TextEditor({
       ? labelRectAt(connectorMidpoint(annotations, a).x, connectorMidpoint(annotations, a).y)
       : labelRect(a as Surface);
   const centered = a.kind !== "text";
+  const justify =
+    a.align === "left" ? "flex-start" : a.align === "right" ? "flex-end" : "center";
 
   useEffect(() => {
     const el = ref.current;
@@ -754,7 +756,10 @@ function TextEditor({
 
   return (
     <foreignObject x={r.x * W} y={r.y * H} width={r.w * W} height={r.h * H} overflow="visible">
-      <div className={`anno-editwrap${centered ? " centered" : ""}`}>
+      <div
+        className={`anno-editwrap${centered ? " centered" : ""}`}
+        style={centered ? { justifyContent: justify } : undefined}
+      >
         <div
           ref={ref}
           className="anno-text editing"

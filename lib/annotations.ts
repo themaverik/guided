@@ -778,6 +778,32 @@ export function nearestPoint(p: Point, points: Point[], thr: number): Point | nu
   return best;
 }
 
+/** Ids of rect-bearing surfaces (box/diamond/ellipse/text/bracket) whose bounds
+ *  contain `p`, top-most first (array order is bottom→top, so reverse). Pure;
+ *  used to cycle selection through overlapping shapes on Alt-click. */
+export function hitStack(annotations: Annotation[], p: Point): string[] {
+  const ids: string[] = [];
+  for (const a of annotations) {
+    if (
+      a.kind === "box" || a.kind === "diamond" || a.kind === "ellipse" ||
+      a.kind === "text" || a.kind === "bracket"
+    ) {
+      if (p.x >= a.x && p.x <= a.x + a.w && p.y >= a.y && p.y <= a.y + a.h) {
+        ids.push(a.id);
+      }
+    }
+  }
+  return ids.reverse();
+}
+
+/** The id after `currentId` in `stack`, wrapping to the first; the first id if
+ *  `currentId` is not in `stack`; `null` if `stack` is empty. */
+export function nextInStack(stack: string[], currentId: string | null): string | null {
+  if (stack.length === 0) return null;
+  const i = currentId == null ? -1 : stack.indexOf(currentId);
+  return stack[(i + 1) % stack.length];
+}
+
 /** Nearest target line to any source line within `thr`; returns the signed delta
  *  (target − source) and the matched target coordinate, or null. */
 function nearestLine(

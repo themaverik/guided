@@ -150,8 +150,9 @@ export default function BackgroundSettings() {
         ) : null}
       </div>
       <p className="editor-help">
-        Recolors all page text (titles, body, labels) for legibility over a dark
-        background. Applies to every page; callouts keep their own colors.
+        Recolors all page text (titles, body, labels) and dividers for
+        legibility over a dark background. Applies to every page; callouts keep
+        their own colors.
       </p>
     </section>
   );

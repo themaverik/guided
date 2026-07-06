@@ -14,5 +14,9 @@ describe("pageInkVars", () => {
     expect(v["--ink-text"]).toBe("#ffffff");
     expect(v["--accent"]).toBe("#ffffff");
     expect(v["--muted"]).toBe("color-mix(in srgb, #ffffff 70%, transparent)");
+    expect(v["--rule"]).toBe("color-mix(in srgb, #ffffff 22%, transparent)");
+    expect(v["--rule-strong"]).toBe(
+      "color-mix(in srgb, #ffffff 40%, transparent)",
+    );
   });
 });

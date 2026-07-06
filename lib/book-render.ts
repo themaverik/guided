@@ -193,8 +193,9 @@ export function themeVars(theme: Theme | undefined): CSSProperties {
  * Root-level CSS custom properties for a book-wide text-color override. When
  * `color` is set it recolors the neutral "ink" family (titles, body, labels,
  * eyebrows) across every page via the .book root — the fix for unreadable text
- * over a dark background image. Decorative ink FILLS (badge backgrounds) use the
- * fixed --color-ink token instead, so they are unaffected. Empty when unset.
+ * over a dark background image, and fades the hairline rules to a translucent
+ * tint of the same color. Decorative ink FILLS (badge backgrounds) use the fixed
+ * --color-ink token instead, so they are unaffected. Empty when unset.
  */
 export function pageInkVars(color?: string): CSSProperties {
   if (!color) return {} as CSSProperties;
@@ -203,6 +204,10 @@ export function pageInkVars(color?: string): CSSProperties {
     "--ink-text": color,
     "--accent": color,
     "--muted": `color-mix(in srgb, ${color} 70%, transparent)`,
+    // Hairline rules/dividers follow the text color (translucent) so they stay
+    // visible on a dark background instead of vanishing as dark-on-dark.
+    "--rule": `color-mix(in srgb, ${color} 22%, transparent)`,
+    "--rule-strong": `color-mix(in srgb, ${color} 40%, transparent)`,
   } as CSSProperties;
 }
 

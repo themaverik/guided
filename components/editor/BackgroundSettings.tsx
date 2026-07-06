@@ -5,10 +5,21 @@
  * clear. The image renders behind content on every page, below the watermark.
  */
 import { useRef, useState } from "react";
-import { assetUrl, uploadApiFor } from "@/lib/project-routes";
+import type { BackgroundFit } from "@/lib/book-schema";
+import { DEFAULT_BACKGROUND_FIT } from "@/lib/book-schema";
+import { backgroundImageSrc } from "@/lib/book-render";
+import { assetBaseFor, uploadApiFor } from "@/lib/project-routes";
 import { useEditor } from "@/lib/store";
 
 const BG_FOLDER = "_background";
+
+const FIT_OPTIONS: { value: BackgroundFit; label: string }[] = [
+  { value: "auto", label: "Auto (fill page, crop excess)" },
+  { value: "crop", label: "Crop to fill" },
+  { value: "shrink", label: "Shrink to fit (never enlarge)" },
+  { value: "fit", label: "Fit within page (letterbox)" },
+  { value: "stretch", label: "Stretch to fill" },
+];
 
 export default function BackgroundSettings() {
   const background = useEditor((s) => s.book.background);
@@ -19,6 +30,7 @@ export default function BackgroundSettings() {
 
   const image = background?.image;
   const opacity = background?.opacity ?? 1;
+  const fit = background?.fit ?? DEFAULT_BACKGROUND_FIT;
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,7 +44,9 @@ export default function BackgroundSettings() {
       const res = await fetch(uploadApiFor(slug), { method: "POST", body: fd });
       const data = (await res.json()) as { filename?: string };
       if (res.ok && data.filename) {
-        updateBackground({ image: assetUrl(slug, BG_FOLDER, data.filename) });
+        // Store a bare filename so the image survives download/re-import; it is
+        // resolved against the current project at render time.
+        updateBackground({ image: data.filename });
       }
     } finally {
       setUploading(false);
@@ -47,7 +61,11 @@ export default function BackgroundSettings() {
         <>
           <div className="wm-icon-row">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="wm-icon-preview" src={image} alt="" />
+            <img
+              className="wm-icon-preview"
+              src={backgroundImageSrc(assetBaseFor(slug), image)}
+              alt=""
+            />
             <span className="img-picker-name">{image}</span>
             <button
               className="mini-btn danger"
@@ -56,6 +74,21 @@ export default function BackgroundSettings() {
             >
               ×
             </button>
+          </div>
+          <div className="ctrl-row">
+            <span className="ctrl-label">Fit</span>
+            <select
+              value={fit}
+              onChange={(e) =>
+                updateBackground({ fit: e.target.value as BackgroundFit })
+              }
+            >
+              {FIT_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="ctrl-row">
             <span className="ctrl-label">Opacity {opacity.toFixed(2)}</span>

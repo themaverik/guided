@@ -14,6 +14,7 @@
 import { Fragment } from "react";
 import type { Book } from "@/lib/book-schema";
 import {
+  backgroundImageSrc,
   bookFitKey,
   computePaging,
   themeVars,
@@ -42,7 +43,11 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
   const wm = book.watermark
     ? { ...book.watermark, icon: watermarkIconSrc(assetBase, book.watermark.icon) }
     : undefined;
-  const bg = book.background;
+  // Resolve the background image to a URL for the current project so it
+  // survives download/re-import (the stored value is a portable bare filename).
+  const bg = book.background
+    ? { ...book.background, image: backgroundImageSrc(assetBase, book.background.image) }
+    : undefined;
 
   return (
     <BookCanvas

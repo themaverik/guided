@@ -588,6 +588,33 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   - **Epic complete** — `square` connectors reach FigJam parity: orthogonal auto-routing (P1) + rounded
     corners (P2) + draggable, reflow-surviving segment handles (P3).
 
+- **Improvement rev4 bundle** — [in progress] (`feature/improvement-rev4`). Six additive
+  fixes/features: (1) demo hardening — `/demo` is seeded via a new `forceGridLayout` (always
+  grid, never legacy), never offered for crash-recovery, and `useAutosave` no-ops for it (no
+  localStorage mirror, no server PUT); (2) legacy→grid migration — confirmed feasible and
+  lossless (`legacyStepToGrid` already total over `Step`); added a bulk `migrateAllStepsToGrid` +
+  a "Migrate all legacy steps to grid" `BookSettings` action, and new steps (`blankStep`,
+  `defaultBook`) now default to `layoutMode: "grid"` (legacy stays fully supported for existing
+  content); (3) background image — added `Background.fit` (`auto`/`crop`/`shrink`/`fit`/
+  `stretch`, `PageBackground` switched from a CSS `background-image` div to an `<img>` +
+  `object-fit` so `scale-down` is available) and fixed the image being stored as a slug-baked URL
+  (now a bare filename resolved per-project via new `backgroundImageSrc`, mirroring
+  `watermarkIconSrc`); (4) watermark — `.wm-mark` is now a row (icon left of text, not stacked),
+  icon sizing rebalanced for that layout; opacity was already applied once on the outer wrapper
+  (confirmed consistent, no change needed); (5) fonts — `--font-heading`/`--font-body` repointed
+  to Roboto by default, with a new `--font-cover` (Montserrat) so only the cover title keeps its
+  old look; (6) restore/discard — `restore()` now checks if the original project is still alive
+  server-side and, if so, PUTs the cached book onto that *same* slug and reopens it (assets
+  untouched, fixing the "images vanish on restore" bug) instead of always recreating a new,
+  asset-less project; added a per-item **Discard** action on the homepage reusing `ConfirmDialog`
+  (same pattern as `AnnotationDeleteController`) that calls a new `DELETE /api/projects/[slug]`
+  and clears the local cache entry. No `schemaVersion` bump — every addition is an optional field
+  with a defaulted fallback. Spec/plan
+  `docs/superpowers/{specs,plans}/2026-07-06-editor-improvement-rev4*`. Suite/typecheck/lint were
+  verified against a clean install after a sandbox filesystem-sync issue prevented running them
+  in-session against live edits — every changed file was re-synced verbatim and re-verified before
+  commit.
+
 ## Later (v3 remainder)
 
 - **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle

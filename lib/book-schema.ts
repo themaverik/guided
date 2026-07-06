@@ -399,12 +399,21 @@ export type ThemeSection = "cover" | "chapter" | "step" | "row" | "callout";
 
 export type Theme = Partial<Record<ThemeSection, SectionFont>>;
 
+/** How a background image is sized against the (fixed-size) printed page.
+ *  `auto`/`crop` fill the page and crop overflow; `shrink` fits within the page
+ *  without ever enlarging a small image; `fit` letterboxes to show the whole
+ *  image; `stretch` fills both axes exactly, distorting if needed. */
+export type BackgroundFit = "auto" | "crop" | "shrink" | "fit" | "stretch";
+
 /** Full-page background image rendered behind content (above the page color). */
 export interface Background {
-  /** Path/URL of the image. */
+  /** Bare filename (resolved against the current project at render time, like
+   *  Watermark.icon) so it survives download/re-import. */
   image?: string;
   /** 0–1, default 1. */
   opacity?: number;
+  /** Default "auto" (fills the page, crops overflow — the original behavior). */
+  fit?: BackgroundFit;
 }
 
 /** The closing (back-cover) page content. All optional with sensible defaults. */
@@ -469,6 +478,7 @@ export const DEFAULT_BORDER = true;
 export const DEFAULT_IMAGE_FIT: ImageFit = "contain";
 export const DEFAULT_WATERMARK_OPACITY = 0.06;
 export const DEFAULT_WATERMARK_SCALE = 1;
+export const DEFAULT_BACKGROUND_FIT: BackgroundFit = "auto";
 
 /**
  * Resolve a row/step layout per the README's resolution order:

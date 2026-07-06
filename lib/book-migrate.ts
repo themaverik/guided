@@ -159,3 +159,22 @@ export function migrateBook(book: Book): Book {
     })),
   };
 }
+
+/** Force every step of a book into grid layout mode (building a grid skeleton from
+ *  any legacy fields where one isn't already present). Additive + idempotent, like
+ *  `migrateStep`, but — unlike `migrateBook` — always flips `layoutMode`, so it is
+ *  NOT part of the ordinary load-time schema migration. Used only where grid-by-
+ *  default content is wanted outright (the /demo seed). */
+export function forceGridLayout(book: Book): Book {
+  return {
+    ...book,
+    chapters: book.chapters.map((ch) => ({
+      ...ch,
+      steps: ch.steps.map((step) => ({
+        ...step,
+        layoutMode: "grid" as const,
+        grid: step.grid ?? legacyStepToGrid(step),
+      })),
+    })),
+  };
+}

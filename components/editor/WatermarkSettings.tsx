@@ -128,7 +128,7 @@ export default function WatermarkSettings() {
           </div>
 
           <div className="editor-field">
-            <label>Logo (optional — shown above the text)</label>
+            <label>Logo (optional — shown to the left of the text)</label>
             {wm?.icon ? (
               <div className="wm-icon-row">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

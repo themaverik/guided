@@ -1,11 +1,15 @@
 "use client";
 
 /* Book-level settings (Phase 4 scope; watermark controls arrive in Phase 6). */
+import { hasLegacySteps } from "@/lib/book-mutations";
 import { useEditor } from "@/lib/store";
 
 export default function BookSettings() {
   const book = useEditor((s) => s.book);
   const updateBookMeta = useEditor((s) => s.updateBookMeta);
+  const migrateAllToGrid = useEditor((s) => s.migrateAllToGrid);
+  const isDemo = useEditor((s) => s.projectSlug === "demo");
+  const showMigrate = !isDemo && hasLegacySteps(book);
 
   return (
     <section className="editor-section">
@@ -42,6 +46,29 @@ export default function BookSettings() {
           onChange={(e) => updateBookMeta({ edition: e.target.value })}
         />
       </div>
+      {showMigrate ? (
+        <div className="editor-field">
+          <button
+            className="add-btn"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Migrate every legacy step to the grid layout? Original row/callout data is kept, so this is safe and reversible per step.",
+                )
+              ) {
+                migrateAllToGrid();
+              }
+            }}
+          >
+            Migrate all legacy steps to grid
+          </button>
+          <p className="editor-help">
+            Converts every step still using the legacy row layout into an
+            equivalent grid — additive, nothing is deleted, and any step can be
+            switched back to Legacy afterwards from its Layout control.
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }

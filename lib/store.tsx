@@ -123,6 +123,7 @@ export interface EditorState {
     patch: Partial<Pick<Step, "title" | "instruction" | "layoutMode">>,
   ) => void;
   setStepLayoutMode: (ci: number, si: number, mode: "legacy" | "grid") => void;
+  migrateAllToGrid: () => void;
 
   // rows
   addRow: (ci: number, si: number) => void;
@@ -411,6 +412,8 @@ export function createEditorStore(
       set((s) => ({ book: M.updateStep(s.book, ci, si, patch) })),
     setStepLayoutMode: (ci, si, mode) =>
       set((s) => ({ book: M.setStepLayoutMode(s.book, ci, si, mode) })),
+    migrateAllToGrid: () =>
+      set((s) => ({ book: M.migrateAllStepsToGrid(s.book) })),
 
     // ── rows ──
     addRow: (ci, si) =>

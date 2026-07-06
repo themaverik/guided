@@ -29,6 +29,12 @@ export function useAutosave(debounceMs = 800): SaveStatus {
       first.current = false;
       return;
     }
+    // Demo is a disposable sandbox: never mirrored to localStorage, never PUT to
+    // the server — edits live only in memory for the session (rev4 Task 1).
+    if (slug === "demo") {
+      setStatus("idle");
+      return;
+    }
     setStatus("saving");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void save(slug, book, setStatus), debounceMs);

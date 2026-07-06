@@ -787,4 +787,12 @@ describe("hitStack + nextInStack — overlapping-shape cycling", () => {
     expect(nextInStack(["b", "a"], "zzz")).toBe("b");
     expect(nextInStack([], "a")).toBeNull();
   });
+  it("excludes connectors (and non-rect kinds) from the hit stack", () => {
+    const c = connector({ x: 0.0, y: 0.0, style: "none" }, { x: 0.5, y: 0.5, style: "arrow" }, "straight");
+    const a = box("a", 0.0, 0.0, 0.6, 0.6);
+    expect(hitStack([c, a], { x: 0.2, y: 0.2 })).toEqual(["a"]);
+  });
+  it("wraps a single-element stack back to itself", () => {
+    expect(nextInStack(["a"], "a")).toBe("a");
+  });
 });

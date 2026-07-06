@@ -124,30 +124,33 @@ export default function BackgroundSettings() {
         onChange={onUpload}
       />
 
-      <div className="ctrl-row" style={{ marginTop: "10px" }}>
-        <span className="ctrl-label">Page text</span>
-        <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <input
-            type="checkbox"
-            checked={pageTextColor != null}
-            onChange={(e) =>
-              updateBookMeta({
-                pageTextColor: e.target.checked
-                  ? RECOMMENDED_TEXT_COLOR
-                  : undefined,
-              })
-            }
-          />
-          Custom color
-        </label>
-        {pageTextColor != null ? (
-          <input
-            type="color"
-            value={pageTextColor}
-            onChange={(e) => updateBookMeta({ pageTextColor: e.target.value })}
-            title="Page text color"
-          />
-        ) : null}
+      <div className="theme-row" style={{ marginTop: "10px" }}>
+        <span className="theme-row-label">Page text</span>
+        <div className="theme-row-controls">
+          <label className="ctrl-check">
+            <input
+              type="checkbox"
+              checked={pageTextColor != null}
+              onChange={(e) =>
+                updateBookMeta({
+                  pageTextColor: e.target.checked
+                    ? RECOMMENDED_TEXT_COLOR
+                    : undefined,
+                })
+              }
+            />
+            Custom color
+          </label>
+          {pageTextColor != null ? (
+            <input
+              className="theme-color"
+              type="color"
+              value={pageTextColor}
+              onChange={(e) => updateBookMeta({ pageTextColor: e.target.value })}
+              title="Page text color"
+            />
+          ) : null}
+        </div>
       </div>
       <p className="editor-help">
         Recolors all page text (titles, body, labels) and dividers for

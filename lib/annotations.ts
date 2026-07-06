@@ -793,7 +793,7 @@ export function hitStack(annotations: Annotation[], p: Point): string[] {
       }
     }
   }
-  return ids.reverse();
+  return [...ids].reverse();
 }
 
 /** The id after `currentId` in `stack`, wrapping to the first; the first id if

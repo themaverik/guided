@@ -712,6 +712,12 @@
   pointer-events: none;
   shape-rendering: crispEdges;
 }
+.preview-anno-distguide line {
+  stroke: #c026d3;
+  stroke-width: 1;
+  pointer-events: none;
+  shape-rendering: crispEdges;
+}
 .preview-anno-draft {
   fill: rgba(2, 68, 80, 0.06);
   stroke: #024450;

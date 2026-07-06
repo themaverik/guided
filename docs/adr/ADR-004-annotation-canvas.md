@@ -631,7 +631,7 @@ No schema change; no migration; renderer and `/print` route untouched.
 
 Alt/Option-click on the annotation canvas cycles the active selection through overlapping
 rect-bearing shapes (`box`, `diamond`, `ellipse`, `text`, `bracket`) via the pure helpers
-`hitStack(point, annotations)` and `nextInStack(stack, currentId)` in `lib/annotations.ts`.
+`hitStack(annotations, p)` and `nextInStack(stack, currentId)` in `lib/annotations.ts`.
 `hitStack` collects all shapes whose **AABB bounds** contain the click point and returns them
 back-to-front; `nextInStack` advances one step with wrap. A plain click is unchanged — it still
 selects the topmost shape by SVG hit-test.
@@ -646,7 +646,7 @@ under-inclusion for overlapping shapes.
 
 ### Equal-spacing distribution snapping (`snapDistribute` / `DistGuide`)
 
-`snapDistribute` and result type `DistGuide { axis, at, cap1, cap2 }` are added to
+`snapDistribute` and result type `DistGuide { axis, at, from, to }` are added to
 `lib/annotations.ts` and run **alongside** `snapAlign` on the move drag in
 `PreviewAnnotations.tsx`. Interaction rules:
 

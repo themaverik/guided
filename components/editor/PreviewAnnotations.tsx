@@ -219,6 +219,8 @@ export default function PreviewAnnotations({
     if (part === "move" || part === "resize") {
       const pageEl = scalerRef.current?.querySelectorAll<HTMLElement>(".page")[pageIndex];
       if (pageEl) targets = collectSnapTargets(pageEl, annotations, id);
+    }
+    if (part === "move") {
       sibs = annotations
         .filter(
           (an) =>
@@ -295,6 +297,7 @@ export default function PreviewAnnotations({
         updateAnnotation(ci, si, d.id, { x, y });
       } else if (a.kind === "line") {
         setActiveGuides([]);
+        setActiveDistGuides([]);
         // A line points any direction, so allow negative extent (full 360°
         // rotation). Snap to horizontal/vertical within a small angle; Shift
         // hard-locks the dominant axis.
@@ -311,6 +314,7 @@ export default function PreviewAnnotations({
           guides = s.guides;
         }
         setActiveGuides(guides);
+        setActiveDistGuides([]);
         updateAnnotation(ci, si, d.id, { w, h });
       }
       return;

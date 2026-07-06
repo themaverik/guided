@@ -528,7 +528,7 @@
   width: 20px;
   height: 20px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--color-ink);
   color: var(--paper);
   font-family: var(--font-heading);
   font-weight: 600;
@@ -546,6 +546,9 @@
   min-width: 0;
 }
 .callout {
+  --ink: var(--color-ink);
+  --ink-text: var(--color-ink-text);
+  --muted: var(--color-muted);
   position: relative;
   padding: 4mm 5mm;
   border: 1px solid;
@@ -671,7 +674,7 @@
   width: 5mm;
   height: 5mm;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--color-ink);
   color: var(--paper);
   font-family: var(--font-heading);
   font-weight: 600;
@@ -759,7 +762,7 @@
   left: 0;
   right: 0;
   height: 8mm;
-  background: var(--ink);
+  background: var(--color-ink);
   opacity: 0.06;
 }
 

@@ -12,6 +12,7 @@ import { assetBaseFor, uploadApiFor } from "@/lib/project-routes";
 import { useEditor } from "@/lib/store";
 
 const BG_FOLDER = "_background";
+const RECOMMENDED_TEXT_COLOR = "#ffffff";
 
 const FIT_OPTIONS: { value: BackgroundFit; label: string }[] = [
   { value: "auto", label: "Auto (fill page, crop excess)" },
@@ -25,6 +26,8 @@ export default function BackgroundSettings() {
   const background = useEditor((s) => s.book.background);
   const slug = useEditor((s) => s.projectSlug);
   const updateBackground = useEditor((s) => s.updateBackground);
+  const pageTextColor = useEditor((s) => s.book.pageTextColor);
+  const updateBookMeta = useEditor((s) => s.updateBookMeta);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -120,6 +123,36 @@ export default function BackgroundSettings() {
         hidden
         onChange={onUpload}
       />
+
+      <div className="ctrl-row" style={{ marginTop: "10px" }}>
+        <span className="ctrl-label">Page text</span>
+        <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <input
+            type="checkbox"
+            checked={pageTextColor != null}
+            onChange={(e) =>
+              updateBookMeta({
+                pageTextColor: e.target.checked
+                  ? RECOMMENDED_TEXT_COLOR
+                  : undefined,
+              })
+            }
+          />
+          Custom color
+        </label>
+        {pageTextColor != null ? (
+          <input
+            type="color"
+            value={pageTextColor}
+            onChange={(e) => updateBookMeta({ pageTextColor: e.target.value })}
+            title="Page text color"
+          />
+        ) : null}
+      </div>
+      <p className="editor-help">
+        Recolors all page text (titles, body, labels) for legibility over a dark
+        background. Applies to every page; callouts keep their own colors.
+      </p>
     </section>
   );
 }

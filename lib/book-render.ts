@@ -189,6 +189,23 @@ export function themeVars(theme: Theme | undefined): CSSProperties {
   return vars as CSSProperties;
 }
 
+/**
+ * Root-level CSS custom properties for a book-wide text-color override. When
+ * `color` is set it recolors the neutral "ink" family (titles, body, labels,
+ * eyebrows) across every page via the .book root — the fix for unreadable text
+ * over a dark background image. Decorative ink FILLS (badge backgrounds) use the
+ * fixed --color-ink token instead, so they are unaffected. Empty when unset.
+ */
+export function pageInkVars(color?: string): CSSProperties {
+  if (!color) return {} as CSSProperties;
+  return {
+    "--ink": color,
+    "--ink-text": color,
+    "--accent": color,
+    "--muted": `color-mix(in srgb, ${color} 70%, transparent)`,
+  } as CSSProperties;
+}
+
 /** Total page count: cover + (intro + steps) per chapter + back cover. */
 export function totalPages(book: Book): number {
   const steps = book.chapters.reduce((a, c) => a + c.steps.length, 0);

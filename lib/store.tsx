@@ -95,7 +95,9 @@ export interface EditorState {
 
   // book meta
   updateBookMeta: (
-    patch: Partial<Pick<Book, "title" | "subtitle" | "author" | "edition">>,
+    patch: Partial<
+      Pick<Book, "title" | "subtitle" | "author" | "edition" | "pageTextColor">
+    >,
   ) => void;
   updateWatermark: (patch: Partial<Watermark>) => void;
   updateTheme: (section: ThemeSection, patch: Partial<SectionFont>) => void;

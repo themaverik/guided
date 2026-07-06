@@ -33,11 +33,14 @@ import {
   resolveEndpoint,
   snapAlign,
   snapAxisVector,
+  snapDistribute,
   snapPoint,
   squareBaseRoute,
   compassDir,
+  hitStack,
+  nextInStack,
 } from "@/lib/annotations";
-import type { GuideLine, Point, Rect } from "@/lib/annotations";
+import type { DistGuide, GuideLine, Point, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
 import { useAnnotationDraw } from "./use-annotation-draw";
 
@@ -127,11 +130,13 @@ export default function PreviewAnnotations({
     baseSeg?: number;
     axis?: "h" | "v";
     targets?: Rect[];
+    sibs?: Rect[];
     which?: "from" | "to";
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
   const [activeGuides, setActiveGuides] = useState<GuideLine[]>([]);
+  const [activeDistGuides, setActiveDistGuides] = useState<DistGuide[]>([]);
   const [gridAnchors, setGridAnchors] = useState<Point[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(
@@ -210,11 +215,22 @@ export default function PreviewAnnotations({
       grabY = p.y - a.y;
     }
     let targets: Rect[] | undefined;
+    let sibs: Rect[] | undefined;
     if (part === "move" || part === "resize") {
       const pageEl = scalerRef.current?.querySelectorAll<HTMLElement>(".page")[pageIndex];
       if (pageEl) targets = collectSnapTargets(pageEl, annotations, id);
     }
-    drag.current = { id, part, grabX, grabY, targets };
+    if (part === "move") {
+      sibs = annotations
+        .filter(
+          (an) =>
+            an.id !== id &&
+            (an.kind === "box" || an.kind === "diamond" || an.kind === "ellipse" ||
+              an.kind === "text" || an.kind === "bracket"),
+        )
+        .map((an) => { const s = an as Surface; return { x: s.x, y: s.y, w: s.w, h: s.h }; });
+    }
+    drag.current = { id, part, grabX, grabY, targets, sibs };
     setAnnotationDragging(true);
     svgRef.current?.setPointerCapture(e.pointerId);
   };
@@ -257,16 +273,31 @@ export default function PreviewAnnotations({
         let x = clamp01(p.x - d.grabX);
         let y = clamp01(p.y - d.grabY);
         let guides: GuideLine[] = [];
-        if (!alt && d.targets && a.kind !== "line") {
-          const s = snapAlign({ x, y, w: a.w, h: a.h }, d.targets, thrX, thrY, "move");
-          x = clamp01(x + s.dx);
-          y = clamp01(y + s.dy);
-          guides = s.guides;
+        let dguides: DistGuide[] = [];
+        if (!alt && a.kind !== "line") {
+          if (d.targets) {
+            const s = snapAlign({ x, y, w: a.w, h: a.h }, d.targets, thrX, thrY, "move");
+            x = clamp01(x + s.dx);
+            y = clamp01(y + s.dy);
+            guides = s.guides;
+          }
+          if (d.sibs) {
+            const alignedX = guides.some((g) => g.axis === "x");
+            const alignedY = guides.some((g) => g.axis === "y");
+            const dist = snapDistribute(
+              { x, y, w: a.w, h: a.h }, d.sibs, alignedX ? 0 : thrX, alignedY ? 0 : thrY,
+            );
+            x = clamp01(x + dist.dx);
+            y = clamp01(y + dist.dy);
+            dguides = dist.guides;
+          }
         }
         setActiveGuides(guides);
+        setActiveDistGuides(dguides);
         updateAnnotation(ci, si, d.id, { x, y });
       } else if (a.kind === "line") {
         setActiveGuides([]);
+        setActiveDistGuides([]);
         // A line points any direction, so allow negative extent (full 360°
         // rotation). Snap to horizontal/vertical within a small angle; Shift
         // hard-locks the dominant axis.
@@ -283,6 +314,7 @@ export default function PreviewAnnotations({
           guides = s.guides;
         }
         setActiveGuides(guides);
+        setActiveDistGuides([]);
         updateAnnotation(ci, si, d.id, { w, h });
       }
       return;
@@ -360,6 +392,7 @@ export default function PreviewAnnotations({
     if (raf.current != null) cancelAnimationFrame(raf.current);
     svgRef.current?.releasePointerCapture(e.pointerId);
     setActiveGuides([]);
+    setActiveDistGuides([]);
     force((n) => n + 1);
   };
 
@@ -411,6 +444,21 @@ export default function PreviewAnnotations({
           <line key={`guide-${i}`} x1={0} y1={g.at * H} x2={W} y2={g.at * H} className="preview-anno-guide" />
         ),
       )}
+      {activeDistGuides.map((g, i) =>
+        g.axis === "x" ? (
+          <g key={`dg-${i}`} className="preview-anno-distguide">
+            <line x1={g.from * W} y1={g.at * H} x2={g.to * W} y2={g.at * H} />
+            <line x1={g.from * W} y1={g.at * H - 4} x2={g.from * W} y2={g.at * H + 4} />
+            <line x1={g.to * W} y1={g.at * H - 4} x2={g.to * W} y2={g.at * H + 4} />
+          </g>
+        ) : (
+          <g key={`dg-${i}`} className="preview-anno-distguide">
+            <line x1={g.at * W} y1={g.from * H} x2={g.at * W} y2={g.to * H} />
+            <line x1={g.at * W - 4} y1={g.from * H} x2={g.at * W + 4} y2={g.from * H} />
+            <line x1={g.at * W - 4} y1={g.to * H} x2={g.at * W + 4} y2={g.to * H} />
+          </g>
+        ),
+      )}
       {draw.preview ? (
         draw.preview.kind === "rect" ? (
           <rect
@@ -434,6 +482,13 @@ export default function PreviewAnnotations({
       {annotations.map((a) => {
         const onDown = (e: React.PointerEvent) => {
           e.stopPropagation();
+          if (e.altKey) {
+            const next = nextInStack(hitStack(annotations, toN(e)), selectedId);
+            if (next) {
+              selectAnnotation(next);
+              return;
+            }
+          }
           selectAnnotation(a.id);
         };
         if (a.kind === "connector") {
@@ -735,6 +790,8 @@ function TextEditor({
       ? labelRectAt(connectorMidpoint(annotations, a).x, connectorMidpoint(annotations, a).y)
       : labelRect(a as Surface);
   const centered = a.kind !== "text";
+  const justify =
+    a.align === "left" ? "flex-start" : a.align === "right" ? "flex-end" : "center";
 
   useEffect(() => {
     const el = ref.current;
@@ -754,7 +811,10 @@ function TextEditor({
 
   return (
     <foreignObject x={r.x * W} y={r.y * H} width={r.w * W} height={r.h * H} overflow="visible">
-      <div className={`anno-editwrap${centered ? " centered" : ""}`}>
+      <div
+        className={`anno-editwrap${centered ? " centered" : ""}`}
+        style={centered ? { justifyContent: justify } : undefined}
+      >
         <div
           ref={ref}
           className="anno-text editing"

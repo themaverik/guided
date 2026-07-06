@@ -747,6 +747,12 @@ export interface GuideLine { axis: "x" | "y"; at: number }
 
 export interface AlignSnapResult { dx: number; dy: number; guides: GuideLine[] }
 
+/** A distribution guide: a short capped bar marking one equal gap. For axis "x"
+ *  the bar is horizontal at cross-y `at`, spanning x `from`→`to`; for axis "y" it
+ *  is vertical at cross-x `at`, spanning y `from`→`to`. */
+export interface DistGuide { axis: "x" | "y"; at: number; from: number; to: number }
+export interface DistResult { dx: number; dy: number; guides: DistGuide[] }
+
 /** The 9 anchor points of a rectangle: 4 corners, 4 edge midpoints, center.
  *  Order: top-left, top-center, top-right, mid-left, center, mid-right,
  *  bottom-left, bottom-center, bottom-right. */
@@ -776,6 +782,32 @@ export function nearestPoint(p: Point, points: Point[], thr: number): Point | nu
     }
   }
   return best;
+}
+
+/** Ids of rect-bearing surfaces (box/diamond/ellipse/text/bracket) whose bounds
+ *  contain `p`, top-most first (array order is bottom→top, so reverse). Pure;
+ *  used to cycle selection through overlapping shapes on Alt-click. */
+export function hitStack(annotations: Annotation[], p: Point): string[] {
+  const ids: string[] = [];
+  for (const a of annotations) {
+    if (
+      a.kind === "box" || a.kind === "diamond" || a.kind === "ellipse" ||
+      a.kind === "text" || a.kind === "bracket"
+    ) {
+      if (p.x >= a.x && p.x <= a.x + a.w && p.y >= a.y && p.y <= a.y + a.h) {
+        ids.push(a.id);
+      }
+    }
+  }
+  return [...ids].reverse();
+}
+
+/** The id after `currentId` in `stack`, wrapping to the first; the first id if
+ *  `currentId` is not in `stack`; `null` if `stack` is empty. */
+export function nextInStack(stack: string[], currentId: string | null): string | null {
+  if (stack.length === 0) return null;
+  const i = currentId == null ? -1 : stack.indexOf(currentId);
+  return stack[(i + 1) % stack.length];
 }
 
 /** Nearest target line to any source line within `thr`; returns the signed delta
@@ -831,6 +863,72 @@ export function snapAlign(
   if (bx) guides.push({ axis: "x", at: bx.at });
   if (by) guides.push({ axis: "y", at: by.at });
   return { dx: bx ? bx.delta : 0, dy: by ? by.delta : 0, guides };
+}
+
+/** One axis of equal-spacing distribution. `m0`/`mSize` = moving interval
+ *  start+size; `sibs` = sibling intervals (start `s`, end `e`, center `c`) on this
+ *  axis; `thr` = normalized snap threshold (≤0 disables). Returns the delta to
+ *  apply and the equal-gap spans, or null. */
+function distributeAxis(
+  m0: number,
+  mSize: number,
+  sibs: { s: number; e: number; c: number }[],
+  thr: number,
+): { delta: number; gaps: [number, number][] } | null {
+  if (thr <= 0 || sibs.length === 0) return null;
+  const mc = m0 + mSize / 2;
+  const left = sibs.filter((s) => s.c < mc).sort((a, b) => b.c - a.c);
+  const right = sibs.filter((s) => s.c > mc).sort((a, b) => a.c - b.c);
+  const L = left[0];
+  const R = right[0];
+  // Case 1 — centered between two neighbors (equal gaps on both sides).
+  if (L && R) {
+    const target = (L.e + R.s - mSize) / 2;
+    if (target - L.e < 0) return null;
+    const delta = target - m0;
+    // delta === 0: the rect is already at the equal-spacing target — nothing to correct, so no snap/guide.
+    if (delta === 0 || Math.abs(delta) > thr) return null;
+    return { delta, gaps: [[L.e, target], [target + mSize, R.s]] };
+  }
+  // Case 2 — continue the run: match the gap just beyond the single neighbor.
+  if (L && left[1]) {
+    const gap = L.s - left[1].e;
+    if (gap <= 0) return null;
+    const target = L.e + gap;
+    const delta = target - m0;
+    if (delta === 0 || Math.abs(delta) > thr) return null;
+    return { delta, gaps: [[L.e, target]] };
+  }
+  if (R && right[1]) {
+    const gap = right[1].s - R.e;
+    if (gap <= 0) return null;
+    const target = R.s - gap - mSize;
+    const delta = target - m0;
+    if (delta === 0 || Math.abs(delta) > thr) return null;
+    return { delta, gaps: [[target + mSize, R.s]] };
+  }
+  return null;
+}
+
+/** Figma-style equal-spacing snap for a moving rect against sibling rects. X and Y
+ *  resolve independently. Returns the position delta + distribution guide bars.
+ *  Pure. `siblings` should already exclude the moving surface. */
+export function snapDistribute(
+  moving: Rect,
+  siblings: Rect[],
+  thrX: number,
+  thrY: number,
+): DistResult {
+  const mcx = moving.x + moving.w / 2;
+  const mcy = moving.y + moving.h / 2;
+  const sibX = siblings.map((s) => ({ s: s.x, e: s.x + s.w, c: s.x + s.w / 2 }));
+  const sibY = siblings.map((s) => ({ s: s.y, e: s.y + s.h, c: s.y + s.h / 2 }));
+  const rx = distributeAxis(moving.x, moving.w, sibX, thrX);
+  const ry = distributeAxis(moving.y, moving.h, sibY, thrY);
+  const guides: DistGuide[] = [];
+  if (rx) for (const [from, to] of rx.gaps) guides.push({ axis: "x", at: mcy + (ry ? ry.delta : 0), from, to });
+  if (ry) for (const [from, to] of ry.gaps) guides.push({ axis: "y", at: mcx + (rx ? rx.delta : 0), from, to });
+  return { dx: rx ? rx.delta : 0, dy: ry ? ry.delta : 0, guides };
 }
 
 /** Normalized value → CSS/SVG percentage string. */

@@ -647,7 +647,6 @@
 .anno-editwrap.centered {
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 .anno-editwrap.centered > .anno-text.editing {
   width: auto;
@@ -709,6 +708,12 @@
 }
 .preview-anno-guide {
   stroke: #e5484d;
+  stroke-width: 1;
+  pointer-events: none;
+  shape-rendering: crispEdges;
+}
+.preview-anno-distguide line {
+  stroke: #c026d3;
   stroke-width: 1;
   pointer-events: none;
   shape-rendering: crispEdges;
@@ -1167,6 +1172,16 @@
   outline: 2px solid #2563eb;
   outline-offset: -2px;
   background: rgba(37, 99, 235, 0.06);
+}
+.preview-grid-select .grid-cell-select.drop {
+  outline: 2px dashed #2563eb;
+  outline-offset: -2px;
+  background: rgba(37, 99, 235, 0.12);
+}
+.preview-grid-select .grid-cell-select.drop-error {
+  outline: 2px solid #dc2626;
+  outline-offset: -2px;
+  background: rgba(220, 38, 38, 0.08);
 }
 
 /* Cell editor panel (Plan 7) */

@@ -36,4 +36,8 @@ describe("uploadImage", () => {
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network"); }));
     expect(await uploadImage("proj", "ch1", file)).toEqual({ error: "upload failed" });
   });
+  it("returns a generic error when the response is ok but has no filename", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({}) })));
+    expect(await uploadImage("proj", "ch1", file)).toEqual({ error: "upload failed" });
+  });
 });

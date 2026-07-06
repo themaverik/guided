@@ -1172,6 +1172,11 @@
   outline-offset: -2px;
   background: rgba(37, 99, 235, 0.12);
 }
+.preview-grid-select .grid-cell-select.drop-error {
+  outline: 2px solid #dc2626;
+  outline-offset: -2px;
+  background: rgba(220, 38, 38, 0.08);
+}
 
 /* Cell editor panel (Plan 7) */
 .cell-editor .cell-crop-hint {

@@ -12,6 +12,8 @@ import type { GridRow } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
 import { isImageFile, uploadImage } from "@/lib/upload-image";
 
+const isFileDrag = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
+
 interface Box { l: number; t: number; w: number; h: number }
 
 export default function PreviewGridSelect({
@@ -31,6 +33,7 @@ export default function PreviewGridSelect({
   const slug = useEditor((s) => s.projectSlug);
   const chapterId = useEditor((s) => s.book.chapters[ci]?.id ?? "");
   const [dropKey, setDropKey] = useState<string | null>(null);
+  const [errKey, setErrKey] = useState<string | null>(null);
   const [cells, setCells] = useState<{ ri: number; cidx: number; box: Box }[] | null>(null);
 
   useLayoutEffect(() => {
@@ -52,9 +55,6 @@ export default function PreviewGridSelect({
     setCells(out);
   }, [scalerRef, pageIndex, fitKey, scale, grid]);
 
-  const isFileDrag = (e: React.DragEvent) =>
-    Array.from(e.dataTransfer.types).includes("Files");
-
   if (!cells) return null;
 
   return (
@@ -68,7 +68,7 @@ export default function PreviewGridSelect({
             tabIndex={-1}
             className={`grid-cell-select${isSel ? " selected" : ""}${
               dropKey === `${ri}-${cidx}` ? " drop" : ""
-            }`}
+            }${errKey === `${ri}-${cidx}` ? " drop-error" : ""}`}
             style={{ position: "absolute", left: box.l, top: box.t, width: box.w, height: box.h, pointerEvents: "all" }}
             onClick={(e) => { e.stopPropagation(); selectCell(ci, si, ri, cidx); }}
             aria-label={`Select cell ${ri + 1}.${cidx + 1}`}
@@ -76,6 +76,7 @@ export default function PreviewGridSelect({
               if (!isFileDrag(e)) return;
               e.preventDefault();
               setDropKey(`${ri}-${cidx}`);
+              setErrKey(null);
             }}
             onDragLeave={() => setDropKey((k) => (k === `${ri}-${cidx}` ? null : k))}
             onDrop={async (e) => {
@@ -84,7 +85,12 @@ export default function PreviewGridSelect({
               const dropped = e.dataTransfer.files?.[0];
               if (!dropped || !isImageFile(dropped.name) || !chapterId) return;
               const result = await uploadImage(slug, chapterId, dropped);
-              if ("filename" in result) setCellImage(ci, si, ri, cidx, result.filename);
+              if ("filename" in result) {
+                setErrKey(null);
+                setCellImage(ci, si, ri, cidx, result.filename);
+              } else {
+                setErrKey(`${ri}-${cidx}`);
+              }
             }}
           />
         );

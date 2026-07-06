@@ -6,6 +6,7 @@
 import { notFound } from "next/navigation";
 import EditorApp from "@/components/editor/EditorApp";
 import { loadExampleBook } from "@/lib/book-io";
+import { forceGridLayout } from "@/lib/book-migrate";
 import {
   loadProjectBook,
   projectExists,
@@ -40,7 +41,13 @@ export default async function ProjectEditor({
 
   if (!(await projectExists(slug))) {
     if (slug === "demo") {
-      await seedProject("demo", "Demo guidebook", await loadExampleBook());
+      // Demo is always grid-preview, never legacy — see docs/superpowers/plans/
+      // 2026-07-06-editor-improvement-rev4.md Task 1.
+      await seedProject(
+        "demo",
+        "Demo guidebook",
+        forceGridLayout(await loadExampleBook()),
+      );
     } else {
       notFound();
     }

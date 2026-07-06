@@ -20,6 +20,7 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
   const updateStep = useEditor((s) => s.updateStep);
   const setStepLayoutMode = useEditor((s) => s.setStepLayoutMode);
   const addRow = useEditor((s) => s.addRow);
+  const isDemo = useEditor((s) => s.projectSlug === "demo");
 
   if (!step) return null;
 
@@ -46,23 +47,25 @@ export default function StepEditor({ ci, si }: { ci: number; si: number }) {
         />
       </div>
 
-      <div className="editor-field">
-        <label>Layout</label>
-        <select
-          value={stepLayoutMode(step)}
-          onChange={(e) =>
-            setStepLayoutMode(ci, si, e.target.value as "legacy" | "grid")
-          }
-        >
-          <option value="legacy">Legacy (rows)</option>
-          <option value="grid">Grid (preview)</option>
-        </select>
-        <p className="editor-help">
-          Grid lays out image and callout content in resizable cells. Drag the
-          dividers on the page to resize; select a cell to add an image or
-          callouts, then drag a callout to float it anywhere in the cell.
-        </p>
-      </div>
+      {isDemo ? null : (
+        <div className="editor-field">
+          <label>Layout</label>
+          <select
+            value={stepLayoutMode(step)}
+            onChange={(e) =>
+              setStepLayoutMode(ci, si, e.target.value as "legacy" | "grid")
+            }
+          >
+            <option value="legacy">Legacy (rows)</option>
+            <option value="grid">Grid (preview)</option>
+          </select>
+          <p className="editor-help">
+            Grid lays out image and callout content in resizable cells. Drag the
+            dividers on the page to resize; select a cell to add an image or
+            callouts, then drag a callout to float it anywhere in the cell.
+          </p>
+        </div>
+      )}
 
       {mode === "grid" && step.grid ? (
         <>

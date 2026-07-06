@@ -118,6 +118,17 @@
   justify-content: space-between;
   gap: 10px;
 }
+.landing-recover-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.landing-recover-row .landing-btn {
+  flex: 1 1 auto;
+}
+.landing-recover-row .landing-recover-clear {
+  flex: 0 0 auto;
+}
 .landing-recover-title {
   font-family: var(--font-mono);
   font-size: 11px;

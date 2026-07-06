@@ -59,6 +59,29 @@ export function setStepLayoutMode(
   return next;
 }
 
+/** Migrate every legacy step in the book to grid layout in one pass (rev4 Task 2).
+ *  Additive + idempotent: steps already in grid mode are left untouched (their
+ *  author edits are preserved); legacy fields are never deleted, so switching any
+ *  individual step back to "Legacy" afterwards still works. */
+export function migrateAllStepsToGrid(book: Book): Book {
+  const next = clone(book);
+  for (const chapter of next.chapters) {
+    for (const step of chapter.steps) {
+      if (stepLayoutMode(step) === "grid") continue;
+      step.layoutMode = "grid";
+      step.grid = step.grid ?? legacyStepToGrid(step);
+    }
+  }
+  return next;
+}
+
+/** True if the book has at least one step still in legacy layout mode. */
+export function hasLegacySteps(book: Book): boolean {
+  return book.chapters.some((ch) =>
+    ch.steps.some((step) => stepLayoutMode(step) === "legacy"),
+  );
+}
+
 /*
  * Fields that belong to a ROW (not the page), used to split a legacy step into
  * the multi-row form. NOTE: `title`/`instruction` are intentionally excluded —
@@ -89,8 +112,19 @@ export function blankCallout(): Callout {
   return { type: "info", title: "", body: "" };
 }
 
+/** New steps start in grid mode (rev4 Task 2) — legacy stays available (and is
+ *  what already-authored steps without a `layoutMode` keep resolving to via
+ *  `stepLayoutMode`'s fallback), but there's no reason to keep authoring brand
+ *  new content in the legacy path now that legacy→grid migration is lossless. */
 export function blankStep(): Step {
-  return { title: "New step", instruction: "", image: "", layout: "single" };
+  return {
+    title: "New step",
+    instruction: "",
+    image: "",
+    layout: "single",
+    layoutMode: "grid",
+    grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
+  };
 }
 
 export function blankChapter(index: number): Chapter {

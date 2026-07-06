@@ -56,6 +56,27 @@ export function watermarkIconSrc(
   return `${assetBase}/${WATERMARK_ASSET_FOLDER}/${icon}`;
 }
 
+/** Folder (under a project's assets) where the page background image is stored. */
+export const BACKGROUND_ASSET_FOLDER = "_background";
+
+/**
+ * Browser URL for the page background image. Stored as a bare filename so it
+ * stays portable across download/re-import (resolves against whichever project
+ * is currently serving it, same fix as `watermarkIconSrc`). Legacy values saved
+ * as a full `/api/projects/<oldslug>/assets/_background/<file>` URL are re-homed
+ * to the current project; any other absolute/external URL is left untouched.
+ */
+export function backgroundImageSrc(
+  assetBase: string,
+  image?: string,
+): string | undefined {
+  if (!image) return undefined;
+  const legacy = image.match(/(?:^|\/)_background\/([^/]+)$/);
+  if (legacy) return `${assetBase}/${BACKGROUND_ASSET_FOLDER}/${legacy[1]}`;
+  if (image.includes("/")) return image; // some other absolute/external URL
+  return `${assetBase}/${BACKGROUND_ASSET_FOLDER}/${image}`;
+}
+
 /**
  * The second slot's filename for a `double` row. Prefer an explicit `image2`
  * (the model's recommended field); otherwise derive it from the `-2`-before-

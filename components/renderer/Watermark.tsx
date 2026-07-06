@@ -3,8 +3,10 @@
  * the page background (z-index 0; .page-inner sits at z-index 1). It is NOT
  * hidden in print. Text marks render large/uppercase in the heading font at the
  * configured opacity; `center` is rotated ~-30° and centered, corners are small
- * and inset ~10mm. A logo and text can both show — when both are set the logo
- * sits above the text; either one alone is fine too.
+ * and inset ~10mm. A logo and text can both show — when both are set, the logo
+ * renders as a small icon to the LEFT of the text, in tandem (same row, vertically
+ * centered); either one alone is fine too. `opacity` is set once on the outer
+ * wrapper, so it applies identically to the icon and the text.
  */
 import type { CSSProperties } from "react";
 import type { Watermark as WatermarkData } from "@/lib/book-schema";
@@ -28,7 +30,7 @@ export default function Watermark({
 
   return (
     <div className={`watermark wm-${position}`} style={style} aria-hidden>
-      {/* Logo and/or text — when both are set, the logo sits above the text. */}
+      {/* Logo and/or text — when both are set, the logo sits left of the text. */}
       <div className="wm-mark">
         {watermark.icon ? (
           // eslint-disable-next-line @next/next/no-img-element

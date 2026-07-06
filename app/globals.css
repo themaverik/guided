@@ -6,8 +6,11 @@
  * bind to the next/font CSS variables set in app/layout.tsx.
  */
 @theme {
-  --font-heading: var(--font-montserrat), "Montserrat", sans-serif;
-  --font-body: var(--font-inter), "Inter", sans-serif;
+  /* Roboto is the default for all text (rev4 Item 5) except the cover title,
+   * which keeps its previous distinct look via --font-cover (Montserrat). */
+  --font-heading: var(--font-roboto), "Roboto", sans-serif;
+  --font-body: var(--font-roboto), "Roboto", sans-serif;
+  --font-cover: var(--font-montserrat), "Montserrat", sans-serif;
   --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
 
   /* Brand / surfaces */

@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Book } from "@/lib/book-schema";
+import { bookApiFor } from "@/lib/project-routes";
+import ConfirmDialog from "@/components/editor/ConfirmDialog";
 
 const LS_PREFIX = "guidebook:book:";
 
@@ -26,6 +28,8 @@ export default function LandingActions() {
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [recoverable, setRecoverable] = useState<Recoverable[]>([]);
+  const [pendingDiscard, setPendingDiscard] = useState<Recoverable | null>(null);
+  const [pendingClearAll, setPendingClearAll] = useState(false);
 
   // Surface any locally-mirrored books (crash/expiry recovery).
   useEffect(() => {
@@ -34,13 +38,15 @@ export default function LandingActions() {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (!key?.startsWith(LS_PREFIX)) continue;
+        const slug = key.slice(LS_PREFIX.length);
+        if (slug === "demo") continue; // demo is never offered for restore
         try {
           const book = JSON.parse(localStorage.getItem(key) ?? "") as Book;
           if (Array.isArray(book?.chapters)) {
             found.push({
               key,
-              slug: key.slice(LS_PREFIX.length),
-              title: book.title || key.slice(LS_PREFIX.length),
+              slug,
+              title: book.title || slug,
               book,
             });
           }
@@ -54,34 +60,70 @@ export default function LandingActions() {
     }
   }, []);
 
-  const clearRecent = () => {
-    if (recoverable.length === 0) return;
-    const ok = window.confirm(
-      `Clear ${recoverable.length} recovery checkpoint${
-        recoverable.length === 1 ? "" : "s"
-      } from this browser? This can't be undone.`,
-    );
-    if (!ok) return;
+  const clearAllConfirmed = () => {
     try {
       for (const r of recoverable) localStorage.removeItem(r.key);
     } catch {
       /* localStorage unavailable */
     }
     setRecoverable([]);
+    setPendingClearAll(false);
   };
 
+  const discardConfirmed = async () => {
+    const item = pendingDiscard;
+    setPendingDiscard(null);
+    if (!item) return;
+    try {
+      // Best-effort: the underlying project may already be expired/gone.
+      await fetch(`/api/projects/${item.slug}`, { method: "DELETE" });
+    } catch {
+      /* server-side delete failing shouldn't block clearing the local cache */
+    }
+    try {
+      localStorage.removeItem(item.key);
+    } catch {
+      /* localStorage unavailable */
+    }
+    setRecoverable((prev) => prev.filter((r) => r.key !== item.key));
+  };
+
+  // Restore an abrupt-close checkpoint. The project usually still exists
+  // server-side (TTL default 1 day, far longer than a crash-to-reopen gap), and
+  // its assets are untouched there — so the fix for "images vanish on restore"
+  // is to sync the cached book onto the SAME project and reopen it, not to
+  // recreate a new project (which always starts with an empty assets folder).
   const restore = async (item: Recoverable) => {
     setBusy(true);
     setError(null);
     try {
+      const check = await fetch(bookApiFor(item.slug));
+      if (check.ok) {
+        await fetch(bookApiFor(item.slug), {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(item.book),
+        });
+        router.push(`/${item.slug}`);
+        return;
+      }
+      // Original project expired — recreate under a new slug. Images cannot be
+      // recovered here: the browser cache only ever held the book JSON, and the
+      // source assets directory is gone.
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ name: item.title, book: item.book }),
       });
       const data = (await res.json()) as { slug?: string; error?: string };
-      if (res.ok && data.slug) router.push(`/${data.slug}`);
-      else setError(data.error ?? "Could not restore");
+      if (res.ok && data.slug) {
+        window.alert(
+          "The original project had expired, so it was recreated — uploaded images could not be recovered.",
+        );
+        router.push(`/${data.slug}`);
+      } else {
+        setError(data.error ?? "Could not restore");
+      }
     } catch {
       setError("Could not restore");
     } finally {
@@ -194,26 +236,56 @@ export default function LandingActions() {
             <button
               type="button"
               className="landing-recover-clear"
-              onClick={clearRecent}
-              disabled={busy}
+              onClick={() => setPendingClearAll(true)}
+              disabled={busy || recoverable.length === 0}
             >
               Clear all
             </button>
           </div>
           {recoverable.map((r) => (
-            <button
-              key={r.key}
-              className="landing-btn"
-              onClick={() => restore(r)}
-              disabled={busy}
-            >
-              Restore “{r.title}”
-            </button>
+            <div key={r.key} className="landing-recover-row">
+              <button
+                className="landing-btn"
+                onClick={() => restore(r)}
+                disabled={busy}
+              >
+                Restore “{r.title}”
+              </button>
+              <button
+                type="button"
+                className="landing-recover-clear"
+                onClick={() => setPendingDiscard(r)}
+                disabled={busy}
+              >
+                Discard
+              </button>
+            </div>
           ))}
         </div>
       ) : null}
 
       {error ? <p className="landing-error">{error}</p> : null}
+
+      <ConfirmDialog
+        open={pendingDiscard != null}
+        title="Discard this project?"
+        message={`This permanently deletes "${pendingDiscard?.title}" and removes it from this browser. This can't be undone.`}
+        confirmLabel="Discard"
+        tone="danger"
+        onConfirm={() => void discardConfirmed()}
+        onCancel={() => setPendingDiscard(null)}
+      />
+      <ConfirmDialog
+        open={pendingClearAll}
+        title="Clear all recovery checkpoints?"
+        message={`This removes ${recoverable.length} recovery checkpoint${
+          recoverable.length === 1 ? "" : "s"
+        } from this browser. This can't be undone.`}
+        confirmLabel="Clear all"
+        tone="danger"
+        onConfirm={clearAllConfirmed}
+        onCancel={() => setPendingClearAll(false)}
+      />
     </div>
   );
 }

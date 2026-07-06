@@ -93,7 +93,18 @@ export function defaultBook(name: string): Book {
         id: "chapter1",
         title: "Chapter 1",
         description: "",
-        steps: [{ title: "Step 1", instruction: "", image: "", layout: "single" }],
+        steps: [
+          {
+            title: "Step 1",
+            instruction: "",
+            image: "",
+            layout: "single",
+            // New projects default to grid layout (rev4 Task 2) — legacy stays
+            // available for existing content via the per-step Layout toggle.
+            layoutMode: "grid",
+            grid: [{ heightFr: 1, cells: [{ widthFr: 1, objects: [] }] }],
+          },
+        ],
       },
     ],
   };
@@ -116,6 +127,12 @@ export async function createProject(name: string): Promise<ProjectMeta> {
 
 export async function projectExists(slug: string): Promise<boolean> {
   return exists(bookPath(slug));
+}
+
+/** Permanently delete a project directory (book, meta, assets — everything). Used
+ *  by the homepage "Discard" action; a no-op (not an error) if already gone. */
+export async function deleteProject(slug: string): Promise<void> {
+  await rm(projectDir(slug), { recursive: true, force: true });
 }
 
 /** Create a project at a specific slug from a given book (used to seed /demo). */

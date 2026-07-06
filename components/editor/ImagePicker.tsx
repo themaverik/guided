@@ -7,7 +7,8 @@
  * current selection previews in the trigger button.
  */
 import { useEffect, useRef, useState } from "react";
-import { assetUrl, imagesApiFor, uploadApiFor } from "@/lib/project-routes";
+import { assetUrl, imagesApiFor } from "@/lib/project-routes";
+import { uploadImage } from "@/lib/upload-image";
 import { useEditor } from "@/lib/store";
 
 export default function ImagePicker({
@@ -70,17 +71,13 @@ export default function ImagePicker({
     setUploading(true);
     setError(null);
     try {
-      const fd = new FormData();
-      fd.append("chapterId", chapterId);
-      fd.append("file", file);
-      const res = await fetch(uploadApiFor(slug), { method: "POST", body: fd });
-      const data = (await res.json()) as { filename?: string; error?: string };
-      if (!res.ok || !data.filename) {
-        setError(data.error ?? "upload failed");
+      const result = await uploadImage(slug, chapterId, file);
+      if ("error" in result) {
+        setError(result.error);
         return;
       }
       await refresh();
-      onPick(data.filename);
+      onPick(result.filename);
     } catch {
       setError("upload failed");
     } finally {

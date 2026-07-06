@@ -74,7 +74,12 @@
 .page-bg {
   position: absolute;
   inset: 0;
-  z-index: -1; /* below watermark (0) and content (1), above page color */
+  /* Same stacking layer as the watermark: DOM order (PageBackground is
+     rendered before <Watermark>) keeps the image behind the mark, while
+     content (.page-inner) sits above at z-index 1. Must be 0, not -1 — a
+     z-index:-1 child paints BEHIND the parent's opaque paper background
+     (.page { background: var(--paper) }), which hid the image entirely. */
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-position: center;

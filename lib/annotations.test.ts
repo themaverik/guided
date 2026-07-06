@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack, snapDistribute } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -764,5 +764,89 @@ describe("connector label placement", () => {
     const m = connectorMidpoint([c], c);
     expect(m.x).toBeCloseTo(0.4);
     expect(m.y).toBeCloseTo(0.3);
+  });
+});
+
+describe("hitStack + nextInStack — overlapping-shape cycling", () => {
+  it("returns rect-bearing shapes under the point, topmost first", () => {
+    const a = box("a", 0.0, 0.0, 0.6, 0.6); // bottom
+    const b = box("b", 0.1, 0.1, 0.4, 0.4); // top (later in array)
+    expect(hitStack([a, b], { x: 0.2, y: 0.2 })).toEqual(["b", "a"]);
+  });
+  it("excludes shapes that don't contain the point", () => {
+    const a = box("a", 0.0, 0.0, 0.2, 0.2);
+    const b = box("b", 0.5, 0.5, 0.2, 0.2);
+    expect(hitStack([a, b], { x: 0.1, y: 0.1 })).toEqual(["a"]);
+  });
+  it("advances to the next id, wrapping to the first", () => {
+    expect(nextInStack(["b", "a"], "b")).toBe("a");
+    expect(nextInStack(["b", "a"], "a")).toBe("b");
+  });
+  it("returns the first id when current is absent, null when empty", () => {
+    expect(nextInStack(["b", "a"], null)).toBe("b");
+    expect(nextInStack(["b", "a"], "zzz")).toBe("b");
+    expect(nextInStack([], "a")).toBeNull();
+  });
+  it("excludes connectors (and non-rect kinds) from the hit stack", () => {
+    const c = connector({ x: 0.0, y: 0.0, style: "none" }, { x: 0.5, y: 0.5, style: "arrow" }, "straight");
+    const a = box("a", 0.0, 0.0, 0.6, 0.6);
+    expect(hitStack([c, a], { x: 0.2, y: 0.2 })).toEqual(["a"]);
+  });
+  it("wraps a single-element stack back to itself", () => {
+    expect(nextInStack(["a"], "a")).toBe("a");
+  });
+});
+
+describe("snapDistribute — equal-spacing", () => {
+  const T = 0.05;
+  const r = (x: number, y: number, w: number, h: number) => ({ x, y, w, h });
+
+  it("centers a rect between two neighbors (equal gaps)", () => {
+    // left [0,0.1], right [0.4,0.5], moving w=0.1 → centered x = 0.2
+    const res = snapDistribute(r(0.22, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBeCloseTo(-0.02, 6);
+    expect(res.dy).toBe(0);
+    expect(res.guides.filter((g) => g.axis === "x")).toHaveLength(2);
+    const xg = res.guides.filter((g) => g.axis === "x");
+    expect(xg).toHaveLength(2);
+    expect(xg[0].from).toBeCloseTo(0.1, 6);
+    expect(xg[0].to).toBeCloseTo(0.2, 6);
+    expect(xg[1].from).toBeCloseTo(0.3, 6);
+    expect(xg[1].to).toBeCloseTo(0.4, 6);
+    expect(xg[0].at).toBeCloseTo(0.45, 6);
+  });
+
+  it("matches the adjacent gap when only one side has neighbors", () => {
+    // siblings [0,0.1] & [0.2,0.3] → existing gap 0.1; moving to the right snaps
+    // so its left gap equals 0.1 → x = 0.3 + 0.1 = 0.4
+    const res = snapDistribute(r(0.42, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.2, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBeCloseTo(-0.02, 6);
+    expect(res.guides.some((g) => g.axis === "x")).toBe(true);
+  });
+
+  it("does not snap when the rect is already exactly at the equal-spacing target (delta 0)", () => {
+    const res = snapDistribute(r(0.8, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("does not snap when the equal-spacing target is beyond the threshold", () => {
+    const res = snapDistribute(r(0.7, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("does not snap (no inverted guide) when the rect cannot fit between too-tight neighbors", () => {
+    const res = snapDistribute(r(0.05, 0.4, 0.3, 0.1), [r(0, 0, 0.1, 0.1), r(0.2, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBe(0);
+    expect(res.guides.every((g) => g.from <= g.to)).toBe(true);
+  });
+
+  it("returns no snap when there are no siblings", () => {
+    expect(snapDistribute(r(0.5, 0.5, 0.1, 0.1), [], T, T)).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("disables an axis when its threshold is 0", () => {
+    const res = snapDistribute(r(0.22, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], 0, T);
+    expect(res.dx).toBe(0);
+    expect(res.guides.filter((g) => g.axis === "x")).toHaveLength(0);
   });
 });

@@ -4,6 +4,7 @@
 import type { PageSize } from "@/lib/book-schema";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
+import { clampPageMm, MIN_PAGE_MM, MAX_PAGE_MM } from "@/lib/grid-math";
 
 const SIZES: PageSize[] = ["A4", "Letter", "A5", "Legal", "Custom"];
 
@@ -26,6 +27,32 @@ export default function PageSettings() {
           ))}
         </select>
       </div>
+      {cfg.size === "Custom" ? (
+        <div className="editor-field">
+          <label htmlFor="pg-cw">Width (mm)</label>
+          <input
+            id="pg-cw"
+            type="number"
+            min={MIN_PAGE_MM}
+            max={MAX_PAGE_MM}
+            value={cfg.custom?.w ?? 210}
+            onChange={(e) =>
+              update({ custom: { w: clampPageMm(Number(e.target.value)), h: cfg.custom?.h ?? 297 } })
+            }
+          />
+          <label htmlFor="pg-ch">Height (mm)</label>
+          <input
+            id="pg-ch"
+            type="number"
+            min={MIN_PAGE_MM}
+            max={MAX_PAGE_MM}
+            value={cfg.custom?.h ?? 297}
+            onChange={(e) =>
+              update({ custom: { w: cfg.custom?.w ?? 210, h: clampPageMm(Number(e.target.value)) } })
+            }
+          />
+        </div>
+      ) : null}
       <div className="editor-field">
         <label htmlFor="pg-orientation">Orientation</label>
         <select

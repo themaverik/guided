@@ -11,6 +11,16 @@ const PAGE_MM: Record<Exclude<PageConfig["size"], "Custom">, { w: number; h: num
 /** Minimum on-page size (mm) for a grid row or column; the resize floor. */
 export const MIN_CELL_MM = 15;
 
+/** Printable page-dimension bounds (mm). */
+export const MIN_PAGE_MM = 10;
+export const MAX_PAGE_MM = 2000;
+
+/** Clamp a page dimension (mm) into the printable range; NaN → the min. */
+export function clampPageMm(v: number): number {
+  if (Number.isNaN(v)) return MIN_PAGE_MM;
+  return Math.max(MIN_PAGE_MM, Math.min(MAX_PAGE_MM, v));
+}
+
 /** Page dimensions in mm, with landscape orientation applied. */
 export function pageDimensions(cfg: PageConfig): { w: number; h: number } {
   const base =

@@ -621,3 +621,51 @@ duplicating fields.
   editor canvas and the Playwright PDF export.
 - **Editor-only controls:** connector label editing (text/font/size/align/color) wires
   into the existing text controls row in `AnnotationContext`; no new UI primitives.
+
+## Amendment (2026-07-06): shape cycler, distribution snapping, and text-label alignment while typing
+
+Three additive, editor-only interaction improvements from `feat/editor-polish-bundle`.
+No schema change; no migration; renderer and `/print` route untouched.
+
+### Alt/Option-click shape cycler
+
+Alt/Option-click on the annotation canvas cycles the active selection through overlapping
+rect-bearing shapes (`box`, `diamond`, `ellipse`, `text`, `bracket`) via the pure helpers
+`hitStack(point, annotations)` and `nextInStack(stack, currentId)` in `lib/annotations.ts`.
+`hitStack` collects all shapes whose **AABB bounds** contain the click point and returns them
+back-to-front; `nextInStack` advances one step with wrap. A plain click is unchanged — it still
+selects the topmost shape by SVG hit-test.
+
+Lines and connectors are excluded from cycling: their AABB spans the full bounding box and does
+not represent a meaningful shape area for this interaction.
+
+**Accepted tradeoff:** the cycler uses AABB bounds (looser than the rendered SVG outline for
+diamond and bracket shapes). Plain click uses the exact SVG hit-test; the cycler's generous hit
+area is deliberate — it is a disambiguation tool, so over-inclusion is preferable to
+under-inclusion for overlapping shapes.
+
+### Equal-spacing distribution snapping (`snapDistribute` / `DistGuide`)
+
+`snapDistribute` and result type `DistGuide { axis, at, cap1, cap2 }` are added to
+`lib/annotations.ts` and run **alongside** `snapAlign` on the move drag in
+`PreviewAnnotations.tsx`. Interaction rules:
+
+- Alignment (`snapAlign`) wins per axis when it fires.
+- Distribution fills any axis alignment does not claim: it computes the equal-spacing position for
+  the dragged shape among the other shapes on that axis and snaps if within threshold.
+- Move-drag only; resize is out of scope.
+- Overlap-guarded: shapes that overlap are excluded from the equal-spacing calculation to avoid
+  degenerate results.
+
+`DistGuide` renders as **editor-only magenta capped tick bars** in `PreviewAnnotations`. Guides
+never reach `AnnotationLayer` or the print path — verified by grep (no snapping/guide refs in the
+renderer or print route; same constraint as alignment guides). The guide `at` value is post-snap,
+reflecting the actual snapped outcome.
+
+### Text-label editing overlay honors `align` while typing
+
+The inline text editor wrapper (`.anno-editwrap`) now derives `justify-content` from the selected
+shape's `align` field. Previously the wrapper was always flex-centered regardless of `align`, so a
+left- or right-aligned label appeared centered while editing and jumped to its aligned position only
+on blur. The fix is a pure CSS binding in `PreviewAnnotations.tsx`; no logic change, no schema
+change.

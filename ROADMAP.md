@@ -274,7 +274,10 @@ lists; the connector square-routing + angle-smoothing bug fixes; the FigJam-elbo
 auto-routing + rounded corners + reflow-surviving segment-drag handles); annotation alignment snapping + smart
 guides; connector→grid-content snapping; connector endpoint direction override (panel + on-canvas knob); the
 floating annotation palette **SP1** (on-canvas drag-to-size creation + tool palette); and the annotation
-**delete key + confirm modal** — each detailed under the backlog below. Remaining v3 work — annotation
+**delete key + confirm modal** — each detailed under the backlog below. **Five further editor-only
+improvements shipped on `feat/editor-polish-bundle`:** shape cycler (Alt-click cycles overlapping shapes),
+text-label alignment while typing, equal-spacing distribution guides, custom page-size inputs, and
+file-drop-onto-cell — each detailed in the backlog below. Remaining v3 work — annotation
 standardization (ISO 32000 vocabulary) and the OKLCH color system. (Note:
 plan numbering was re-sequenced during just-in-time brainstorming; annotation standardization and color moved
 later than the original 6–8 sketch.)
@@ -463,6 +466,27 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   Transient `pendingDelete` store state; `AnnotationDeleteController` mounted inside the store
   provider; editor-only (no schema change, renderer/print untouched). ADR-004 amended.
 
+- **Editor-polish bundle** — [done] (`feat/editor-polish-bundle`). Five additive, editor-only
+  improvements with no schema change, no migration, and renderer/print route untouched:
+  - **Shape cycler:** Alt/Option-click cycles the active selection through overlapping rect-bearing
+    shapes (`box`/`diamond`/`ellipse`/`text`/`bracket`) via pure `hitStack`/`nextInStack` helpers
+    in `lib/annotations.ts`; plain click is unchanged; lines/connectors excluded. Cycler uses AABB
+    bounds (deliberately looser than the SVG outline for diamond/bracket — a disambiguation tool
+    benefits from a generous hit area).
+  - **Text-label alignment while typing:** `.anno-editwrap` derives `justify-content` from the
+    shape's `align` field so left/right-aligned labels no longer appear centered during editing.
+    Pure CSS binding; no logic change.
+  - **Equal-spacing distribution guides:** `snapDistribute` + `DistGuide` in `lib/annotations.ts`
+    run alongside `snapAlign` on the annotation move drag — alignment wins per axis, distribution
+    fills the rest. Editor-only magenta capped tick bars that never reach `AnnotationLayer` or the
+    print path. Move-drag only; overlap-guarded; guide `at` is post-snap.
+  - **Custom page-size inputs:** Width/Height (mm) number inputs in `PageSettings.tsx` shown when
+    page size is "Custom"; values clamped by `clampPageMm` in `lib/grid-math.ts`. Schema already
+    had `PageConfig.custom`; no model change.
+  - **File-drop-onto-cell:** drag an image file onto a grid cell to upload (shared
+    `lib/upload-image.ts` helper) and set it as the cell's image; drop highlight + red error
+    outline on failure.
+
 - **UI polish (per DESIGN.md)** — [todo]. Catch-all for visual + interaction refinement against the
   canonical design system in `DESIGN.md` (tokens, type scale, spacing, control styling, focus states,
   mini-toolbars, popovers, mobile touch targets ≥768/<768). Not yet scoped — break into concrete,
@@ -487,7 +511,7 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   screen-consistent ~6px threshold; **Alt** bypasses snapping (surfaces + connectors → fully-free placement).
   Editor-only (guides never print); renderer/print untouched; no schema change. Spec/plan
   `docs/superpowers/{specs,plans}/2026-07-01-annotation-alignment-snapping*`, ADR-004 amended. Suite 168/168.
-  *Still open (separate item):* fixed-**grid** snapping and equal-spacing/distribution guides.
+  *Still open (separate item):* fixed-**grid** snapping. Equal-spacing/distribution guides — [done] (`feat/editor-polish-bundle`); see **Editor-polish bundle** entry below.
 - **Connector endpoints snap to grid content** — [done] (`feat/connector-grid-content-snapping`).
   A connector endpoint snaps to grid-content anchors — cell borders, screenshots, callouts, text blocks
   (`.grid-cell`/`.img-slot`/`.callout`/`.grid-text`) — landing as a **free point** (snap-and-stay, no
@@ -570,4 +594,4 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   selection; segment-drag connector reshape; arrow-snap defaults; grid-guides on/off toggle).
 - **OKLCH color system** (paired tokens in `@theme`; swatch palette + hybrid inspector; editor-only fill
   tint, full opacity in export; unify callouts).
-- **Misc:** file-drop-onto-cell image upload; `Custom` page-size width/height inputs.
+- **Misc:** file-drop-onto-cell image upload — [done] (`feat/editor-polish-bundle`); `Custom` page-size width/height inputs — [done] (`feat/editor-polish-bundle`).

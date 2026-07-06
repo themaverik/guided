@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { pageDimensions, bodyRegion, resizeAdjacent } from "@/lib/grid-math";
 import { redistributeProportional, normalizeFractions } from "@/lib/grid-math";
+import { clampPageMm, MIN_PAGE_MM, MAX_PAGE_MM } from "@/lib/grid-math";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/book-schema";
 
 describe("pageDimensions", () => {
@@ -65,6 +66,22 @@ describe("normalizeFractions", () => {
   });
   it("equal-splits when all zero", () => {
     expect(normalizeFractions([0, 0])).toEqual([0.5, 0.5]);
+  });
+});
+
+describe("clampPageMm", () => {
+  it("passes a value within range through unchanged", () => {
+    expect(clampPageMm(210)).toBe(210);
+  });
+  it("clamps below the minimum", () => {
+    expect(clampPageMm(2)).toBe(MIN_PAGE_MM);
+  });
+  it("clamps above the maximum", () => {
+    expect(clampPageMm(9999)).toBe(MAX_PAGE_MM);
+  });
+  it("maps NaN / non-finite to the minimum", () => {
+    expect(clampPageMm(Number.NaN)).toBe(MIN_PAGE_MM);
+    expect(clampPageMm(Infinity)).toBe(MAX_PAGE_MM);
   });
 });
 

@@ -588,7 +588,7 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   - **Epic complete** — `square` connectors reach FigJam parity: orthogonal auto-routing (P1) + rounded
     corners (P2) + draggable, reflow-surviving segment handles (P3).
 
-- **Improvement rev4 bundle** — [in progress] (`feature/improvement-rev4`). Six additive
+- **Improvement rev4 bundle** — [done] (`feature/improvement-rev4`). Six additive
   fixes/features: (1) demo hardening — `/demo` is seeded via a new `forceGridLayout` (always
   grid, never legacy), never offered for crash-recovery, and `useAutosave` no-ops for it (no
   localStorage mirror, no server PUT); (2) legacy→grid migration — confirmed feasible and
@@ -613,7 +613,9 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   `docs/superpowers/{specs,plans}/2026-07-06-editor-improvement-rev4*`. Suite/typecheck/lint were
   verified against a clean install after a sandbox filesystem-sync issue prevented running them
   in-session against live edits — every changed file was re-synced verbatim and re-verified before
-  commit.
+  commit. Shipped on `feature/improvement-rev4` (commit `968779d`, 23 files, suite/typecheck/lint
+  clean); merged to `main` via `--no-ff` merge commit `1862764`. Branch intentionally kept (not
+  deleted) as a fix-forward point in case issues surface post-merge.
 
 ## Later (v3 remainder)
 

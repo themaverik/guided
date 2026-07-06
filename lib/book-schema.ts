@@ -445,6 +445,11 @@ export interface Book {
   schemaVersion?: number;
   /** Page size/orientation/margins/header-footer. Defaults to DEFAULT_PAGE_CONFIG. */
   pageConfig?: PageConfig;
+  /** Base text color for ALL pages. Overrides the default dark ink across
+   *  titles, body, labels, and eyebrows for legibility over a dark background
+   *  image. Per-section theme colors still win; callouts keep their palette.
+   *  Unset = default dark ink. */
+  pageTextColor?: string;
 }
 
 // --- Defaults (centralize the README's documented fallbacks) ---

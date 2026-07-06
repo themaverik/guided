@@ -17,6 +17,7 @@ import {
   backgroundImageSrc,
   bookFitKey,
   computePaging,
+  pageInkVars,
   themeVars,
   watermarkIconSrc,
 } from "@/lib/book-render";
@@ -53,7 +54,11 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
     <BookCanvas
       fitKey={bookFitKey(book)}
       onReport={onReport}
-      rootStyle={{ ...themeVars(book.theme), ...pageVars(book.pageConfig) }}
+      rootStyle={{
+        ...themeVars(book.theme),
+        ...pageVars(book.pageConfig),
+        ...pageInkVars(book.pageTextColor),
+      }}
     >
       <CoverPage book={book} paging={paging} watermark={wm} background={bg} />
       {book.chapters.map((chapter, ci) => (

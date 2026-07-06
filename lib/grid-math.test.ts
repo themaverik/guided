@@ -79,9 +79,10 @@ describe("clampPageMm", () => {
   it("clamps above the maximum", () => {
     expect(clampPageMm(9999)).toBe(MAX_PAGE_MM);
   });
-  it("maps NaN / non-finite to the minimum", () => {
+  it("maps NaN to the minimum and clamps +Infinity to the max, -Infinity to the min", () => {
     expect(clampPageMm(Number.NaN)).toBe(MIN_PAGE_MM);
     expect(clampPageMm(Infinity)).toBe(MAX_PAGE_MM);
+    expect(clampPageMm(-Infinity)).toBe(MIN_PAGE_MM);
   });
 });
 

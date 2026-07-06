@@ -4,7 +4,8 @@
  * Reusable presentational confirmation modal — props-driven, no store coupling.
  * A dimmed overlay + centered panel with Cancel + confirm buttons. Esc and
  * overlay-click cancel; focus lands on Cancel on open (safe default for a
- * destructive action). Editor-only; never rendered in print.
+ * destructive action). Used across routes (editor + landing); its styles live
+ * in app/globals.css so it renders correctly wherever it is mounted.
  */
 import { useEffect, useRef } from "react";
 

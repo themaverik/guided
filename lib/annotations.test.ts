@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack, snapDistribute } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -794,5 +794,41 @@ describe("hitStack + nextInStack — overlapping-shape cycling", () => {
   });
   it("wraps a single-element stack back to itself", () => {
     expect(nextInStack(["a"], "a")).toBe("a");
+  });
+});
+
+describe("snapDistribute — equal-spacing", () => {
+  const T = 0.05;
+  const r = (x: number, y: number, w: number, h: number) => ({ x, y, w, h });
+
+  it("centers a rect between two neighbors (equal gaps)", () => {
+    // left [0,0.1], right [0.4,0.5], moving w=0.1 → centered x = 0.2
+    const res = snapDistribute(r(0.22, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBeCloseTo(-0.02, 6);
+    expect(res.dy).toBe(0);
+    expect(res.guides.filter((g) => g.axis === "x")).toHaveLength(2);
+  });
+
+  it("matches the adjacent gap when only one side has neighbors", () => {
+    // siblings [0,0.1] & [0.2,0.3] → existing gap 0.1; moving to the right snaps
+    // so its left gap equals 0.1 → x = 0.3 + 0.1 = 0.4
+    const res = snapDistribute(r(0.42, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.2, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBeCloseTo(-0.02, 6);
+    expect(res.guides.some((g) => g.axis === "x")).toBe(true);
+  });
+
+  it("does not snap beyond the threshold", () => {
+    const res = snapDistribute(r(0.8, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("returns no snap when there are no siblings", () => {
+    expect(snapDistribute(r(0.5, 0.5, 0.1, 0.1), [], T, T)).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("disables an axis when its threshold is 0", () => {
+    const res = snapDistribute(r(0.22, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], 0, T);
+    expect(res.dx).toBe(0);
+    expect(res.guides.filter((g) => g.axis === "x")).toHaveLength(0);
   });
 });

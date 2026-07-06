@@ -807,6 +807,13 @@ describe("snapDistribute — equal-spacing", () => {
     expect(res.dx).toBeCloseTo(-0.02, 6);
     expect(res.dy).toBe(0);
     expect(res.guides.filter((g) => g.axis === "x")).toHaveLength(2);
+    const xg = res.guides.filter((g) => g.axis === "x");
+    expect(xg).toHaveLength(2);
+    expect(xg[0].from).toBeCloseTo(0.1, 6);
+    expect(xg[0].to).toBeCloseTo(0.2, 6);
+    expect(xg[1].from).toBeCloseTo(0.3, 6);
+    expect(xg[1].to).toBeCloseTo(0.4, 6);
+    expect(xg[0].at).toBeCloseTo(0.45, 6);
   });
 
   it("matches the adjacent gap when only one side has neighbors", () => {
@@ -817,9 +824,20 @@ describe("snapDistribute — equal-spacing", () => {
     expect(res.guides.some((g) => g.axis === "x")).toBe(true);
   });
 
-  it("does not snap beyond the threshold", () => {
+  it("does not snap when the rect is already exactly at the equal-spacing target (delta 0)", () => {
     const res = snapDistribute(r(0.8, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
     expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("does not snap when the equal-spacing target is beyond the threshold", () => {
+    const res = snapDistribute(r(0.7, 0.4, 0.1, 0.1), [r(0, 0, 0.1, 0.1), r(0.4, 0, 0.1, 0.1)], T, T);
+    expect(res).toEqual({ dx: 0, dy: 0, guides: [] });
+  });
+
+  it("does not snap (no inverted guide) when the rect cannot fit between too-tight neighbors", () => {
+    const res = snapDistribute(r(0.05, 0.4, 0.3, 0.1), [r(0, 0, 0.1, 0.1), r(0.2, 0, 0.1, 0.1)], T, T);
+    expect(res.dx).toBe(0);
+    expect(res.guides.every((g) => g.from <= g.to)).toBe(true);
   });
 
   it("returns no snap when there are no siblings", () => {

@@ -884,13 +884,16 @@ function distributeAxis(
   // Case 1 — centered between two neighbors (equal gaps on both sides).
   if (L && R) {
     const target = (L.e + R.s - mSize) / 2;
+    if (target - L.e < 0) return null;
     const delta = target - m0;
+    // delta === 0: the rect is already at the equal-spacing target — nothing to correct, so no snap/guide.
     if (delta === 0 || Math.abs(delta) > thr) return null;
     return { delta, gaps: [[L.e, target], [target + mSize, R.s]] };
   }
   // Case 2 — continue the run: match the gap just beyond the single neighbor.
   if (L && left[1]) {
     const gap = L.s - left[1].e;
+    if (gap <= 0) return null;
     const target = L.e + gap;
     const delta = target - m0;
     if (delta === 0 || Math.abs(delta) > thr) return null;
@@ -898,6 +901,7 @@ function distributeAxis(
   }
   if (R && right[1]) {
     const gap = right[1].s - R.e;
+    if (gap <= 0) return null;
     const target = R.s - gap - mSize;
     const delta = target - m0;
     if (delta === 0 || Math.abs(delta) > thr) return null;
@@ -922,8 +926,8 @@ export function snapDistribute(
   const rx = distributeAxis(moving.x, moving.w, sibX, thrX);
   const ry = distributeAxis(moving.y, moving.h, sibY, thrY);
   const guides: DistGuide[] = [];
-  if (rx) for (const [from, to] of rx.gaps) guides.push({ axis: "x", at: mcy, from, to });
-  if (ry) for (const [from, to] of ry.gaps) guides.push({ axis: "y", at: mcx, from, to });
+  if (rx) for (const [from, to] of rx.gaps) guides.push({ axis: "x", at: mcy + (ry ? ry.delta : 0), from, to });
+  if (ry) for (const [from, to] of ry.gaps) guides.push({ axis: "y", at: mcx + (rx ? rx.delta : 0), from, to });
   return { dx: rx ? rx.delta : 0, dy: ry ? ry.delta : 0, guides };
 }
 

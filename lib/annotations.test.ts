@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -764,5 +764,27 @@ describe("connector label placement", () => {
     const m = connectorMidpoint([c], c);
     expect(m.x).toBeCloseTo(0.4);
     expect(m.y).toBeCloseTo(0.3);
+  });
+});
+
+describe("hitStack + nextInStack — overlapping-shape cycling", () => {
+  it("returns rect-bearing shapes under the point, topmost first", () => {
+    const a = box("a", 0.0, 0.0, 0.6, 0.6); // bottom
+    const b = box("b", 0.1, 0.1, 0.4, 0.4); // top (later in array)
+    expect(hitStack([a, b], { x: 0.2, y: 0.2 })).toEqual(["b", "a"]);
+  });
+  it("excludes shapes that don't contain the point", () => {
+    const a = box("a", 0.0, 0.0, 0.2, 0.2);
+    const b = box("b", 0.5, 0.5, 0.2, 0.2);
+    expect(hitStack([a, b], { x: 0.1, y: 0.1 })).toEqual(["a"]);
+  });
+  it("advances to the next id, wrapping to the first", () => {
+    expect(nextInStack(["b", "a"], "b")).toBe("a");
+    expect(nextInStack(["b", "a"], "a")).toBe("b");
+  });
+  it("returns the first id when current is absent, null when empty", () => {
+    expect(nextInStack(["b", "a"], null)).toBe("b");
+    expect(nextInStack(["b", "a"], "zzz")).toBe("b");
+    expect(nextInStack([], "a")).toBeNull();
   });
 });

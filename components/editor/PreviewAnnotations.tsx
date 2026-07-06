@@ -36,6 +36,8 @@ import {
   snapPoint,
   squareBaseRoute,
   compassDir,
+  hitStack,
+  nextInStack,
 } from "@/lib/annotations";
 import type { GuideLine, Point, Rect } from "@/lib/annotations";
 import { useEditor } from "@/lib/store";
@@ -434,6 +436,13 @@ export default function PreviewAnnotations({
       {annotations.map((a) => {
         const onDown = (e: React.PointerEvent) => {
           e.stopPropagation();
+          if (e.altKey) {
+            const next = nextInStack(hitStack(annotations, toN(e)), selectedId);
+            if (next) {
+              selectAnnotation(next);
+              return;
+            }
+          }
           selectAnnotation(a.id);
         };
         if (a.kind === "connector") {

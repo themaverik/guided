@@ -27,13 +27,6 @@ export type CalloutType =
   | "warn";
 
 /** The canonical types (excludes the `warn` alias) — used by editor controls. */
-export const CALLOUT_TYPE_OPTIONS = [
-  "info",
-  "note",
-  "success",
-  "warning",
-  "danger",
-] as const;
 
 export type RowLayout = "single" | "double" | "single-wide";
 

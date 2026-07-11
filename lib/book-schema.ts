@@ -468,7 +468,6 @@ export const LEGACY_PAGE_CONFIG: PageConfig = {
   footerH: 0,
 };
 
-export const DEFAULT_CALLOUT_TYPE: CalloutType = "info";
 export const DEFAULT_ROW_LAYOUT: RowLayout = "single";
 export const DEFAULT_CALLOUT_LAYOUT: CalloutLayout = "side";
 export const DEFAULT_CALLOUT_COLS: CalloutCols = 2;

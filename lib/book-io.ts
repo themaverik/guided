@@ -42,10 +42,6 @@ export function parseBookSource(source: string): Book {
 }
 
 /** Load and parse public/book.js from disk. */
-export async function loadBook(): Promise<Book> {
-  const source = await readFile(BOOK_JS_PATH, "utf8");
-  return parseBookSource(source);
-}
 
 /** The committed demo seed (public/example/book.json) used to seed /demo. */
 export const EXAMPLE_BOOK_PATH = path.join(

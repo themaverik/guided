@@ -1,0 +1,10 @@
+# Deflash pilot config (WU-17). Verify commands are the repo's real full
+# suite; e2e (playwright) is excluded from the gate because browsers cannot
+# be provisioned offline (documented in the pilot report).
+[project]
+languages = ["typescript"]
+src = ["app/", "components/", "lib/"]
+exclude = ["**/*.test.ts"]
+
+[verify]
+commands = ["pnpm exec vitest run", "pnpm typecheck", "pnpm build"]

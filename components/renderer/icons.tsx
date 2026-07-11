@@ -18,18 +18,3 @@ export function PhotoIcon() {
   );
 }
 
-export function ArrowGlyph() {
-  return (
-    <div className="step-arrow" aria-hidden="true">
-      <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M2 10 H34 M28 4 L34 10 L28 16"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-}

@@ -27,13 +27,6 @@ export type CalloutType =
   | "warn";
 
 /** The canonical types (excludes the `warn` alias) — used by editor controls. */
-export const CALLOUT_TYPE_OPTIONS = [
-  "info",
-  "note",
-  "success",
-  "warning",
-  "danger",
-] as const;
 
 export type RowLayout = "single" | "double" | "single-wide";
 
@@ -475,11 +468,9 @@ export const LEGACY_PAGE_CONFIG: PageConfig = {
   footerH: 0,
 };
 
-export const DEFAULT_CALLOUT_TYPE: CalloutType = "info";
 export const DEFAULT_ROW_LAYOUT: RowLayout = "single";
 export const DEFAULT_CALLOUT_LAYOUT: CalloutLayout = "side";
 export const DEFAULT_CALLOUT_COLS: CalloutCols = 2;
-export const DEFAULT_BORDER = true;
 export const DEFAULT_IMAGE_FIT: ImageFit = "contain";
 export const DEFAULT_WATERMARK_OPACITY = 0.06;
 export const DEFAULT_WATERMARK_SCALE = 1;

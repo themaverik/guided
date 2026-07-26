@@ -8,6 +8,7 @@ import {
   swatchPatch,
   fillForStroke,
   mixToWhite,
+  rgbaFromHex,
 } from "./annotation-palette";
 
 describe("annotation palette", () => {
@@ -79,6 +80,19 @@ describe("fill tint", () => {
     expect(swatchPatch(sw, "line", true).fill).toBeUndefined();
     expect(swatchPatch(sw, "text", true).fill).toBeUndefined();
     expect(swatchPatch(sw, "box").fill).toBeUndefined(); // default filled=false
+  });
+});
+
+describe("rgbaFromHex", () => {
+  it("converts a hex + alpha to rgba", () => {
+    expect(rgbaFromHex("#1A5FB4", 0.5)).toBe("rgba(26, 95, 180, 0.5)");
+  });
+  it("passes a malformed hex through unchanged", () => {
+    expect(rgbaFromHex("nope", 0.5)).toBe("nope");
+  });
+  it("handles alpha 0 and 1", () => {
+    expect(rgbaFromHex("#000000", 1)).toBe("rgba(0, 0, 0, 1)");
+    expect(rgbaFromHex("#ffffff", 0)).toBe("rgba(255, 255, 255, 0)");
   });
 });
 

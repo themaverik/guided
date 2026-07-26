@@ -180,6 +180,22 @@ export default function AnnotationContext({
             Fill
           </label>
         ) : null}
+        {(shape.kind === "box" || shape.kind === "diamond" || shape.kind === "ellipse") &&
+        shape.fill != null ? (
+          <label className="anno-num">
+            opacity
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={shape.fillOpacity ?? 1}
+              onChange={(e) =>
+                updateAnnotation(ci, si, shape.id, { fillOpacity: Number(e.target.value) })
+              }
+            />
+          </label>
+        ) : null}
       </div>
 
       {c ? (
@@ -299,6 +315,21 @@ export default function AnnotationContext({
               title="Fill (background) color"
               aria-label="Fill color"
             />
+          ) : null}
+          {shape.fill != null ? (
+            <label className="anno-num">
+              opacity
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={shape.fillOpacity ?? 1}
+                onChange={(e) =>
+                  updateAnnotation(ci, si, shape.id, { fillOpacity: Number(e.target.value) })
+                }
+              />
+            </label>
           ) : null}
         </div>
       ) : null}

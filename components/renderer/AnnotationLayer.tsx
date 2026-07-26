@@ -28,6 +28,7 @@ import {
   labelRectAt,
   pct,
 } from "@/lib/annotations";
+import { rgbaFromHex } from "@/lib/annotation-palette";
 
 /** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
 const CORNER = 10;
@@ -96,6 +97,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={6}
         {...common}
         fill={s.fill ?? "none"}
+        fillOpacity={s.fillOpacity ?? 1}
       />,
     );
   }
@@ -108,6 +110,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={pct(s.h / 2)}
         {...common}
         fill={s.fill ?? "none"}
+        fillOpacity={s.fillOpacity ?? 1}
       />,
     );
   }
@@ -151,6 +154,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         <path
           d={d}
           fill={s.fill ?? "none"}
+          fillOpacity={s.fillOpacity ?? 1}
           stroke={s.stroke}
           strokeWidth={s.width}
           strokeLinejoin="round"
@@ -177,7 +181,7 @@ function SurfaceShape({ s }: { s: Surface }) {
             fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "left",
-            background: s.fill ?? undefined,
+            background: s.fill != null ? rgbaFromHex(s.fill, s.fillOpacity ?? 1) : undefined,
             border: s.width ? `${s.width}px solid ${s.stroke}` : undefined,
             padding: s.fill != null || s.width ? "2px 4px" : undefined,
           }}

@@ -669,3 +669,45 @@ shape's `align` field. Previously the wrapper was always flex-centered regardles
 left- or right-aligned label appeared centered while editing and jumped to its aligned position only
 on blur. The fix is a pure CSS binding in `PreviewAnnotations.tsx`; no logic change, no schema
 change.
+
+## Amendment (2026-07-26): fill opacity, draggable text-label offset, and annotation z-order (Wave 2 gate)
+
+Three additive model extensions for the upcoming Wave 2 annotation work. This amendment is the
+ADR-first gate for that work; no code lands with it.
+
+### Surface.fillOpacity? (closed-shape fill transparency)
+
+`Surface.fillOpacity?: number` (0–1) is a new optional field, applied as the SVG `fill-opacity`
+attribute alongside the existing `fill`. Absent means today's opaque-tint behavior is unchanged.
+This refines rather than reverses the WYSIWYG full-opacity decision from the 2026-07-04 ellipse/fill
+amendment: full opacity was the default because no control existed; the value is now
+user-adjustable per shape via an editor slider, and still renders identically — data-driven, no
+`@media print` split, no export-time value swap — in both the editor canvas and the Playwright PDF.
+
+### TextLabel.labelOffset? (draggable label position)
+
+`TextLabel.labelOffset?: { x: number; y: number }` is a new optional normalized offset layered on
+top of the anchor position computed by `labelRect` / `labelRectAt` (2026-07-04 amendments), letting
+a label be dragged off its owning shape or connector. Absent means today's anchored position
+(centered on the shape, or on the connector midpoint) is unchanged. The offset label still renders
+through the existing masked free-label path (the open-shape/connector opaque pill background), so a
+dragged label keeps the established guarantee that no stroke crosses the text.
+
+### Z-order via array order (raiseAnnotation / lowerAnnotation)
+
+Paint order remains the existing `step.annotations` array order (later index paints on top) — no
+new `zIndex` field. New immutable mutations `raiseAnnotation` / `lowerAnnotation`
+(`lib/book-mutations.ts`) swap an annotation with its adjacent array neighbor; the editor exposes
+this as bring-forward / send-backward buttons on the selection popover. **Deliberate scope limit:**
+connectors are still painted after (on top of) all surfaces regardless of array position — see
+"Two render surfaces, one model" — so reordering only changes relative order *within* each of the
+two render passes, not across them. Interleaving surfaces and connectors in one paint order is
+deferred.
+
+### Additive
+
+No `schemaVersion` bump; no migration. All three additions are optional fields or new mutation
+functions; existing books render unchanged. Renderer parity is preserved: `fillOpacity` and
+`labelOffset` are data-driven and consumed identically by `AnnotationLayer` (print) and the editor
+canvas; `raiseAnnotation` / `lowerAnnotation` only reorder the same `step.annotations` array both
+render paths already iterate.

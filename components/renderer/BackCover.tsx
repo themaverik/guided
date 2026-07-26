@@ -4,6 +4,7 @@ import type {
   Book,
   Watermark as WatermarkData,
 } from "@/lib/book-schema";
+import { pageInkVars } from "@/lib/book-render";
 import PageBackground from "./PageBackground";
 import RichText from "./RichText";
 import Watermark from "./Watermark";
@@ -18,13 +19,19 @@ export default function BackCover({
   book,
   watermark,
   background,
+  pageTextColor,
 }: {
   book: Book;
   watermark?: WatermarkData;
   background?: Background;
+  pageTextColor?: string;
 }) {
   return (
-    <section className="page page--cream" data-screen-label="ZZ Back">
+    <section
+      className="page page--cream"
+      data-screen-label="ZZ Back"
+      style={pageInkVars(pageTextColor)}
+    >
       <PageBackground background={background} />
       <Watermark watermark={watermark} />
       <div className="page-inner" style={{ justifyContent: "space-between" }}>

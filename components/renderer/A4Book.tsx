@@ -18,6 +18,7 @@ import {
   bookFitKey,
   computePaging,
   pageInkVars,
+  resolvePageBackground,
   themeVars,
   watermarkIconSrc,
 } from "@/lib/book-render";
@@ -60,7 +61,13 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
         ...pageInkVars(book.pageTextColor),
       }}
     >
-      <CoverPage book={book} paging={paging} watermark={wm} background={bg} />
+      <CoverPage
+        book={book}
+        paging={paging}
+        watermark={wm}
+        background={resolvePageBackground(assetBase, book.coverBackground, book.background)}
+        pageTextColor={book.coverTextColor ?? book.pageTextColor}
+      />
       {book.chapters.map((chapter, ci) => (
         <Fragment key={chapter.id}>
           <ChapterIntro
@@ -68,7 +75,16 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
             index={ci}
             paging={paging[ci]}
             watermark={wm}
-            background={bg}
+            background={resolvePageBackground(assetBase, chapter.background, book.background)}
+            pageTextColor={chapter.pageTextColor ?? book.pageTextColor}
+            coverImage={
+              chapter.coverImage
+                ? {
+                    ...chapter.coverImage,
+                    image: backgroundImageSrc(assetBase, chapter.coverImage.image)!,
+                  }
+                : undefined
+            }
           />
           {chapter.steps.map((step, si) => (
             <StepPage
@@ -84,7 +100,12 @@ export default function A4Book({ book, assetBase, onReport }: A4BookProps) {
           ))}
         </Fragment>
       ))}
-      <BackCover book={book} watermark={wm} background={bg} />
+      <BackCover
+        book={book}
+        watermark={wm}
+        background={resolvePageBackground(assetBase, book.ending?.background, book.background)}
+        pageTextColor={book.ending?.pageTextColor ?? book.pageTextColor}
+      />
     </BookCanvas>
   );
 }

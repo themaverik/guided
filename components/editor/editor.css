@@ -622,6 +622,11 @@
   fill: var(--color-ink);
   cursor: nwse-resize;
 }
+.preview-anno-handle.label {
+  fill: var(--color-accent, #658995);
+  stroke: #fff;
+  cursor: move;
+}
 .preview-anno-handle:active {
   cursor: grabbing;
 }
@@ -629,6 +634,13 @@
   fill: transparent;
   stroke: transparent;
   cursor: pointer;
+}
+/* Chapter cover image move/resize overlay (editor-only; never printed). Only
+   the two handles are interactive, so empty page area stays click-through. */
+.preview-chapter-image {
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
 }
 /* Inline text-annotation editor: an opaque box covers the static label beneath
    while typing. */
@@ -638,6 +650,7 @@
   background: rgba(255, 255, 255, 0.92);
   border-radius: 3px;
   cursor: text;
+  white-space: pre-wrap;
 }
 .anno-editwrap {
   width: 100%;
@@ -1389,6 +1402,21 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+.anno-popover-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: #8fa3a3;
+  font-size: 13px;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.anno-popover-grip:active {
+  cursor: grabbing;
 }
 .anno-popover select {
   height: 28px;

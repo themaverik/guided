@@ -139,6 +139,10 @@ export interface TextLabel {
   /** Text color (defaults to `stroke` when unset). */
   color?: string;
   align?: "left" | "center" | "right";
+  /** Normalized offset from the label's default anchor (shape centre / connector
+   *  midpoint). Set by dragging the label; renders through the masked free-label
+   *  box so no stroke crosses the text. Unset = pinned default. */
+  labelOffset?: { x: number; y: number };
 }
 
 /**
@@ -159,6 +163,9 @@ export interface Surface extends TextLabel {
   stroke: string;
   width: number;
   fill?: string;
+  /** Fill alpha 0–1 (default 1). Applied as SVG fill-opacity so a shape beneath
+   *  shows through; stroke + label stay fully opaque. */
+  fillOpacity?: number;
   /** polygon only: closed-shape vertices, normalized 0–1. */
   vertices?: { x: number; y: number }[];
   /** polygon only: preset that constrains authoring (e.g. a decision diamond). */
@@ -350,6 +357,16 @@ export interface Step {
   layoutMode?: "legacy" | "grid";
 }
 
+/** A freely-placed image on a chapter-intro page (normalized 0–1 rect). */
+export interface ChapterCoverImage {
+  image: string; // bare filename, resolved at render time
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fit?: ImageFit; // default "contain"
+}
+
 export interface Chapter {
   /** Folder slug — images load from public/<id>/. */
   id: string;
@@ -357,6 +374,12 @@ export interface Chapter {
   /** Shown on the chapter-intro page and in the TOC. */
   description: string;
   steps: Step[];
+  /** Freely-placed hero image on the chapter-intro page. */
+  coverImage?: ChapterCoverImage;
+  /** Full-page background image for the chapter-intro page (overrides Book.background). */
+  background?: Background;
+  /** Base text color for the chapter-intro page (overrides Book.pageTextColor). */
+  pageTextColor?: string;
 }
 
 export type WatermarkPosition =
@@ -424,6 +447,10 @@ export interface Ending {
   title?: string;
   /** Body text — may contain the markdown subset. */
   body?: string;
+  /** Full-page background image for the back-cover page (overrides Book.background). */
+  background?: Background;
+  /** Base text color for the back-cover page (overrides Book.pageTextColor). */
+  pageTextColor?: string;
 }
 
 export interface Book {
@@ -450,6 +477,10 @@ export interface Book {
    *  dark background image. Per-section theme colors still win; callouts keep
    *  their palette. Unset = default dark ink. */
   pageTextColor?: string;
+  /** Full-page background image for the front-cover page (overrides `background`). */
+  coverBackground?: Background;
+  /** Base text color for the front-cover page (overrides `pageTextColor`). */
+  coverTextColor?: string;
 }
 
 // --- Defaults (centralize the README's documented fallbacks) ---

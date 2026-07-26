@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText, setCellTextAlign, setCellImageBorder } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText, setCellTextAlign, setCellImageBorder, raiseAnnotation, lowerAnnotation } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
@@ -337,5 +337,35 @@ describe("updateCellObjectPlacement", () => {
     updateCellObjectPlacement(book, 0, 0, 0, 0, "a", { positioned: true, x: 0.9 });
     expect(objOf(book, "a").positioned).toBeUndefined();
     expect(objOf(book, "a").x).toBe(0);
+  });
+});
+
+function bookWithAnnotations(ids: string[]): Book {
+  return bookWith({
+    annotations: ids.map((id) => ({ id, kind: "box", x: 0, y: 0, w: 0.1, h: 0.1, stroke: "#000", width: 2 })),
+  });
+}
+
+describe("raise/lowerAnnotation", () => {
+  it("raise swaps with the next sibling (paints later/on top)", () => {
+    const out = raiseAnnotation(bookWithAnnotations(["a", "b", "c"]), 0, 0, "b");
+    expect(out.chapters[0].steps[0].annotations!.map((a) => a.id)).toEqual(["a", "c", "b"]);
+  });
+  it("lower swaps with the previous sibling", () => {
+    const out = lowerAnnotation(bookWithAnnotations(["a", "b", "c"]), 0, 0, "b");
+    expect(out.chapters[0].steps[0].annotations!.map((a) => a.id)).toEqual(["b", "a", "c"]);
+  });
+  it("raise is a no-op at the top", () => {
+    const book = bookWithAnnotations(["a", "b"]);
+    expect(raiseAnnotation(book, 0, 0, "b")).toBe(book);
+  });
+  it("lower is a no-op at the bottom", () => {
+    const book = bookWithAnnotations(["a", "b"]);
+    expect(lowerAnnotation(book, 0, 0, "a")).toBe(book);
+  });
+  it("does not mutate the input", () => {
+    const book = bookWithAnnotations(["a", "b"]);
+    raiseAnnotation(book, 0, 0, "a");
+    expect(book.chapters[0].steps[0].annotations!.map((a) => a.id)).toEqual(["a", "b"]);
   });
 });

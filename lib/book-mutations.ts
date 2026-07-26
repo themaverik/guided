@@ -458,6 +458,26 @@ export function removeAnnotation(
   return next;
 }
 
+/** Move an annotation one step later in `step.annotations` (paints on top). */
+export function raiseAnnotation(book: Book, ci: number, si: number, id: string): Book {
+  return reorderAnnotation(book, ci, si, id, +1);
+}
+/** Move an annotation one step earlier in `step.annotations` (paints beneath). */
+export function lowerAnnotation(book: Book, ci: number, si: number, id: string): Book {
+  return reorderAnnotation(book, ci, si, id, -1);
+}
+function reorderAnnotation(book: Book, ci: number, si: number, id: string, dir: 1 | -1): Book {
+  const list = book.chapters[ci]?.steps[si]?.annotations;
+  if (!list) return book;
+  const i = list.findIndex((a) => a.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return book;
+  const next = clone(book);
+  const arr = next.chapters[ci].steps[si].annotations!;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  return next;
+}
+
 // ── Grid resize ────────────────────────────────────────────
 
 /** Resize the divider between rows `dividerIndex` and `dividerIndex+1` of a

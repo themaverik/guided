@@ -196,6 +196,8 @@ export interface EditorState {
     patch: Partial<Surface> & Partial<Connector>,
   ) => void;
   removeAnnotation: (ci: number, si: number, id: string) => void;
+  bringAnnotationForward: (ci: number, si: number, id: string) => void;
+  sendAnnotationBackward: (ci: number, si: number, id: string) => void;
   selectAnnotation: (id: string | null) => void;
   setActiveTool: (tool: AnnotationTool) => void;
   setDrawColor: (color: string) => void;
@@ -497,6 +499,10 @@ export function createEditorStore(
         selectedAnnotation:
           s.selectedAnnotation === id ? null : s.selectedAnnotation,
       })),
+    bringAnnotationForward: (ci, si, id) =>
+      set((s) => ({ book: M.raiseAnnotation(s.book, ci, si, id) })),
+    sendAnnotationBackward: (ci, si, id) =>
+      set((s) => ({ book: M.lowerAnnotation(s.book, ci, si, id) })),
     selectAnnotation: (id) => set({ selectedAnnotation: id }),
     setActiveTool: (tool) => set({ activeTool: tool }),
     setDrawColor: (color) => set({ drawColor: color }),

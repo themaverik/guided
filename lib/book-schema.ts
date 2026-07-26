@@ -139,6 +139,10 @@ export interface TextLabel {
   /** Text color (defaults to `stroke` when unset). */
   color?: string;
   align?: "left" | "center" | "right";
+  /** Normalized offset from the label's default anchor (shape centre / connector
+   *  midpoint). Set by dragging the label; renders through the masked free-label
+   *  box so no stroke crosses the text. Unset = pinned default. */
+  labelOffset?: { x: number; y: number };
 }
 
 /**

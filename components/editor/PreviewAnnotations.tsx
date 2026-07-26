@@ -22,12 +22,11 @@ import {
   anchorPoint,
   bendForDrag,
   bracketSegments,
+  connectorLabelRect,
   connectorPoints,
   connectorRoute,
   diamondSegments,
-  labelRect,
-  labelRectAt,
-  connectorMidpoint,
+  labelRectFor,
   nearestPoint,
   rectAnchors,
   resolveEndpoint,
@@ -45,7 +44,12 @@ import { useEditor } from "@/lib/store";
 import { useAnnotationDraw } from "./use-annotation-draw";
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-type Part = "move" | "resize" | "from" | "to" | "wp" | "seg" | "dir";
+type Part = "move" | "resize" | "from" | "to" | "wp" | "seg" | "dir" | "label";
+
+/** Snap-back radius (normalized): releasing a dragged label within this
+ *  distance of its anchor clears `labelOffset` so it re-pins to the default
+ *  anchored position. */
+const LABEL_SNAP_BACK = 0.03;
 
 /** Screen-space snap radius (px) for alignment; converted to normalized per axis. */
 const SNAP_PX = 6;
@@ -132,6 +136,7 @@ export default function PreviewAnnotations({
     targets?: Rect[];
     sibs?: Rect[];
     which?: "from" | "to";
+    labelBase?: { x: number; y: number };
   } | null>(null);
   const raf = useRef<number | null>(null);
   const [, force] = useState(0);
@@ -209,10 +214,17 @@ export default function PreviewAnnotations({
     const a = annotations.find((x) => x.id === id);
     let grabX = 0;
     let grabY = 0;
+    let labelBase: { x: number; y: number } | undefined;
     if (part === "move" && a && a.kind !== "connector") {
       const p = toN(e);
       grabX = p.x - a.x;
       grabY = p.y - a.y;
+    }
+    if (part === "label" && a) {
+      const p = toN(e);
+      grabX = p.x;
+      grabY = p.y;
+      labelBase = a.labelOffset ?? { x: 0, y: 0 };
     }
     let targets: Rect[] | undefined;
     let sibs: Rect[] | undefined;
@@ -230,7 +242,7 @@ export default function PreviewAnnotations({
         )
         .map((an) => { const s = an as Surface; return { x: s.x, y: s.y, w: s.w, h: s.h }; });
     }
-    drag.current = { id, part, grabX, grabY, targets, sibs };
+    drag.current = { id, part, grabX, grabY, targets, sibs, labelBase };
     setAnnotationDragging(true);
     svgRef.current?.setPointerCapture(e.pointerId);
   };
@@ -266,6 +278,12 @@ export default function PreviewAnnotations({
     if (!d) return;
     const a = annotations.find((x) => x.id === d.id);
     if (!a) return;
+    if (d.part === "label") {
+      const base = d.labelBase ?? { x: 0, y: 0 };
+      const off = { x: base.x + (p.x - d.grabX), y: base.y + (p.y - d.grabY) };
+      updateAnnotation(ci, si, d.id, { labelOffset: off });
+      return;
+    }
     const thrX = SNAP_PX / (W * scale);
     const thrY = SNAP_PX / (H * scale);
     if (a.kind !== "connector") {
@@ -386,6 +404,16 @@ export default function PreviewAnnotations({
       draw.end(toN(e));
       svgRef.current?.releasePointerCapture(e.pointerId);
       return;
+    }
+    const d = drag.current;
+    if (d?.part === "label") {
+      // Recompute from the up-event position (not the last rAF-throttled apply,
+      // which may have been cancelled below) so the snap-back check is exact.
+      const p = toN(e);
+      const base = d.labelBase ?? { x: 0, y: 0 };
+      const off = { x: base.x + (p.x - d.grabX), y: base.y + (p.y - d.grabY) };
+      const snapBack = Math.hypot(off.x, off.y) < LABEL_SNAP_BACK;
+      updateAnnotation(ci, si, d.id, { labelOffset: snapBack ? undefined : off });
     }
     drag.current = null;
     setAnnotationDragging(false);
@@ -754,6 +782,22 @@ export default function PreviewAnnotations({
           </>
         )
       ) : null}
+      {focused && focused.kind !== "text" && focused.text && focused.text.trim() &&
+      editingId !== focused.id ? (() => {
+        const r =
+          focused.kind === "connector"
+            ? connectorLabelRect(annotations, focused as Connector)
+            : labelRectFor(focused as Surface);
+        return (
+          <Handle
+            pt={{ x: r.x + r.w / 2, y: r.y + r.h / 2 }}
+            W={W}
+            H={H}
+            onDown={startDrag(focused.id, "label")}
+            kind="label"
+          />
+        );
+      })() : null}
       {editTarget ? (
         <TextEditor
           a={editTarget}
@@ -787,8 +831,8 @@ function TextEditor({
   const ref = useRef<HTMLDivElement>(null);
   const r =
     a.kind === "connector"
-      ? labelRectAt(connectorMidpoint(annotations, a).x, connectorMidpoint(annotations, a).y)
-      : labelRect(a as Surface);
+      ? connectorLabelRect(annotations, a)
+      : labelRectFor(a as Surface);
   const centered = a.kind !== "text";
   const justify =
     a.align === "left" ? "flex-start" : a.align === "right" ? "flex-end" : "center";
@@ -855,7 +899,7 @@ function Handle({
   W: number;
   H: number;
   onDown: (e: React.PointerEvent) => void;
-  kind?: "move" | "resize";
+  kind?: "move" | "resize" | "label";
 }) {
   return (
     <circle

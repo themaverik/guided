@@ -788,9 +788,14 @@ export default function PreviewAnnotations({
           focused.kind === "connector"
             ? connectorLabelRect(annotations, focused as Connector)
             : labelRectFor(focused as Surface);
+        // Grab at the label rect's top-left corner, not its center: for an
+        // un-offset label the rect is centered on the same point as the shape's
+        // move handle (or the line/connector midpoint), so a center grab point
+        // would silently steal the move handle's clicks. The corner stays a
+        // fixed, distinct point in both the offset and un-offset states.
         return (
           <Handle
-            pt={{ x: r.x + r.w / 2, y: r.y + r.h / 2 }}
+            pt={{ x: r.x, y: r.y }}
             W={W}
             H={H}
             onDown={startDrag(focused.id, "label")}

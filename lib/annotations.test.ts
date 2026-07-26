@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack, snapDistribute } from "@/lib/annotations";
+import { buildRoundedConnector, CORNER_RADIUS, connectorPoints, snapAxisVector, routeWithBends, squareBaseRoute, bendForDrag, snapAlign, nearestPoint, rectAnchors, compassDir, boundsFromDrag, anchorPoint, snapAnchors, labelRect, LABEL_W, LABEL_H, labelRectAt, connectorMidpoint, hitStack, nextInStack, snapDistribute, labelAnchor, labelRectFor, connectorLabelRect } from "@/lib/annotations";
 import type { Annotation, Connector, Surface } from "@/lib/book-schema";
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -764,6 +764,61 @@ describe("connector label placement", () => {
     const m = connectorMidpoint([c], c);
     expect(m.x).toBeCloseTo(0.4);
     expect(m.y).toBeCloseTo(0.3);
+  });
+});
+
+describe("labelAnchor / labelRectFor / connectorLabelRect — draggable label offset", () => {
+  const s = { id: "b", kind: "box", x: 0.4, y: 0.4, w: 0.2, h: 0.2, stroke: "#000", width: 2 } as Surface;
+
+  it("labelAnchor returns the shape center", () => {
+    expect(labelAnchor(s)).toEqual({ x: 0.5, y: 0.5 });
+  });
+
+  it("labelRectFor: no offset falls back to labelRect (fills closed-shape bounds)", () => {
+    expect(labelRectFor(s)).toEqual({ x: 0.4, y: 0.4, w: 0.2, h: 0.2 });
+  });
+
+  it("labelRectFor: with offset returns a fixed masked box centred at anchor+offset", () => {
+    const a = labelAnchor(s);
+    const r = labelRectFor({ ...s, labelOffset: { x: 0.2, y: 0 } });
+    expect(r.w).toBe(LABEL_W);
+    expect(r.h).toBe(LABEL_H);
+    expect(r.x).toBeCloseTo(a.x + 0.2 - LABEL_W / 2);
+  });
+
+  it("labelRectFor: clamps the offset box inside the page", () => {
+    const r = labelRectFor({ ...s, labelOffset: { x: 5, y: 5 } });
+    expect(r.x).toBeLessThanOrEqual(1 - LABEL_W);
+    expect(r.y).toBeLessThanOrEqual(1 - LABEL_H);
+  });
+
+  it("connectorLabelRect: no offset centers the masked box on the connector midpoint", () => {
+    const c = {
+      id: "c", kind: "connector", stroke: "#000", width: 2,
+      from: { x: 0.2, y: 0.2, style: "none" },
+      to: { x: 0.6, y: 0.4, style: "arrow" },
+    } as Connector;
+    const r = connectorLabelRect([c], c);
+    const want = labelRectAt(0.4, 0.3);
+    expect(r.x).toBeCloseTo(want.x);
+    expect(r.y).toBeCloseTo(want.y);
+    expect(r.w).toBe(LABEL_W);
+    expect(r.h).toBe(LABEL_H);
+  });
+
+  it("connectorLabelRect: offset shifts the masked box off the midpoint", () => {
+    const c = {
+      id: "c", kind: "connector", stroke: "#000", width: 2,
+      from: { x: 0.2, y: 0.2, style: "none" },
+      to: { x: 0.6, y: 0.4, style: "arrow" },
+      labelOffset: { x: 0.1, y: 0 },
+    } as Connector;
+    const r = connectorLabelRect([c], c);
+    const want = labelRectAt(0.5, 0.3);
+    expect(r.x).toBeCloseTo(want.x);
+    expect(r.y).toBeCloseTo(want.y);
+    expect(r.w).toBe(LABEL_W);
+    expect(r.h).toBe(LABEL_H);
   });
 });
 

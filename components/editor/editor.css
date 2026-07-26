@@ -622,6 +622,11 @@
   fill: var(--color-ink);
   cursor: nwse-resize;
 }
+.preview-anno-handle.label {
+  fill: var(--color-accent, #658995);
+  stroke: #fff;
+  cursor: move;
+}
 .preview-anno-handle:active {
   cursor: grabbing;
 }

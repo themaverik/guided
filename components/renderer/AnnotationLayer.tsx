@@ -22,10 +22,9 @@ import {
   MARKER_PX,
   bracketSegments,
   buildRoundedConnector,
-  connectorMidpoint,
+  connectorLabelRect,
   connectorPoints,
-  labelRect,
-  labelRectAt,
+  labelRectFor,
   pct,
 } from "@/lib/annotations";
 import { rgbaFromHex } from "@/lib/annotation-palette";
@@ -60,13 +59,13 @@ function ShapeLabel({ s }: { s: Surface }) {
   if (!s.text || !s.text.trim()) return null;
   return (
     <LabelBox
-      rect={labelRect(s)}
+      rect={labelRectFor(s)}
       text={s.text}
       fontSize={s.fontSize}
       fontFamily={s.fontFamily}
       color={s.color ?? s.stroke}
       align={s.align}
-      masked={s.kind === "line" || s.kind === "bracket"}
+      masked={s.kind === "line" || s.kind === "bracket" || s.labelOffset != null}
     />
   );
 }
@@ -322,16 +321,13 @@ function ConnectorLine({
         strokeWidth={c.width}
         markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
       />
-      {c.text && c.text.trim() ? (() => {
-        const mid = connectorMidpoint(annotations, c);
-        return (
-          <LabelBox
-            rect={labelRectAt(mid.x, mid.y)}
-            text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
-            color={c.color ?? c.stroke} align={c.align} masked
-          />
-        );
-      })() : null}
+      {c.text && c.text.trim() ? (
+        <LabelBox
+          rect={connectorLabelRect(annotations, c)}
+          text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+          color={c.color ?? c.stroke} align={c.align} masked
+        />
+      ) : null}
     </g>
   );
 }

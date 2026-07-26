@@ -798,6 +798,7 @@
   display: inline-block;
   max-width: 100%;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 /* Open-shape (line/bracket) label: an opaque pill that masks the stroke beneath. */
 .anno-shape-label.masked > span {

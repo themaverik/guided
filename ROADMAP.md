@@ -617,6 +617,29 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   clean); merged to `main` via `--no-ff` merge commit `1862764`. Branch intentionally kept (not
   deleted) as a fix-forward point in case issues surface post-merge.
 
+- **Improvement rev6 bundle** — [done] (`feature/improvement-rev6`). Six additive,
+  editor-only-authoring features shipped across three SDD waves, no schema migration:
+  (1) darker blue/violet annotation swatch strokes (`#1A5FB4` / `#6740B8`), which also
+  shifts the `info` callout color; (2) multi-line annotation text labels with correct
+  alignment (newlines preserved) and draggable labels that re-anchor on snap-back via a
+  new `TextLabel.labelOffset?`, rendered through the existing masked opaque-pill path so
+  no stroke crosses the text; (3) a draggable annotation selection popover — drag it
+  aside by a grip, editor-only, per-annotation, non-persisted; (4) annotation z-order —
+  bring-forward / send-backward on the popover (`raiseAnnotation`/`lowerAnnotation`) —
+  and an adjustable fill-opacity slider (`Surface.fillOpacity?`), single-opacity WYSIWYG
+  so preview and `/print` render identically; (5) chapter cover image — place an image
+  anywhere on the chapter-intro page and drag/resize it on-canvas (`Chapter.coverImage?`;
+  editor-only overlay, data-driven render in print); (6) per-page background + text color
+  for the cover, chapter-intro, and back-cover pages (`Book.coverBackground?`/
+  `coverTextColor?`, `Chapter.background?`/`pageTextColor?`, `Ending.background?`/
+  `pageTextColor?`), layering over the existing book-level fallback — scoped to those
+  three page types only, no per-step background. All fields additive/optional; no
+  `schemaVersion` bump, no migration. ADR-004 (annotations) and ADR-001/ADR-005
+  (renderer/persistence) amended per wave. Spec/plans
+  `docs/superpowers/{specs,plans}/2026-07-26-editor-improvement-rev6*`. Shipped on
+  `feature/improvement-rev6` (17 commits across 3 waves, HEAD `8501d6c`; suite 287/287,
+  typecheck clean); branch not yet merged to `main`.
+
 ## Later (v3 remainder)
 
 - **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle

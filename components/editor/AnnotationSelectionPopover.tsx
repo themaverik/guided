@@ -7,7 +7,7 @@
  * from the shape's measured screen bounds. Editor-only; hides during an active drag.
  * Nothing prints.
  */
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Annotation } from "@/lib/book-schema";
 import { useEditor } from "@/lib/store";
 import {
@@ -50,6 +50,19 @@ export default function AnnotationSelectionPopover({
 
   const popRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  // Per-annotation drag offset from the auto-placed position. Editor-only,
+  // never persisted to the Book — component state only, reset on step change.
+  const [offsets, setOffsets] = useState<Record<string, { dx: number; dy: number }>>({});
+  const dragRef = useRef<{
+    id: string;
+    startX: number;
+    startY: number;
+    base: { dx: number; dy: number };
+  } | null>(null);
+
+  useEffect(() => {
+    setOffsets({});
+  }, [ci, si]);
 
   const shape = selectedId
     ? annotations.find((a) => a.id === selectedId) ?? null
@@ -79,7 +92,16 @@ export default function AnnotationSelectionPopover({
         ? { w: pop.offsetWidth, h: pop.offsetHeight }
         : { w: 240, h: 40 };
       const pl = popoverPlacement(box, size, { w: cr.width, h: cr.height }, POPOVER_GAP);
-      setPos({ top: pl.top, left: pl.left });
+      const off = offsets[shape.id] ?? { dx: 0, dy: 0 };
+      const top = Math.max(
+        POPOVER_GAP,
+        Math.min(pl.top + off.dy, cr.height - size.h - POPOVER_GAP),
+      );
+      const left = Math.max(
+        POPOVER_GAP,
+        Math.min(pl.left + off.dx, cr.width - size.w - POPOVER_GAP),
+      );
+      setPos({ top, left });
     };
     measure();
     const sc = scrollRef.current;
@@ -89,7 +111,7 @@ export default function AnnotationSelectionPopover({
       sc?.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, [shape, annotations, dragging, scale, fitKey, pageIndex, scalerRef, containerRef, scrollRef]);
+  }, [shape, annotations, dragging, scale, fitKey, pageIndex, scalerRef, containerRef, scrollRef, offsets]);
 
   if (!shape) return null;
   const visible = !!pos && !dragging;
@@ -106,6 +128,27 @@ export default function AnnotationSelectionPopover({
   const applyWidth = (value: number) =>
     updateAnnotation(ci, si, shape.id, { width: value });
 
+  const onGripPointerDown = (e: React.PointerEvent<HTMLSpanElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      id: shape.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      base: offsets[shape.id] ?? { dx: 0, dy: 0 },
+    };
+  };
+  const onGripPointerMove = (e: React.PointerEvent<HTMLSpanElement>) => {
+    const d = dragRef.current;
+    if (!d) return;
+    setOffsets((o) => ({
+      ...o,
+      [d.id]: { dx: d.base.dx + (e.clientX - d.startX), dy: d.base.dy + (e.clientY - d.startY) },
+    }));
+  };
+  const onGripPointerUp = () => {
+    dragRef.current = null;
+  };
+
   return (
     <div
       ref={popRef}
@@ -115,6 +158,16 @@ export default function AnnotationSelectionPopover({
       aria-label="Selection"
     >
       <div className="anno-popover-row">
+        <span
+          className="anno-popover-grip"
+          role="button"
+          aria-label="Move popover"
+          onPointerDown={onGripPointerDown}
+          onPointerMove={onGripPointerMove}
+          onPointerUp={onGripPointerUp}
+        >
+          ⠿
+        </span>
         {SWATCHES.map((sw) => (
           <button
             key={sw.id}

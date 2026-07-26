@@ -3,22 +3,14 @@ import type {
   Background,
   Chapter,
   ChapterCoverImage,
-  ImageFit,
   Watermark as WatermarkData,
 } from "@/lib/book-schema";
 import { type ChapterPaging, pad2, pageInkVars } from "@/lib/book-render";
+import { imageFitClass } from "@/lib/grid-render";
 import PageBackground from "./PageBackground";
 import PageFooter from "./PageFooter";
 import RichText from "./RichText";
 import Watermark from "./Watermark";
-
-/** ImageFit → CSS object-fit (fit-width/fit-height crop like a cover fit;
- *  the grid-cell anchor bias doesn't apply to a freely-placed image). */
-const COVER_IMG_OBJECT_FIT: Record<ImageFit, "contain" | "cover"> = {
-  contain: "contain",
-  "fit-width": "cover",
-  "fit-height": "cover",
-};
 
 export default function ChapterIntro({
   chapter,
@@ -43,6 +35,9 @@ export default function ChapterIntro({
     steps > 0
       ? `pages ${paging.firstStepPage}–${paging.lastStepPage}`
       : "no steps yet";
+  // Same anchored-crop fit as grid-cell images (lib/grid-render.ts): "" for
+  // contain/undefined, so the default markup (no crop class) is unchanged.
+  const coverFitCls = imageFitClass(coverImage?.fit);
 
   return (
     <section
@@ -52,20 +47,18 @@ export default function ChapterIntro({
     >
       <PageBackground background={background} />
       {coverImage?.image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          className="chap-cover-img"
-          aria-hidden
-          alt=""
-          src={coverImage.image}
+        <div
+          className={`chap-cover-img${coverFitCls ? ` ${coverFitCls}` : ""}`}
           style={{
             left: `${coverImage.x * 100}%`,
             top: `${coverImage.y * 100}%`,
             width: `${coverImage.w * 100}%`,
             height: `${coverImage.h * 100}%`,
-            objectFit: COVER_IMG_OBJECT_FIT[coverImage.fit ?? "contain"],
           }}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img aria-hidden alt="" src={coverImage.image} />
+        </div>
       ) : null}
       <Watermark watermark={watermark} />
       <div className="page-inner">

@@ -3,9 +3,11 @@
 /* Book-level settings (Phase 4 scope; watermark controls arrive in Phase 6). */
 import { hasLegacySteps } from "@/lib/book-mutations";
 import { useEditor } from "@/lib/store";
+import PageDecorControls from "./PageDecorControls";
 
 export default function BookSettings() {
   const book = useEditor((s) => s.book);
+  const slug = useEditor((s) => s.projectSlug);
   const updateBookMeta = useEditor((s) => s.updateBookMeta);
   const migrateAllToGrid = useEditor((s) => s.migrateAllToGrid);
   const isDemo = useEditor((s) => s.projectSlug === "demo");
@@ -69,6 +71,17 @@ export default function BookSettings() {
           </p>
         </div>
       ) : null}
+
+      <h3 className="editor-subtitle">Cover page</h3>
+      <PageDecorControls
+        background={book.coverBackground}
+        textColor={book.coverTextColor}
+        onBackground={(p) =>
+          updateBookMeta({ coverBackground: { ...book.coverBackground, ...p } })
+        }
+        onTextColor={(c) => updateBookMeta({ coverTextColor: c })}
+        slug={slug}
+      />
     </section>
   );
 }

@@ -198,7 +198,9 @@ export function moveChapter(book: Book, ci: number, dir: -1 | 1): Book {
 export function updateChapter(
   book: Book,
   ci: number,
-  patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+  patch: Partial<
+    Pick<Chapter, "id" | "title" | "description" | "background" | "pageTextColor">
+  >,
 ): Book {
   const next = clone(book);
   Object.assign(next.chapters[ci], patch);

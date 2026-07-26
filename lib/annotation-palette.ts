@@ -18,8 +18,8 @@ export const SWATCHES: readonly Swatch[] = [
   { id: "amber", label: "Amber", fill: "#fef3d2", stroke: "#957800" },
   { id: "green", label: "Green", fill: "#e0f7e4", stroke: "#369150" },
   { id: "teal", label: "Teal", fill: "#daf7f6", stroke: "#188d8d" },
-  { id: "blue", label: "Blue", fill: "#e2f2ff", stroke: "#217fd0" },
-  { id: "violet", label: "Violet", fill: "#f1edff", stroke: "#8464cf" },
+  { id: "blue", label: "Blue", fill: "#e2f2ff", stroke: "#1A5FB4" },
+  { id: "violet", label: "Violet", fill: "#f1edff", stroke: "#6740B8" },
 ];
 
 export interface WidthPreset {
@@ -62,6 +62,14 @@ export function mixToWhite(hex: string, amount: number): string {
   const b = mix(n & 0xff);
   const h = (v: number) => v.toString(16).padStart(2, "0");
   return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+/** `#rrggbb` → `rgba(r,g,b,alpha)`. A malformed hex is returned unchanged. */
+export function rgbaFromHex(hex: string, alpha: number): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 0xff}, ${(n >> 8) & 0xff}, ${n & 0xff}, ${alpha})`;
 }
 
 /** The light interior tint paired with a stroke: the exact swatch fill when the

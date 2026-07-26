@@ -73,8 +73,11 @@ pnpm e2e            # playwright
 - Markdown-subset rich text (bold, italic, headings, strikethrough, lists) in instructions,
   descriptions, callouts, and grid-cell text blocks.
 - Annotation canvas: boxes, lines, square brackets, and connectors with snapping, waypoints,
-  endpoint styles (arrow / circle / point / bar), and straight or rectangular routing.
-- Per-section fonts, page background image, watermark, and a customizable ending page.
+  endpoint styles (arrow / circle / point / bar), straight or rectangular routing, adjustable
+  fill opacity, z-order (bring forward / send backward), and draggable multi-line text labels.
+- Per-section fonts, page background image, watermark, and a customizable ending page. The
+  cover, chapter-intro, and back-cover pages each take their own background and text color,
+  and a chapter can carry a placeable, resizable cover image.
 - Multi-project hosting with ~1-hour ephemeral storage, project download (zip), and PDF export.
 
 ## Project layout

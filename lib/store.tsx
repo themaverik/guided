@@ -18,6 +18,7 @@ import type {
   Border,
   Callout,
   Chapter,
+  ChapterCoverImage,
   Connector,
   Ending,
   ImageFit,
@@ -96,7 +97,16 @@ export interface EditorState {
   // book meta
   updateBookMeta: (
     patch: Partial<
-      Pick<Book, "title" | "subtitle" | "author" | "edition" | "pageTextColor">
+      Pick<
+        Book,
+        | "title"
+        | "subtitle"
+        | "author"
+        | "edition"
+        | "pageTextColor"
+        | "coverBackground"
+        | "coverTextColor"
+      >
     >,
   ) => void;
   updateWatermark: (patch: Partial<Watermark>) => void;
@@ -112,7 +122,13 @@ export interface EditorState {
   moveChapter: (ci: number, dir: -1 | 1) => void;
   updateChapter: (
     ci: number,
-    patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+    patch: Partial<
+      Pick<Chapter, "id" | "title" | "description" | "background" | "pageTextColor">
+    >,
+  ) => void;
+  setChapterCoverImage: (
+    ci: number,
+    patch: Partial<ChapterCoverImage> | null,
   ) => void;
 
   // steps
@@ -196,6 +212,8 @@ export interface EditorState {
     patch: Partial<Surface> & Partial<Connector>,
   ) => void;
   removeAnnotation: (ci: number, si: number, id: string) => void;
+  bringAnnotationForward: (ci: number, si: number, id: string) => void;
+  sendAnnotationBackward: (ci: number, si: number, id: string) => void;
   selectAnnotation: (id: string | null) => void;
   setActiveTool: (tool: AnnotationTool) => void;
   setDrawColor: (color: string) => void;
@@ -379,6 +397,8 @@ export function createEditorStore(
       set((s) => ({ book: M.moveChapter(s.book, ci, dir) })),
     updateChapter: (ci, patch) =>
       set((s) => ({ book: M.updateChapter(s.book, ci, patch) })),
+    setChapterCoverImage: (ci, patch) =>
+      set((s) => ({ book: M.setChapterCoverImage(s.book, ci, patch) })),
 
     // ── steps ──
     addStep: (ci) =>
@@ -497,6 +517,10 @@ export function createEditorStore(
         selectedAnnotation:
           s.selectedAnnotation === id ? null : s.selectedAnnotation,
       })),
+    bringAnnotationForward: (ci, si, id) =>
+      set((s) => ({ book: M.raiseAnnotation(s.book, ci, si, id) })),
+    sendAnnotationBackward: (ci, si, id) =>
+      set((s) => ({ book: M.lowerAnnotation(s.book, ci, si, id) })),
     selectAnnotation: (id) => set({ selectedAnnotation: id }),
     setActiveTool: (tool) => set({ activeTool: tool }),
     setDrawColor: (color) => set({ drawColor: color }),

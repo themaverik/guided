@@ -18,6 +18,7 @@ import AnnotationPalette from "./AnnotationPalette";
 import AnnotationSelectionPopover from "./AnnotationSelectionPopover";
 import PreviewAnnotations from "./PreviewAnnotations";
 import PreviewCellFloat from "./PreviewCellFloat";
+import PreviewChapterImage from "./PreviewChapterImage";
 import PreviewGridResize from "./PreviewGridResize";
 import PreviewGridSelect from "./PreviewGridSelect";
 
@@ -197,6 +198,16 @@ export default function PreviewPane() {
                 />
               ) : null;
             })()}
+            {selection.stepIndex == null &&
+            book.chapters[selection.chapterIndex]?.coverImage ? (
+              <PreviewChapterImage
+                ci={selection.chapterIndex}
+                coverImage={book.chapters[selection.chapterIndex].coverImage!}
+                scalerRef={scalerRef}
+                pageIndex={currentPage}
+                scale={scale}
+              />
+            ) : null}
             {selection.stepIndex != null ? (
               <PreviewAnnotations
                 scalerRef={scalerRef}

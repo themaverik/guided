@@ -81,3 +81,35 @@ is always a populated example. A new project starts from a minimal default book.
 
 - ROADMAP "v2 — Feature expansion", Phase 10.
 - Feature request items #8, #9, #10, #11; the `next-security` evaluation.
+
+## Amendment (2026-07-26): per-page background + text color (Wave 3 gate)
+
+Extends the existing book-wide `Book.background?`/`Book.pageTextColor?` fields with
+page-scoped overrides on the cover, chapter-intro, and back-cover pages. This amendment is
+the ADR-first gate for Wave 3; no code lands with it. It belongs to this ADR rather than
+ADR-001 because the addition is purely about asset resolution/portability under the
+per-project store, not renderer architecture.
+
+New optional fields: `Chapter.background?` / `Chapter.pageTextColor?` (chapter-intro page),
+`Ending.background?` / `Ending.pageTextColor?` (back-cover page), and `Book.coverBackground?`
+/ `Book.coverTextColor?` (cover page — distinct from the book-wide `background`/
+`pageTextColor` fallback, since the cover already inherits that fallback like every other
+page and needs its own override on top). Scope is deliberately narrow: cover /
+chapter-intro / back-cover only — **no per-step background**; steps keep inheriting the
+book-wide `background` fallback exactly as today.
+
+Backgrounds follow the same portable-bare-filename rule as the existing book-wide
+`Background.image` and `Watermark.icon`: stored as a filename only, resolved through
+`backgroundImageSrc` against whichever project is currently serving the book, so a
+downloaded/re-imported project keeps resolving its per-page backgrounds under the new
+project's asset base rather than a stale slug.
+
+Text color layers rather than replaces: a page's own `pageTextColor`, if set, wins for that
+page; otherwise it falls back to `book.pageTextColor`; otherwise the default ink. This
+requires applying `pageInkVars` at that page's own `.page` section (today it is applied once
+at the `.book` root), so one page can diverge from the rest of the book without affecting
+it.
+
+Additive: all new fields are optional. No `schemaVersion` bump, no migration; a page
+without its own override renders byte-identical to today (falling through to the existing
+book-wide `background`/`pageTextColor` behavior).

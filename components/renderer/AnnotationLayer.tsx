@@ -22,12 +22,12 @@ import {
   MARKER_PX,
   bracketSegments,
   buildRoundedConnector,
-  connectorMidpoint,
+  connectorLabelRect,
   connectorPoints,
-  labelRect,
-  labelRectAt,
+  labelRectFor,
   pct,
 } from "@/lib/annotations";
+import { rgbaFromHex } from "@/lib/annotation-palette";
 
 /** Diamond corner radius in the rhombus's local 100×100 coordinate space. */
 const CORNER = 10;
@@ -59,13 +59,13 @@ function ShapeLabel({ s }: { s: Surface }) {
   if (!s.text || !s.text.trim()) return null;
   return (
     <LabelBox
-      rect={labelRect(s)}
+      rect={labelRectFor(s)}
       text={s.text}
       fontSize={s.fontSize}
       fontFamily={s.fontFamily}
       color={s.color ?? s.stroke}
       align={s.align}
-      masked={s.kind === "line" || s.kind === "bracket"}
+      masked={s.kind === "line" || s.kind === "bracket" || s.labelOffset != null}
     />
   );
 }
@@ -96,6 +96,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={6}
         {...common}
         fill={s.fill ?? "none"}
+        fillOpacity={s.fillOpacity ?? 1}
       />,
     );
   }
@@ -108,6 +109,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         ry={pct(s.h / 2)}
         {...common}
         fill={s.fill ?? "none"}
+        fillOpacity={s.fillOpacity ?? 1}
       />,
     );
   }
@@ -151,6 +153,7 @@ function SurfaceShape({ s }: { s: Surface }) {
         <path
           d={d}
           fill={s.fill ?? "none"}
+          fillOpacity={s.fillOpacity ?? 1}
           stroke={s.stroke}
           strokeWidth={s.width}
           strokeLinejoin="round"
@@ -177,7 +180,7 @@ function SurfaceShape({ s }: { s: Surface }) {
             fontSize: s.fontSize ?? DEFAULT_TEXT_SIZE,
             color: s.color ?? s.stroke,
             textAlign: s.align ?? "left",
-            background: s.fill ?? undefined,
+            background: s.fill != null ? rgbaFromHex(s.fill, s.fillOpacity ?? 1) : undefined,
             border: s.width ? `${s.width}px solid ${s.stroke}` : undefined,
             padding: s.fill != null || s.width ? "2px 4px" : undefined,
           }}
@@ -318,16 +321,13 @@ function ConnectorLine({
         strokeWidth={c.width}
         markerEnd={c.to.style !== "none" ? `url(#${endId})` : undefined}
       />
-      {c.text && c.text.trim() ? (() => {
-        const mid = connectorMidpoint(annotations, c);
-        return (
-          <LabelBox
-            rect={labelRectAt(mid.x, mid.y)}
-            text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
-            color={c.color ?? c.stroke} align={c.align} masked
-          />
-        );
-      })() : null}
+      {c.text && c.text.trim() ? (
+        <LabelBox
+          rect={connectorLabelRect(annotations, c)}
+          text={c.text} fontSize={c.fontSize} fontFamily={c.fontFamily}
+          color={c.color ?? c.stroke} align={c.align} masked
+        />
+      ) : null}
     </g>
   );
 }

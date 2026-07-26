@@ -165,6 +165,34 @@ export function labelRect(s: Surface): { x: number; y: number; w: number; h: num
   return { x: s.x, y: s.y, w: s.w, h: s.h };
 }
 
+/** Default label anchor: shape centre (open shapes' midpoint is the same). */
+export function labelAnchor(s: Surface): Point {
+  return { x: s.x + s.w / 2, y: s.y + s.h / 2 };
+}
+
+/** Label rect honoring an optional drag offset; an offset always yields the
+ *  fixed masked box (centered on anchor+offset, clamped inside the page) so a
+ *  dragged label never re-adopts the closed-shape fill-bounds path. No offset
+ *  falls back to labelRect (today's pinned/anchored behavior, unchanged). */
+export function labelRectFor(s: Surface): { x: number; y: number; w: number; h: number } {
+  if (s.labelOffset) {
+    const a = labelAnchor(s);
+    return labelRectAt(a.x + s.labelOffset.x, a.y + s.labelOffset.y);
+  }
+  return labelRect(s);
+}
+
+/** Connector label rect: midpoint + optional drag offset (always a masked box,
+ *  matching the connector label's existing always-masked render). */
+export function connectorLabelRect(
+  annotations: Annotation[],
+  c: Connector,
+): { x: number; y: number; w: number; h: number } {
+  const m = connectorMidpoint(annotations, c);
+  const o = c.labelOffset ?? { x: 0, y: 0 };
+  return labelRectAt(m.x + o.x, m.y + o.y);
+}
+
 /** Midpoint of a connector's resolved endpoints (normalized). */
 export function connectorMidpoint(annotations: Annotation[], c: Connector): Point {
   const a = resolveEndpoint(annotations, c.from);

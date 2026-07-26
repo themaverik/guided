@@ -16,6 +16,7 @@ import {
   type Callout,
   type CalloutType,
   type Chapter,
+  type ChapterCoverImage,
   type Connector,
   type GridCell,
   type ImageFit,
@@ -197,10 +198,34 @@ export function moveChapter(book: Book, ci: number, dir: -1 | 1): Book {
 export function updateChapter(
   book: Book,
   ci: number,
-  patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+  patch: Partial<
+    Pick<Chapter, "id" | "title" | "description" | "background" | "pageTextColor">
+  >,
 ): Book {
   const next = clone(book);
   Object.assign(next.chapters[ci], patch);
+  return next;
+}
+
+/**
+ * Set/merge a chapter's freely-placed cover image, or clear it (`patch === null`).
+ * A partial merges into the existing image (or a centred default if none yet).
+ * Out-of-range chapter index is a no-op (same book reference).
+ */
+export function setChapterCoverImage(
+  book: Book,
+  ci: number,
+  patch: Partial<ChapterCoverImage> | null,
+): Book {
+  const next = clone(book);
+  const ch = next.chapters[ci];
+  if (!ch) return book;
+  if (patch === null) {
+    delete ch.coverImage;
+    return next;
+  }
+  const base = ch.coverImage ?? { image: "", x: 0.3, y: 0.35, w: 0.4, h: 0.3, fit: "contain" as const };
+  ch.coverImage = { ...base, ...patch };
   return next;
 }
 
@@ -455,6 +480,26 @@ export function removeAnnotation(
   if (!step.annotations) return book;
   step.annotations = step.annotations.filter((a) => a.id !== id);
   if (step.annotations.length === 0) delete step.annotations;
+  return next;
+}
+
+/** Move an annotation one step later in `step.annotations` (paints on top). */
+export function raiseAnnotation(book: Book, ci: number, si: number, id: string): Book {
+  return reorderAnnotation(book, ci, si, id, +1);
+}
+/** Move an annotation one step earlier in `step.annotations` (paints beneath). */
+export function lowerAnnotation(book: Book, ci: number, si: number, id: string): Book {
+  return reorderAnnotation(book, ci, si, id, -1);
+}
+function reorderAnnotation(book: Book, ci: number, si: number, id: string, dir: 1 | -1): Book {
+  const list = book.chapters[ci]?.steps[si]?.annotations;
+  if (!list) return book;
+  const i = list.findIndex((a) => a.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return book;
+  const next = clone(book);
+  const arr = next.chapters[ci].steps[si].annotations!;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
   return next;
 }
 

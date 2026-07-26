@@ -42,9 +42,9 @@
   --swatch-teal-fill: #daf7f6;
   --swatch-teal-stroke: #188d8d;
   --swatch-blue-fill: #e2f2ff;
-  --swatch-blue-stroke: #217fd0;
+  --swatch-blue-stroke: #1A5FB4;
   --swatch-violet-fill: #f1edff;
-  --swatch-violet-stroke: #8464cf;
+  --swatch-violet-stroke: #6740B8;
 
   /* Callout palettes — derived from the swatch tokens (see ADR-007).
      Recipe: bg=fill, title=stroke, marker=stroke, border=stroke@33%; body is

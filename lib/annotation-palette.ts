@@ -18,8 +18,8 @@ export const SWATCHES: readonly Swatch[] = [
   { id: "amber", label: "Amber", fill: "#fef3d2", stroke: "#957800" },
   { id: "green", label: "Green", fill: "#e0f7e4", stroke: "#369150" },
   { id: "teal", label: "Teal", fill: "#daf7f6", stroke: "#188d8d" },
-  { id: "blue", label: "Blue", fill: "#e2f2ff", stroke: "#217fd0" },
-  { id: "violet", label: "Violet", fill: "#f1edff", stroke: "#8464cf" },
+  { id: "blue", label: "Blue", fill: "#e2f2ff", stroke: "#1A5FB4" },
+  { id: "violet", label: "Violet", fill: "#f1edff", stroke: "#6740B8" },
 ];
 
 export interface WidthPreset {

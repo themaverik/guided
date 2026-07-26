@@ -89,10 +89,36 @@
 }
 
 /* Freely-placed chapter cover image (behind text, above the page background),
-   positioned by a normalized 0–1 rect passed inline. */
+   positioned by a normalized 0–1 rect passed inline. Container + inner <img>
+   mirrors the grid-cell fit-width/fit-height anchored-crop pattern below
+   (.grid-cell .img-slot.fit-width/.fit-height, ~line 991) so the same
+   ImageFit value crops identically wherever it's used. */
 .chap-cover-img {
   position: absolute;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.chap-cover-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* whole image visible — default/no-crop */
+}
+.chap-cover-img.fit-width img {
+  inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
+  width: 100%;
+  height: auto;
+  object-fit: fill;
+}
+.chap-cover-img.fit-height img {
+  inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
+  width: auto;
+  height: 100%;
+  object-fit: fill;
 }
 
 /* ────────────── WATERMARK (overlay, behind content) ────────────── */

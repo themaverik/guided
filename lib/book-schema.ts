@@ -159,6 +159,9 @@ export interface Surface extends TextLabel {
   stroke: string;
   width: number;
   fill?: string;
+  /** Fill alpha 0–1 (default 1). Applied as SVG fill-opacity so a shape beneath
+   *  shows through; stroke + label stay fully opaque. */
+  fillOpacity?: number;
   /** polygon only: closed-shape vertices, normalized 0–1. */
   vertices?: { x: number; y: number }[];
   /** polygon only: preset that constrains authoring (e.g. a decision diamond). */

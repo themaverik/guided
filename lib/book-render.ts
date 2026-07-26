@@ -6,6 +6,7 @@
 import type { CSSProperties } from "react";
 import {
   type Annotation,
+  type Background,
   type Book,
   type Border,
   type Chapter,
@@ -75,6 +76,21 @@ export function backgroundImageSrc(
   if (legacy) return `${assetBase}/${BACKGROUND_ASSET_FOLDER}/${legacy[1]}`;
   if (image.includes("/")) return image; // some other absolute/external URL
   return `${assetBase}/${BACKGROUND_ASSET_FOLDER}/${image}`;
+}
+
+/**
+ * Effective background for a page: the page's own background if it has an
+ * image, else the book-level fallback, else undefined. The chosen image is
+ * URL-resolved via `backgroundImageSrc`.
+ */
+export function resolvePageBackground(
+  assetBase: string,
+  pageBg?: Background,
+  bookBg?: Background,
+): Background | undefined {
+  const chosen = pageBg?.image ? pageBg : bookBg;
+  if (!chosen?.image) return undefined;
+  return { ...chosen, image: backgroundImageSrc(assetBase, chosen.image) };
 }
 
 /**

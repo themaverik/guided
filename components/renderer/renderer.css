@@ -88,6 +88,13 @@
   print-color-adjust: exact;
 }
 
+/* Freely-placed chapter cover image (behind text, above the page background),
+   positioned by a normalized 0–1 rect passed inline. */
+.chap-cover-img {
+  position: absolute;
+  z-index: 0;
+}
+
 /* ────────────── WATERMARK (overlay, behind content) ────────────── */
 .watermark {
   position: absolute;

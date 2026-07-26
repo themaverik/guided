@@ -18,6 +18,7 @@ import type {
   Border,
   Callout,
   Chapter,
+  ChapterCoverImage,
   Connector,
   Ending,
   ImageFit,
@@ -96,7 +97,16 @@ export interface EditorState {
   // book meta
   updateBookMeta: (
     patch: Partial<
-      Pick<Book, "title" | "subtitle" | "author" | "edition" | "pageTextColor">
+      Pick<
+        Book,
+        | "title"
+        | "subtitle"
+        | "author"
+        | "edition"
+        | "pageTextColor"
+        | "coverBackground"
+        | "coverTextColor"
+      >
     >,
   ) => void;
   updateWatermark: (patch: Partial<Watermark>) => void;
@@ -112,7 +122,13 @@ export interface EditorState {
   moveChapter: (ci: number, dir: -1 | 1) => void;
   updateChapter: (
     ci: number,
-    patch: Partial<Pick<Chapter, "id" | "title" | "description">>,
+    patch: Partial<
+      Pick<Chapter, "id" | "title" | "description" | "background" | "pageTextColor">
+    >,
+  ) => void;
+  setChapterCoverImage: (
+    ci: number,
+    patch: Partial<ChapterCoverImage> | null,
   ) => void;
 
   // steps
@@ -381,6 +397,8 @@ export function createEditorStore(
       set((s) => ({ book: M.moveChapter(s.book, ci, dir) })),
     updateChapter: (ci, patch) =>
       set((s) => ({ book: M.updateChapter(s.book, ci, patch) })),
+    setChapterCoverImage: (ci, patch) =>
+      set((s) => ({ book: M.setChapterCoverImage(s.book, ci, patch) })),
 
     // ── steps ──
     addStep: (ci) =>

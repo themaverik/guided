@@ -4,7 +4,7 @@ import type {
   Book,
   Watermark as WatermarkData,
 } from "@/lib/book-schema";
-import { type ChapterPaging, pad2 } from "@/lib/book-render";
+import { type ChapterPaging, pad2, pageInkVars } from "@/lib/book-render";
 import PageBackground from "./PageBackground";
 import Watermark from "./Watermark";
 
@@ -13,16 +13,19 @@ export default function CoverPage({
   paging,
   watermark,
   background,
+  pageTextColor,
 }: {
   book: Book;
   paging: ChapterPaging[];
   watermark?: WatermarkData;
   background?: Background;
+  pageTextColor?: string;
 }) {
   return (
     <section
       className="page page--cream"
       data-screen-label="00 Cover & Contents"
+      style={pageInkVars(pageTextColor)}
     >
       <PageBackground background={background} />
       <Watermark watermark={watermark} />

@@ -827,7 +827,7 @@ function TextEditor({
             textAlign: a.align ?? (centered ? "center" : "left"),
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          onInput={(e) => onChange(e.currentTarget.textContent ?? "")}
+          onInput={(e) => onChange(e.currentTarget.innerText ?? "")}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault();
@@ -835,7 +835,7 @@ function TextEditor({
             }
           }}
           onBlur={(e) => {
-            onChange(e.currentTarget.textContent ?? "");
+            onChange(e.currentTarget.innerText ?? "");
             onDone();
           }}
         />

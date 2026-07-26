@@ -635,6 +635,13 @@
   stroke: transparent;
   cursor: pointer;
 }
+/* Chapter cover image move/resize overlay (editor-only; never printed). Only
+   the two handles are interactive, so empty page area stays click-through. */
+.preview-chapter-image {
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
 /* Inline text-annotation editor: an opaque box covers the static label beneath
    while typing. */
 .anno-text.editing {

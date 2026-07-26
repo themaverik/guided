@@ -67,3 +67,26 @@ Negative / trade-offs:
 - `design-references/Guidebook A4.html` — renderer + `fitSteps` source of truth.
 - `design-references/public/book.js` — example data model.
 - `design_handoff_guidebook_editor/Editor UI Reference.html` — editor structure-outline mockup.
+
+## Amendment (2026-07-26): chapter cover image (Wave 3 gate)
+
+Adds a freely-placed cover image to the chapter-intro page — a straight extension of the
+config-driven-renderer model this ADR established, not an architecture change. This
+amendment is the ADR-first gate for Wave 3; no code lands with it.
+
+`Chapter.coverImage?: ChapterCoverImage` — `{ image: string; x: number; y: number; w:
+number; h: number; fit?: ImageFit }`. `image` is a bare filename, resolved against the
+current project's asset base at render time (the same portability convention as
+`Watermark.icon`/`Background.image`, so it survives download/re-import). `x/y/w/h` are
+normalized 0–1 against the chapter-intro content area, matching the normalized-rect
+convention already used by a positioned `StackedObject` — the image is freely placed, not
+slotted into a fixed layout region. `fit?` reuses the existing `ImageFit` union
+(`contain` / `fit-width` / `fit-height`).
+
+Rendered by `ChapterIntro` as a plain `<img>`, resolved and painted identically in the
+editor preview and the `/print` route — no `@media print` branching, matching every other
+data-driven visual in this codebase. Drag/resize handles are editor-only chrome (`components/
+editor/**`); they never reach the renderer or the PDF output.
+
+Additive: `coverImage` is optional and chapter-scoped. Chapters without it render
+byte-identical to today. No `schemaVersion` bump, no migration.

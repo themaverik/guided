@@ -357,6 +357,16 @@ export interface Step {
   layoutMode?: "legacy" | "grid";
 }
 
+/** A freely-placed image on a chapter-intro page (normalized 0–1 rect). */
+export interface ChapterCoverImage {
+  image: string; // bare filename, resolved at render time
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fit?: ImageFit; // default "contain"
+}
+
 export interface Chapter {
   /** Folder slug — images load from public/<id>/. */
   id: string;
@@ -364,6 +374,12 @@ export interface Chapter {
   /** Shown on the chapter-intro page and in the TOC. */
   description: string;
   steps: Step[];
+  /** Freely-placed hero image on the chapter-intro page. */
+  coverImage?: ChapterCoverImage;
+  /** Full-page background image for the chapter-intro page (overrides Book.background). */
+  background?: Background;
+  /** Base text color for the chapter-intro page (overrides Book.pageTextColor). */
+  pageTextColor?: string;
 }
 
 export type WatermarkPosition =
@@ -431,6 +447,10 @@ export interface Ending {
   title?: string;
   /** Body text — may contain the markdown subset. */
   body?: string;
+  /** Full-page background image for the back-cover page (overrides Book.background). */
+  background?: Background;
+  /** Base text color for the back-cover page (overrides Book.pageTextColor). */
+  pageTextColor?: string;
 }
 
 export interface Book {
@@ -457,6 +477,10 @@ export interface Book {
    *  dark background image. Per-section theme colors still win; callouts keep
    *  their palette. Unset = default dark ink. */
   pageTextColor?: string;
+  /** Full-page background image for the front-cover page (overrides `background`). */
+  coverBackground?: Background;
+  /** Base text color for the front-cover page (overrides `pageTextColor`). */
+  coverTextColor?: string;
 }
 
 // --- Defaults (centralize the README's documented fallbacks) ---

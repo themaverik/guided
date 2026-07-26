@@ -16,6 +16,7 @@ import {
   type Callout,
   type CalloutType,
   type Chapter,
+  type ChapterCoverImage,
   type Connector,
   type GridCell,
   type ImageFit,
@@ -201,6 +202,28 @@ export function updateChapter(
 ): Book {
   const next = clone(book);
   Object.assign(next.chapters[ci], patch);
+  return next;
+}
+
+/**
+ * Set/merge a chapter's freely-placed cover image, or clear it (`patch === null`).
+ * A partial merges into the existing image (or a centred default if none yet).
+ * Out-of-range chapter index is a no-op (same book reference).
+ */
+export function setChapterCoverImage(
+  book: Book,
+  ci: number,
+  patch: Partial<ChapterCoverImage> | null,
+): Book {
+  const next = clone(book);
+  const ch = next.chapters[ci];
+  if (!ch) return book;
+  if (patch === null) {
+    delete ch.coverImage;
+    return next;
+  }
+  const base = ch.coverImage ?? { image: "", x: 0.3, y: 0.35, w: 0.4, h: 0.3, fit: "contain" as const };
+  ch.coverImage = { ...base, ...patch };
   return next;
 }
 

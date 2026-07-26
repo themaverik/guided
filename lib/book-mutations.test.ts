@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText, setCellTextAlign, setCellImageBorder, raiseAnnotation, lowerAnnotation } from "@/lib/book-mutations";
+import { resizeGridRow, resizeGridColumn, addGridRow, removeGridRow, addGridColumn, removeGridColumn, setStepLayoutMode, setCellImage, removeCellImage, setCellImageFit, addCellCallout, updateCellCallout, removeCellObject, moveCellObject, updateCellObjectPlacement, addCellText, updateCellText, setCellTextAlign, setCellImageBorder, raiseAnnotation, lowerAnnotation, setChapterCoverImage } from "@/lib/book-mutations";
 import { DEFAULT_PAGE_CONFIG, type Book, type StackedObject } from "@/lib/book-schema";
 
 const bookWith = (step: Book["chapters"][0]["steps"][0]): Book => ({
@@ -367,5 +367,34 @@ describe("raise/lowerAnnotation", () => {
     const book = bookWithAnnotations(["a", "b"]);
     raiseAnnotation(book, 0, 0, "a");
     expect(book.chapters[0].steps[0].annotations!.map((a) => a.id)).toEqual(["a", "b"]);
+  });
+});
+
+const baseBook = (): Book => bookWith({});
+
+describe("setChapterCoverImage", () => {
+  it("sets a new cover image with a centred default rect", () => {
+    const out = setChapterCoverImage(baseBook(), 0, { image: "hero.png" });
+    const ci = out.chapters[0].coverImage!;
+    expect(ci.image).toBe("hero.png");
+    expect(ci.w).toBeGreaterThan(0);
+  });
+  it("merges a position patch into the existing image", () => {
+    const b = setChapterCoverImage(baseBook(), 0, { image: "hero.png" });
+    const out = setChapterCoverImage(b, 0, { x: 0.1, y: 0.2 });
+    expect(out.chapters[0].coverImage).toMatchObject({ image: "hero.png", x: 0.1, y: 0.2 });
+  });
+  it("clears with null", () => {
+    const b = setChapterCoverImage(baseBook(), 0, { image: "hero.png" });
+    expect(setChapterCoverImage(b, 0, null).chapters[0].coverImage).toBeUndefined();
+  });
+  it("does not mutate the input", () => {
+    const b = baseBook();
+    setChapterCoverImage(b, 0, { image: "x.png" });
+    expect(b.chapters[0].coverImage).toBeUndefined();
+  });
+  it("out-of-range chapter index is a no-op returning the same book reference", () => {
+    const b = baseBook();
+    expect(setChapterCoverImage(b, 5, { image: "x.png" })).toBe(b);
   });
 });

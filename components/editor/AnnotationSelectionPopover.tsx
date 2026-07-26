@@ -46,6 +46,8 @@ export default function AnnotationSelectionPopover({
 }) {
   const updateAnnotation = useEditor((s) => s.updateAnnotation);
   const requestDeleteAnnotation = useEditor((s) => s.requestDeleteAnnotation);
+  const bringForward = useEditor((s) => s.bringAnnotationForward);
+  const sendBackward = useEditor((s) => s.sendAnnotationBackward);
   const dragging = useEditor((s) => s.annotationDragging);
 
   const popRef = useRef<HTMLDivElement>(null);
@@ -194,6 +196,11 @@ export default function AnnotationSelectionPopover({
             <span className="ap-width-bar" style={{ height: w.value }} />
           </button>
         ))}
+        <span className="ap-div" />
+        <button type="button" className="mini-btn" title="Send backward"
+          aria-label="Send backward" onClick={() => sendBackward(ci, si, shape.id)}>⤓</button>
+        <button type="button" className="mini-btn" title="Bring forward"
+          aria-label="Bring forward" onClick={() => bringForward(ci, si, shape.id)}>⤒</button>
         <span className="ap-div" />
         <button
           type="button"

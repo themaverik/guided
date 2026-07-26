@@ -1391,6 +1391,21 @@
   align-items: center;
   gap: 6px;
 }
+.anno-popover-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: #8fa3a3;
+  font-size: 13px;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.anno-popover-grip:active {
+  cursor: grabbing;
+}
 .anno-popover select {
   height: 28px;
   border: 1px solid #dbe2e2;

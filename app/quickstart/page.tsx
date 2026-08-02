@@ -35,10 +35,10 @@ export default function Quickstart() {
 
       <h2>3. The page grid and images</h2>
       <p>
-        A step's page is a flexible grid. Drag the dividers to resize rows and
+        A step’s page is a flexible grid. Drag the dividers to resize rows and
         columns, and add or remove rows, columns, and cells from the step
         panel. Fill a cell by dragging an image file straight onto it, or pick
-        an already-uploaded image from the cell's dropdown — uploads are stored
+        an already-uploaded image from the cell’s dropdown — uploads are stored
         with the project. Per image you can choose how it fills the cell
         (maintain ratio, or crop to width/height) and give it a border that
         hugs the screenshot. (Existing content made with the classic row layout
@@ -47,7 +47,7 @@ export default function Quickstart() {
 
       <h2>4. Callouts</h2>
       <p>
-        Callouts annotate a cell. Add one to a cell's stack, choose a type
+        Callouts annotate a cell. Add one to a cell’s stack, choose a type
         (info, note, success, warning, danger), and write a title and body.
         Drag a callout off the stack to float it anywhere in the cell. If a
         page gets crowded, content auto-shrinks so nothing overflows the sheet.

@@ -78,6 +78,11 @@
   --color-danger-border: color-mix(in srgb, var(--swatch-red-stroke) 33%, transparent);
   --color-danger-title: var(--swatch-red-stroke);
   --color-danger-marker: var(--swatch-red-stroke);
+
+  /* UI-chrome tokens (DESIGN §2.1 amendment, sidebar polish 2026-08-02) */
+  --color-selection: #3b82f6;   /* selection/focus blue — heals the #2563eb drift */
+  --color-hover-bg: #f0f5f6;    /* hover tint on flat controls */
+  --color-danger-text: #9e332f; /* AA-safe small danger text; swatch red stays for borders/fills */
 }
 
 /*

@@ -640,6 +640,28 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   `feature/improvement-rev6` (17 commits across 3 waves, HEAD `8501d6c`; suite 287/287,
   typecheck clean); branch not yet merged to `main`.
 
+- **Left-sidebar design polish** — [done] (`feature/sidebar-design-polish`). Production
+  DESIGN.md alignment of the left editor pane, no behavior changes, renderer/print
+  untouched: (1) three new `@theme` UI tokens — `--color-selection: #3b82f6`,
+  `--color-hover-bg: #f0f5f6`, `--color-danger-text: #9e332f` (AA-safe small danger
+  text) — plus adoption of the existing `--color-paper` across `editor.css` (25 sites);
+  (2) zero-dep toast system — store `notices` channel (`pushNotice`/`dismissNotice`) +
+  `components/editor/Toast.tsx` fixed bottom-left stack (~4s auto-dismiss paused on
+  hover/focus, manual ×, `role="alert"`, reduced-motion safe); ImagePicker upload errors
+  migrated off the permanent inline `.img-picker-error`; (3) crop hint restyled as the
+  canonical `.status-pill` (formalized from `.overflow-warn`); (4) "Remove image" fixed
+  from a wrapped 22px `.mini-btn` to a proper `.btn-outline-danger`; a new
+  `.border-controls` rule styles the CellEditor border rows (the old `.border-fields`
+  grid stays for RowCard); (5) section labels to mono 10px/500/1.5px, radius 6→7px
+  outliers, row-card 10→9px; (6) a11y — `:focus-visible` rings on all sidebar controls
+  (`.seg` unclipped via `overflow: visible` + end-cap radii) and `aria-pressed` on all
+  segmented buttons. DESIGN.md gained Notification (toast/pill), danger-button, and
+  Sub-header/Dense-control roles + the new tokens. Spec/plan
+  `docs/superpowers/{specs,plans}/2026-08-02-left-sidebar-polish*`. Suite 288/288,
+  typecheck/build clean; final opus review APPROVE (5 non-blocking notes parked).
+  Note: `pnpm e2e` is unrunnable repo-wide (no `playwright.config.*` committed) —
+  pre-existing, unrelated.
+
 ## Later (v3 remainder)
 
 - **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle

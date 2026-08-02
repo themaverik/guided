@@ -49,7 +49,7 @@
   width: var(--left-w, 420px);
   height: 100%;
   overflow-y: auto;
-  background: #fff;
+  background: var(--color-paper);
   border-right: 1px solid var(--color-rule);
   padding: 20px;
   font-family: var(--font-body);
@@ -60,8 +60,9 @@
 }
 .editor-section-title {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 1.2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--color-ink);
   margin: 0 0 10px;
@@ -84,7 +85,7 @@
   padding: 7px 9px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   outline: none;
 }
 .editor-field input:focus,
@@ -117,10 +118,10 @@
   cursor: pointer;
 }
 .editor-nav-item:hover {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .editor-nav-item.active {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
   border-color: var(--color-ink);
   font-weight: 600;
   color: var(--color-ink);
@@ -171,7 +172,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #fff;
+  background: var(--color-paper);
   border-bottom: 1px solid var(--color-rule);
   font-family: var(--font-body);
   font-size: 13px;
@@ -188,7 +189,7 @@
   cursor: pointer;
 }
 .preview-toolbar button:hover:not(:disabled) {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .preview-toolbar button:disabled {
   opacity: 0.4;
@@ -214,7 +215,7 @@
   text-decoration: none;
 }
 .preview-toolbar a:hover {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .preview-toolbar .print-link {
   text-decoration: none;
@@ -234,11 +235,15 @@
   color: var(--color-ink);
 }
 .preview-toolbar .save-status.error {
-  color: #a11;
+  color: var(--color-danger-text);
 }
+/* Status pill (DESIGN §6): persistent state, inline next to its control */
+.status-pill,
 .preview-toolbar .overflow-warn {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 500;
   color: var(--color-warn-title);
   background: var(--color-warn-bg);
   border: 1px solid var(--color-warn-border);
@@ -295,23 +300,61 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 7px;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
 }
 .mini-btn:hover:not(:disabled) {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .mini-btn:disabled {
   opacity: 0.3;
   cursor: default;
 }
 .mini-btn.danger {
-  color: #a11;
-  border-color: #a112;
+  color: var(--color-danger-text);
+  border-color: color-mix(in srgb, var(--color-danger-text) 13%, transparent);
+}
+
+/* Visible keyboard focus (DESIGN §9) on sidebar controls */
+.seg-btn:focus-visible,
+.mini-btn:focus-visible,
+.add-btn:focus-visible,
+.stepper button:focus-visible,
+.ctrl-row select:focus-visible,
+.callout-item input:focus-visible,
+.callout-item textarea:focus-visible,
+.callout-item select:focus-visible,
+.toast-x:focus-visible {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.mini-btn.danger:focus-visible,
+.btn-outline-danger:focus-visible {
+  outline: 1px solid var(--color-danger-text);
+  outline-offset: 2px;
+}
+
+/* Outlined danger button (DESIGN §6): text-labeled destructive actions */
+.btn-outline-danger {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--swatch-red-stroke) 40%, transparent);
+  border-radius: 7px;
+  background: var(--color-paper);
+  color: var(--color-danger-text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-outline-danger:hover {
+  background: var(--swatch-red-fill);
+  border-color: var(--swatch-red-stroke);
 }
 
 .add-btn {
@@ -327,7 +370,7 @@
   cursor: pointer;
 }
 .add-btn:hover {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 
 .editor-subtitle {
@@ -352,7 +395,7 @@
   padding: 6px 8px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
 }
 
 /* Rows outline */
@@ -363,8 +406,8 @@
 }
 .row-card {
   border: 1px solid var(--color-rule);
-  border-radius: 10px;
-  background: #fff;
+  border-radius: 9px;
+  background: var(--color-paper);
   overflow: hidden;
 }
 .row-card.selected {
@@ -423,7 +466,7 @@
   padding: 5px 8px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink-text);
   max-width: 160px;
 }
@@ -446,17 +489,19 @@
   display: inline-flex;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 .seg-btn {
   padding: 5px 12px;
   border: none;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink-text);
   font-family: var(--font-body);
   font-size: 12px;
   cursor: pointer;
 }
+.seg-btn:first-child { border-radius: 7px 0 0 7px; }
+.seg-btn:last-child { border-radius: 0 7px 7px 0; }
 .seg-btn + .seg-btn {
   border-left: 1px solid var(--color-rule-strong);
 }
@@ -475,8 +520,8 @@
   width: 24px;
   height: 24px;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 7px;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-size: 14px;
   cursor: pointer;
@@ -522,7 +567,7 @@
   padding: 8px;
   border: 1px solid var(--color-rule);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
 }
 .callout-item-head {
   display: flex;
@@ -538,8 +583,8 @@
   color: var(--color-ink-text);
   padding: 6px 8px;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 7px;
+  background: var(--color-paper);
   outline: none;
 }
 
@@ -577,8 +622,8 @@
   width: 26px;
   height: 24px;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 7px;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 12px;
@@ -588,7 +633,7 @@
   justify-content: center;
 }
 .rta-toolbar button:hover {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .rta textarea {
   font-family: var(--font-body);
@@ -597,7 +642,7 @@
   padding: 7px 9px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   outline: none;
   resize: vertical;
 }
@@ -836,15 +881,22 @@
   padding: 4px 6px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-paper);
 }
 .anno-endpoint .anno-num {
   width: 48px;
 }
-/* Border fields (color/width/radius) */
+/* Border fields (color/width/radius) — legacy row (RowCard.tsx), .editor-field children */
 .border-fields {
   display: grid;
   grid-template-columns: 1fr 70px 70px;
+  gap: 8px;
+}
+/* Border controls (grid cell editor, CellEditor.tsx) — children are .ctrl-row
+ * label rows (full-width flex rows), not a bare field sequence, so stack them. */
+.border-controls {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -871,7 +923,7 @@
   padding: 6px 8px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
 }
 .theme-size {
   width: 64px;
@@ -887,7 +939,7 @@
   padding: 0;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
 }
 
 /* Watermark icon row */
@@ -924,7 +976,7 @@
   padding: 6px 8px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   cursor: pointer;
   text-align: left;
 }
@@ -961,7 +1013,7 @@
   z-index: 20;
   margin-top: 4px;
   padding: 8px;
-  background: #fff;
+  background: var(--color-paper);
   border: 1px solid var(--color-rule-strong);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -981,11 +1033,11 @@
   padding: 6px;
   border: 1px solid var(--color-rule);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   cursor: pointer;
 }
 .img-tile:hover {
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .img-tile.selected {
   border-color: var(--color-ink);
@@ -1016,16 +1068,10 @@
   font-size: 22px;
   line-height: 1;
 }
-.img-picker-hint,
-.img-picker-error {
+.img-picker-hint {
   font-size: 11px;
   margin: 8px 2px 0;
-}
-.img-picker-hint {
   color: var(--color-muted);
-}
-.img-picker-error {
-  color: #a11;
 }
 
 /* Skeleton (mini page structure) */
@@ -1079,7 +1125,7 @@
   height: 7px;
   border: 1px solid var(--color-rule-strong);
   border-radius: 2px;
-  background: #f0f5f6;
+  background: var(--color-hover-bg);
 }
 .skel-callouts.below .skel-cell {
   width: auto;
@@ -1170,8 +1216,8 @@
   pointer-events: none;
   user-select: none;
 }
-.grid-canvas-btn.danger circle { stroke: #a11; }
-.grid-canvas-btn.danger text { fill: #a11; }
+.grid-canvas-btn.danger circle { stroke: var(--color-danger-text); }
+.grid-canvas-btn.danger text { fill: var(--color-danger-text); }
 .grid-canvas-btn:hover circle { fill: #eef4ff; }
 
 /* Grid cell-select overlay (Plan 7, editor-only) */
@@ -1197,13 +1243,6 @@
   background: rgba(220, 38, 38, 0.08);
 }
 
-/* Cell editor panel (Plan 7) */
-.cell-editor .cell-crop-hint {
-  margin: 4px 0 6px;
-  font-size: 12px;
-  color: #b45309;
-}
-
 /* Floating callout drag overlay (Plan 9, editor-only) */
 .preview-cell-float .cell-float-hit {
   cursor: grab;
@@ -1222,13 +1261,13 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-paper);
   border: 2px solid #2563eb;
   cursor: ew-resize;
 }
 
 .cell-editor .callout-item.selected {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--color-selection);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -1258,7 +1297,7 @@
   gap: 8px;
   padding: 8px 10px;
   max-width: min(92%, 900px);
-  background: #fff;
+  background: var(--color-paper);
   border: 1px solid #d7dede;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(2, 68, 80, 0.18);
@@ -1287,7 +1326,7 @@
   padding: 0;
   border: 1px solid #dbe2e2;
   border-radius: 7px;
-  background: #fff;
+  background: var(--color-paper);
   cursor: pointer;
 }
 .anno-context select,
@@ -1296,7 +1335,7 @@
   height: 28px;
   border: 1px solid #dbe2e2;
   border-radius: 7px;
-  background: #fff;
+  background: var(--color-paper);
   color: #024450;
   font-size: 12px;
   padding: 0 4px;
@@ -1393,7 +1432,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 8px 10px;
-  background: #fff;
+  background: var(--color-paper);
   border: 1px solid #e8eded;
   border-radius: 9px;
   box-shadow: 0 1px 3px rgba(2, 68, 80, 0.06), 0 8px 32px rgba(2, 68, 80, 0.12);
@@ -1422,9 +1461,68 @@
   height: 28px;
   border: 1px solid #dbe2e2;
   border-radius: 7px;
-  background: #fff;
+  background: var(--color-paper);
   color: #024450;
   font-size: 12px;
   padding: 0 4px;
   cursor: pointer;
+}
+
+/* Toast stack (DESIGN §6 Notification — sidebar polish) */
+.toast-stack {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 60; /* above panes, below .confirm-overlay (100) */
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  max-width: 340px;
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px #02445010, 0 8px 32px #02445017;
+  animation: toast-in 120ms ease;
+}
+.toast.closing {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+.toast-danger {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+.toast-success {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-title);
+}
+.toast-x {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 5px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+.toast-x:hover { background: rgb(0 0 0 / 0.06); }
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+  .toast.closing { transition: none; }
 }

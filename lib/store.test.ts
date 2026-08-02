@@ -173,3 +173,19 @@ describe("store: floating cell callouts", () => {
     expect([o.x, o.y, o.w]).toEqual([0.25, 0.5, 0.4]);
   });
 });
+
+describe("notices channel", () => {
+  it("pushNotice appends immutably with unique ids; dismissNotice removes", () => {
+    const store = createEditorStore(book, "slug");
+    store.getState().pushNotice("danger", "Upload failed");
+    const afterFirst = store.getState().notices;
+    store.getState().pushNotice("success", "Image uploaded.");
+    expect(store.getState().notices).toHaveLength(2);
+    expect(afterFirst).toHaveLength(1); // prior array not mutated
+    const [a, b] = store.getState().notices;
+    expect(a.id).not.toBe(b.id);
+    expect(a).toMatchObject({ tone: "danger", message: "Upload failed" });
+    store.getState().dismissNotice(a.id);
+    expect(store.getState().notices.map((n) => n.id)).toEqual([b.id]);
+  });
+});

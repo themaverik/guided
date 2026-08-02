@@ -23,6 +23,9 @@ export default function Home() {
         <p className="landing-title">
           A simple, minimalist, image-driven, print-ready guidebook editor.
         </p>
+        <p className="landing-tagline">
+          Focus on the content — Guided takes care of the formatting.
+        </p>
         <LandingActions />
         <video
           className="landing-video"

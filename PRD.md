@@ -1,9 +1,19 @@
 # Guided — Flexible Grid Layout Engine & Annotation Standardization
 ## Product Requirements Document (v-next)
 
-**Status:** Draft for build  
+**Status:** Delivered (v0.1.0, 2026-08-02) — retained as the normative record of requirements and the data model.  
 **Date:** 2026-06-23  
 **Builds on:** existing Guided codebase — Next.js 15 (App Router), React 19, TypeScript, Tailwind v4, Zustand; Playwright/Chromium PDF export.
+
+> **Delivery status (v0.1.0):** Phases A (grid engine), B (cell stacks +
+> objects, including migration of legacy rows), and D (OKLCH paired-token
+> color system unifying callouts + annotations, ADR-007) shipped in full.
+> Phase C (annotation standardization) shipped in substance — floating
+> palette, drag-to-size creation, ellipse/diamond, elbow connectors with
+> segment reshape, snapping, grid-chrome toggle — while the internal ISO
+> 32000 vocabulary, generic polygon preset, 8-handle resize, and W3C export
+> remain open (tracked in `ROADMAP.md`). Implementation history:
+> `CHANGELOG.md`, ADR-006/007/008, and `docs/superpowers/` specs/plans.
 
 ---
 

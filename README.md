@@ -8,9 +8,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/badge/release-v0.1.0-024450.svg)](CHANGELOG.md)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
-[![Live](https://img.shields.io/badge/live-guided--editor.netlify.app-00ad9f.svg)](https://guided-editor.netlify.app)
+[![Live](https://img.shields.io/badge/live-guide--editor.netlify.app-00ad9f.svg)](https://guide-editor.netlify.app)
 
-**[Try it live](https://guided-editor.netlify.app)** · **[Explore the demo project](https://guided-editor.netlify.app/demo)** · **[Watch the demo video](public/example/guided-pitch.mp4)**
+**[Try it live](https://guide-editor.netlify.app)** · **[Explore the demo project](https://guide-editor.netlify.app/demo)** · **[Full-quality video](public/example/guided-pitch.mp4)**
+
+![Guided demo](docs/guided-demo.gif)
 
 </div>
 
@@ -27,9 +29,9 @@ drop an image straight onto a cell, float a callout wherever it reads best,
 and draw annotations right on the page. If content gets crowded, it shrinks
 to fit rather than spilling off the sheet.
 
-The best introduction is the [demo project](https://guided-editor.netlify.app/demo):
+The best introduction is the [demo project](https://guide-editor.netlify.app/demo):
 a fully populated guidebook you can poke at and edit. The in-app
-[quickstart](https://guided-editor.netlify.app/quickstart) walks you through
+[quickstart](https://guide-editor.netlify.app/quickstart) walks you through
 your first project.
 
 ## Screenshots
@@ -132,8 +134,8 @@ ROADMAP.md            # upcoming features
 Only the content you create is stored — your text and uploaded images — and
 it's removed about an hour after inactivity (or immediately, if you delete
 the project). No accounts, no analytics, no tracking. See
-[/privacy](https://guided-editor.netlify.app/privacy) and
-[/terms](https://guided-editor.netlify.app/terms).
+[/privacy](https://guide-editor.netlify.app/privacy) and
+[/terms](https://guide-editor.netlify.app/terms).
 
 ## License
 

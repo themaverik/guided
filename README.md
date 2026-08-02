@@ -10,6 +10,15 @@ columns, add/remove cells, fill each cell with images, callouts, and rich-text b
 off the stack to float it anywhere in the cell; align text left/center/right; give an image a border
 that hugs the screenshot), and content auto-shrinks to fit, all within the page bounds.
 
+## Demo
+
+- **Demo video:** [`public/example/guided-pitch.mp4`](public/example/guided-pitch.mp4)
+  (also embedded on the app's home page).
+- **Live example:** open **`/demo`** in a running instance — a fully populated
+  guidebook you can explore and edit. It doubles as the reference for every
+  feature below; the in-app **`/quickstart`** guide walks through authoring
+  your first project.
+
 ## Screenshots
 
 Sample rendered A4 pages (each `.page` prints as one sheet):
@@ -35,8 +44,8 @@ pnpm install
 pnpm dev            # http://localhost:3000
 ```
 
-The home page is the project picker. Open `/demo` for a populated example, or start a new
-project (each lives at its own `/<slug>` route).
+The home page is the project picker. Open `/demo` for the populated example project (the
+best way to learn the editor), or start a new project (each lives at its own `/<slug>` route).
 
 ### PDF export (optional)
 
@@ -49,6 +58,16 @@ npx playwright install chromium
 
 Without it, the **Export PDF** button returns a 501; **Print** (browser print of `/<slug>/print`)
 and **Download** (project zip) always work.
+
+If the server doesn't listen on port 3000, set `PORT` or `PDF_BASE_URL` so the export can
+reach its own print route (it deliberately ignores the request Host header).
+
+### Deployment (Netlify)
+
+`netlify.toml` is included. On Netlify, project storage automatically switches to Netlify
+Blobs (see `docs/adr/ADR-008-pluggable-storage-driver-netlify-blobs.md`) and projects keep
+the ~1-hour idle TTL. Server-side PDF export is unavailable there (501) — use browser
+print-to-PDF on `/<slug>/print`.
 
 ## Scripts
 
@@ -88,7 +107,8 @@ components/renderer/  # the A4 renderer (pages, rows, callouts, annotations)
 components/editor/     # the two-pane editor UI
 lib/                  # schema, mutations, store, renderer + annotation helpers, project store
 docs/adr/             # architecture decision records (MADR)
-ROADMAP.md            # phased build log
+CHANGELOG.md          # released changes
+ROADMAP.md            # upcoming features
 ```
 
 ## Data & privacy

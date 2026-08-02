@@ -11,6 +11,7 @@ import {
   listProjects,
   sweepExpired,
 } from "@/lib/project-store";
+import { sanitizeBookInput } from "@/lib/validate-book";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,7 +43,10 @@ export async function POST(req: Request) {
   // If a book is supplied (e.g. restored from localStorage), seed with it.
   if (book && Array.isArray(book.chapters)) {
     const meta = await importProject(name, [
-      { name: "book.json", data: Buffer.from(JSON.stringify(book, null, 2), "utf8") },
+      {
+        name: "book.json",
+        data: Buffer.from(JSON.stringify(sanitizeBookInput(book), null, 2), "utf8"),
+      },
     ]);
     return NextResponse.json(meta, { status: 201 });
   }

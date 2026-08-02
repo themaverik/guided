@@ -57,6 +57,7 @@ export async function POST(req: Request, { params }: Ctx) {
     await touch(slug);
     return NextResponse.json({ filename });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    console.error(`upload failed for project ${slug}:`, err);
+    return NextResponse.json({ error: "upload failed" }, { status: 500 });
   }
 }

@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import type { Book } from "@/lib/book-schema";
 import { importProject } from "@/lib/project-store";
 import { readZip } from "@/lib/unzip";
+import { sanitizeBookInput } from "@/lib/validate-book";
 
 export const runtime = "nodejs";
 
@@ -48,23 +49,29 @@ export async function POST(req: Request) {
   }
   const slash = bookEntry.name.lastIndexOf("/book.json");
   const topDir = slash > 0 ? bookEntry.name.slice(0, slash + 1) : "";
-  const files = entries.map((e) => ({
-    name: e.name.startsWith(topDir) ? e.name.slice(topDir.length) : e.name,
-    data: e.data,
-  }));
-
   let name = "Imported project";
+  let cleanBook: Book;
   try {
     const book = JSON.parse(bookEntry.data.toString("utf8")) as Book;
     if (book.title) name = book.title;
+    cleanBook = sanitizeBookInput(book);
   } catch {
     return NextResponse.json({ error: "book.json is not valid JSON" }, { status: 400 });
   }
+
+  const files = entries.map((e) => ({
+    name: e.name.startsWith(topDir) ? e.name.slice(topDir.length) : e.name,
+    data:
+      e === bookEntry
+        ? Buffer.from(JSON.stringify(cleanBook, null, 2), "utf8")
+        : e.data,
+  }));
 
   try {
     const meta = await importProject(name, files);
     return NextResponse.json(meta, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    console.error("project import failed:", err);
+    return NextResponse.json({ error: "import failed" }, { status: 500 });
   }
 }

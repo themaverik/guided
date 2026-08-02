@@ -40,6 +40,12 @@ import {
   DEFAULT_WIDTH,
 } from "./annotation-palette";
 
+export interface Notice {
+  id: number;
+  tone: "danger" | "success";
+  message: string;
+}
+
 export interface Selection {
   chapterIndex: number;
   /** null = the chapter intro page is selected (no specific step). */
@@ -71,6 +77,9 @@ export interface EditorState {
   selectedAnnotation: string | null;
   /** data-screen-labels of pages that still overflow after the last fit pass. */
   overflows: string[];
+  notices: Notice[];
+  pushNotice: (tone: Notice["tone"], message: string) => void;
+  dismissNotice: (id: number) => void;
   /** Transient: hide grid editor chrome (guides + handles) for a clean preview. */
   hideGridChrome: boolean;
   /** Transient: the active annotation tool (drives on-canvas drawing). */
@@ -258,6 +267,7 @@ export function createEditorStore(
   initialBook: Book,
   projectSlug: string,
 ): EditorStore {
+  let noticeSeq = 0;
   return createStore<EditorState>()((set) => ({
     projectSlug,
     book: initialBook,
@@ -269,6 +279,11 @@ export function createEditorStore(
     },
     selectedAnnotation: null,
     overflows: [],
+    notices: [],
+    pushNotice: (tone, message) =>
+      set((s) => ({ notices: [...s.notices, { id: ++noticeSeq, tone, message }] })),
+    dismissNotice: (id) =>
+      set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })),
     hideGridChrome: false,
     activeTool: "select",
     drawColor: DEFAULT_STROKE,

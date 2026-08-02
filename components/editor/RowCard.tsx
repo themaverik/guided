@@ -127,12 +127,14 @@ export default function RowCard({
             <div className="seg">
               <button
                 className={`seg-btn${!isDouble ? " active" : ""}`}
+                aria-pressed={!isDouble}
                 onClick={() => setLayout(isWide ? "single-wide" : "single")}
               >
                 single
               </button>
               <button
                 className={`seg-btn${isDouble ? " active" : ""}`}
+                aria-pressed={isDouble}
                 onClick={() => setLayout("double")}
               >
                 double

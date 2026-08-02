@@ -1,9 +1,11 @@
 # Roadmap — Guided (guidebook-editor)
 
-Upcoming features only. Shipped work lives in [CHANGELOG.md](CHANGELOG.md);
-the full pre-0.1.0 phase/plan history is preserved in git history
-(`git log ROADMAP.md` before the 0.1.0 tag) and in `docs/superpowers/`
-specs/plans. Architecture decisions live in `docs/adr/`.
+Upcoming features only. **v0.1.0 is released** — live at
+[guide-editor.netlify.app](https://guide-editor.netlify.app); shipped work
+lives in [CHANGELOG.md](CHANGELOG.md). The full pre-0.1.0 phase/plan history
+is preserved in git history (`git log ROADMAP.md` before the v0.1.0 tag) and
+in `docs/superpowers/` specs/plans. Architecture decisions live in
+`docs/adr/`.
 
 Status legend: [not started] · [in progress]
 
@@ -18,12 +20,19 @@ Status legend: [not started] · [in progress]
 
 ## Later
 
-- **Annotation standardization** — [not started]. ISO 32000 vocabulary;
-  Circle + Polygon / Diamond preset; 8-handle selection; segment-drag
-  connector reshape; arrow-snap defaults; grid-guides on/off toggle.
-- **OKLCH color system** — [not started]. Paired tokens in `@theme`; swatch
-  palette + hybrid inspector; editor-only fill tint, full opacity in export;
-  unify callouts.
+- **Annotation standardization — remainder** — [not started]. Most of the
+  original scope shipped in 0.1.0 (OKLCH paired-token palette unified across
+  callouts + annotations per ADR-007, swatch palette + hybrid inspector,
+  editor-only fill tint, ellipse/diamond shapes, elbow connectors with
+  segment-drag reshape, snapping, grid-chrome toggle). Still open: internal
+  ISO 32000 element vocabulary, a generic polygon preset, 8-handle resize on
+  selection, arrow-snap defaults, and W3C Web Annotation export (P2 in the
+  PRD).
+- **PDF export on Netlify** — [not started]. The Playwright/Chromium export
+  runs only on self-hosted deployments; on serverless it returns 501 and
+  users print `/​<slug>/print` from the browser. Evaluate a
+  serverless-compatible Chromium (or an external render service) so Export
+  PDF works on the hosted app.
 
 ## Accepted limitations (revisit if the hosting model changes)
 
@@ -31,6 +40,8 @@ Status legend: [not started] · [in progress]
   ~1h-TTL hosting model (ADR-005).
 - Content-Length body caps can be bypassed with chunked encoding — accepted
   residual; caps are a soft guard, not a hard quota.
+- `listProjects`/`sweepExpired` scan the whole store per call — accepted at
+  ephemeral-tool scale (ADR-008).
 
 ## Process
 

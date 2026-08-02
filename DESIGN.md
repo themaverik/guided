@@ -32,7 +32,9 @@ them is `Guided Design.dc.html`.
 | `surface-2` | `oklch(0.975 0.004 200)` | `#f7fafa` | Insets, wells, card headers, canvas frame |
 | `line` | `oklch(0.92 0.006 200)` | `#e8eded` | Dividers, hairline borders |
 | `line-2` | `oklch(0.88 0.008 200)` | `#dbe2e2` | Stronger borders, input/control outlines |
-| `selection` | `oklch(0.62 0.17 250)` | `#3b82f6` | Selection box, handles, grid guides, focus, snap |
+| `selection` | `oklch(0.62 0.17 250)` | `#3b82f6` | Selection box, handles, grid guides, focus, snap (`--color-selection`) |
+| `hover` | — | `#f0f5f6` | Hover tint on flat controls (nav items, mini/add buttons, tiles) |
+| `danger-text` | `oklch(0.48 0.16 25)` | `#9e332f` | Small danger text (11–12px) — AA-safe; swatch Red stroke `#cb4a47` stays for borders, icons, large elements |
 | `app-bg` | `oklch(0.93 0.005 200)` | `#eaefef` | Landing background, app shell behind preview |
 | `cream` | — | `#f2f4f4` | Cover / intro / back-cover surfaces (print) |
 | `img-border` | — | `#d7dede` | Image-slot frame (print) |
@@ -96,8 +98,14 @@ Bound to the `next/font` CSS variables in `app/layout.tsx`.
 | UI heading | Montserrat 600 | 18px | — |
 | Body / input | Inter 400 | 13–14px / 1.5 | — |
 | Label | Inter 400 | 11px (`ink-soft`) | — |
+| Sub-header (pane) | Inter 600 | 12px (`ink`) | — |
+| Dense control | Inter 400 | 12px | — |
 | Section label | JetBrains Mono 500 | 10px UPPER (`ink`) | `1.5px` |
 | Meta / data | JetBrains Mono 400 | 9–11px (`ink-soft`) | `1–1.5px` |
+
+**Sub-header** = in-pane group titles ("Cell 2.2", row-card titles). **Dense control** = compact
+sidebar controls (segmented buttons, control-row labels/selects, callout fields) — deliberate
+drafting-table density; do not raise to body size.
 
 ---
 
@@ -148,6 +156,17 @@ Each lists key style + states. See `Guided Design.dc.html` for the rendered refe
   **Expiring-soon** variant = amber-tinted + `⚡ NNm` pill.
 - **Callout (print):** radius 2mm, 1px border, type-colored per the palette mapping; title
   Montserrat 600; below-layout markers auto-numbered.
+- **Toast (transient notification):** fixed bottom-left over the left pane (`16px` inset,
+  z below modals); text pill, padding `8px 12px`, radius 8px, Inter 13px/1.4, standard elevation;
+  tone from the swatch palette (danger = Red, success = Green); auto-dismiss ~4s (paused on
+  hover/focus) + `×` dismiss; ~120ms fade + 4px rise, reduced-motion safe; `role="alert"`
+  (danger) / `role="status"` (success). Newest on top, 8px gap.
+- **Status pill (persistent state):** JetBrains Mono 500 11px sentence-case; warn tones
+  (`warn-title` on `warn-bg`, 1px `warn-border`), radius 6px, padding `3px 8px`, inline next to
+  the control it describes (overflow badge, crop hint).
+- **Danger text-button:** content-sized, padding `4px 8px`, radius 7px, transparent bg,
+  `danger-text` color, Inter 12px/500, nowrap; hover = Red swatch fill tint. For text-labeled
+  destructive actions ("Remove image"); icon-only `×` stays a mini-toolbar button.
 - **Swatch:** 38px, radius 8px; bg = fill, 2px border = stroke, + bottom-right stroke badge.
   States: default · hover (darker fill + soft shadow) · **selected** (`0 0 0 2.5px #fff, 0 0 0 4.5px selection` ring) · focus (2.5px dashed `selection`, 2px offset).
 - **Selection handles:** **8 handles** (4 corners + 4 edge mid-points) + a **center move dot**, in
@@ -181,6 +200,10 @@ Each lists key style + states. See `Guided Design.dc.html` for the rendered refe
   manual waypoint points**. Ends snap to object anchors; bound connectors re-route live as nodes move.
 - **Overflow:** non-blocking inline warning badge; content scales to fit, never clipped.
 - **Save status:** idle (hidden) → `Saving…` → `Saved` → `Save failed` (danger tone).
+- **Notifications:** transient events (upload failed, action succeeded) → toast, bottom-left;
+  persistent state (image doesn't fill cell, page overflow) → inline status pill beside the
+  relevant control; destructive actions are buttons, never notification-styled text. Errors are
+  descriptive, never color-only.
 
 ---
 

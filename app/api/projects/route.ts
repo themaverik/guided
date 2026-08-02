@@ -20,7 +20,13 @@ export async function GET() {
   return NextResponse.json({ projects: await listProjects() });
 }
 
+// Body may carry a restored book (text-only JSON) — same ceiling as book PUT.
+const MAX_BODY_BYTES = 20 * 1024 * 1024;
+
 export async function POST(req: Request) {
+  if (Number(req.headers.get("content-length")) > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "body too large" }, { status: 413 });
+  }
   let name = "";
   let book: Book | undefined;
   try {

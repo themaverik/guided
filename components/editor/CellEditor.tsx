@@ -94,9 +94,9 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
               </div>
             </div>
             {showCropPrompt ? (
-              <p className="cell-crop-hint">
-                This image doesn&apos;t fill the cell — choose a crop above, or keep the ratio.
-              </p>
+              <span className="status-pill status-pill--warn">
+                Image doesn&apos;t fill the cell — choose a crop, or keep the ratio
+              </span>
             ) : null}
             {(() => {
               const rb = resolveBorder(image?.border);
@@ -140,7 +140,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
                 </div>
               );
             })()}
-            <button className="mini-btn danger" onClick={() => removeCellImage(ci, si, ri, cellIndex)}>
+            <button className="btn-outline-danger" onClick={() => removeCellImage(ci, si, ri, cellIndex)}>
               Remove image
             </button>
           </>

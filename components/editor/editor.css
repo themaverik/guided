@@ -236,9 +236,13 @@
 .preview-toolbar .save-status.error {
   color: #a11;
 }
+/* Status pill (DESIGN §6): persistent state, inline next to its control */
+.status-pill,
 .preview-toolbar .overflow-warn {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 500;
   color: var(--color-warn-title);
   background: var(--color-warn-bg);
   border: 1px solid var(--color-warn-border);
@@ -312,6 +316,25 @@
 .mini-btn.danger {
   color: #a11;
   border-color: #a112;
+}
+
+/* Outlined danger button (DESIGN §6): text-labeled destructive actions */
+.btn-outline-danger {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--swatch-red-stroke) 40%, transparent);
+  border-radius: 7px;
+  background: var(--color-paper);
+  color: var(--color-danger-text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-outline-danger:hover {
+  background: var(--swatch-red-fill);
+  border-color: var(--swatch-red-stroke);
 }
 
 .add-btn {
@@ -841,10 +864,17 @@
 .anno-endpoint .anno-num {
   width: 48px;
 }
-/* Border fields (color/width/radius) */
+/* Border fields (color/width/radius) — legacy row (RowCard.tsx), .editor-field children */
 .border-fields {
   display: grid;
   grid-template-columns: 1fr 70px 70px;
+  gap: 8px;
+}
+/* Border controls (grid cell editor, CellEditor.tsx) — children are .ctrl-row
+ * label rows (full-width flex rows), not a bare field sequence, so stack them. */
+.border-controls {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -1189,13 +1219,6 @@
   outline: 2px solid #dc2626;
   outline-offset: -2px;
   background: rgba(220, 38, 38, 0.08);
-}
-
-/* Cell editor panel (Plan 7) */
-.cell-editor .cell-crop-hint {
-  margin: 4px 0 6px;
-  font-size: 12px;
-  color: #b45309;
 }
 
 /* Floating callout drag overlay (Plan 9, editor-only) */

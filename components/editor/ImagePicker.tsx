@@ -23,10 +23,10 @@ export default function ImagePicker({
   label: string;
 }) {
   const slug = useEditor((s) => s.projectSlug);
+  const pushNotice = useEditor((s) => s.pushNotice);
   const [images, setImages] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -69,17 +69,16 @@ export default function ImagePicker({
     e.target.value = ""; // allow re-selecting the same file later
     if (!file) return;
     setUploading(true);
-    setError(null);
     try {
       const result = await uploadImage(slug, chapterId, file);
       if ("error" in result) {
-        setError(result.error);
+        pushNotice("danger", result.error);
         return;
       }
       await refresh();
       onPick(result.filename);
     } catch {
-      setError("upload failed");
+      pushNotice("danger", "Upload failed — check your connection and try again.");
     } finally {
       setUploading(false);
     }
@@ -138,7 +137,6 @@ export default function ImagePicker({
               No images in public/{chapterId}/ yet — upload one.
             </p>
           ) : null}
-          {error ? <p className="img-picker-error">{error}</p> : null}
         </div>
       ) : null}
 

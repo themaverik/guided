@@ -319,6 +319,25 @@
   border-color: color-mix(in srgb, var(--color-danger-text) 13%, transparent);
 }
 
+/* Visible keyboard focus (DESIGN §9) on sidebar controls */
+.seg-btn:focus-visible,
+.mini-btn:focus-visible,
+.add-btn:focus-visible,
+.stepper button:focus-visible,
+.ctrl-row select:focus-visible,
+.callout-item input:focus-visible,
+.callout-item textarea:focus-visible,
+.callout-item select:focus-visible,
+.toast-x:focus-visible {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.mini-btn.danger:focus-visible,
+.btn-outline-danger:focus-visible {
+  outline: 1px solid var(--color-danger-text);
+  outline-offset: 2px;
+}
+
 /* Outlined danger button (DESIGN §6): text-labeled destructive actions */
 .btn-outline-danger {
   display: inline-block;
@@ -470,7 +489,7 @@
   display: inline-flex;
   border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 .seg-btn {
   padding: 5px 12px;
@@ -481,6 +500,8 @@
   font-size: 12px;
   cursor: pointer;
 }
+.seg-btn:first-child { border-radius: 7px 0 0 7px; }
+.seg-btn:last-child { border-radius: 0 7px 7px 0; }
 .seg-btn + .seg-btn {
   border-left: 1px solid var(--color-rule-strong);
 }

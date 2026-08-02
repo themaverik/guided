@@ -1027,6 +1027,8 @@
   inset: 0 0 auto 0; /* top-anchored: crop overflow at the bottom */
   width: 100%;
   height: auto;
+  max-width: none;
+  max-height: none; /* no clamp: keep intrinsic ratio so overflow crops instead of stretching */
   object-fit: fill;
 }
 .grid-cell .img-slot.fit-height img {
@@ -1034,6 +1036,8 @@
   inset: 0 auto 0 0; /* left-anchored: crop overflow at the right */
   width: auto;
   height: 100%;
+  max-width: none;
+  max-height: none; /* no clamp: keep intrinsic ratio so overflow crops instead of stretching */
   object-fit: fill;
 }
 

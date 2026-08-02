@@ -24,6 +24,13 @@ export default function Home() {
           A simple, minimalist, image-driven, print-ready guidebook editor.
         </p>
         <LandingActions />
+        <video
+          className="landing-video"
+          src="/example/guided-pitch.mp4"
+          controls
+          preload="metadata"
+          playsInline
+        />
         <footer className="landing-foot">
           <Link href="/terms">Terms of Use</Link>
           <span>·</span>

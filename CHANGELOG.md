@@ -34,6 +34,9 @@ Initial public release.
   project restore and discard.
 - **PDF export** — flattened-vector PDF via Playwright/Chromium against the
   dedicated print route; dynamic page sizes.
+- **Release packaging** — MIT license + third-party notices, privacy/terms
+  pages with a terms-acceptance gate on the landing page, demo video, Netlify
+  deployment (storage on Netlify Blobs via a pluggable driver, ADR-008).
 
 ### Security
 

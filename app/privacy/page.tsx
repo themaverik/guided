@@ -11,7 +11,7 @@ export default function Privacy() {
         ← Back
       </Link>
       <h1>Privacy Policy</h1>
-      <p className="muted">Last updated: 30 May 2026</p>
+      <p className="muted">Last updated: 2 Aug 2026</p>
 
       <p>
         Guided is built to be private by default. We only store the content you
@@ -23,7 +23,19 @@ export default function Privacy() {
       <ul>
         <li>The guidebook content you enter (titles, instructions, callouts).</li>
         <li>Images you upload, kept with your project.</li>
+        <li>
+          A local backup of your work is kept in your own browser
+          (localStorage) so it can be recovered after a crash. It never leaves
+          your device and you can clear it from the home page.
+        </li>
       </ul>
+      <p>
+        Screenshots you upload may themselves contain personal data (names,
+        email addresses, faces, account details visible in a captured screen).
+        Please do not upload images containing personal or sensitive data you
+        are not entitled to share; uploaded images are deleted together with
+        the project.
+      </p>
 
       <h2>What we do not collect</h2>
       <ul>
@@ -36,10 +48,12 @@ export default function Privacy() {
 
       <h2>How long we keep it</h2>
       <p>
-        Projects are temporary. A project is automatically deleted about one hour
-        after you stop editing it. To keep a guidebook, download it (export is
-        coming soon); once downloaded, the copy is yours and is no longer stored
-        by us.
+        Projects are temporary. A project is automatically deleted about one
+        hour after you stop editing it, and you can delete a project
+        immediately at any time (the Discard action on the home page, or
+        deleting it from the editor). To keep a guidebook, export it as a PDF
+        or a project .zip; once downloaded, the copy is yours and is no longer
+        stored by us.
       </p>
 
       <h2>Changes</h2>

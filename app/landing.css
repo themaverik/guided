@@ -55,6 +55,27 @@
   flex-direction: column;
   gap: 10px;
 }
+.landing-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.landing-terms input {
+  margin-top: 2px;
+  accent-color: var(--color-ink);
+}
+.landing-terms a {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+.landing-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .landing-btn {
   display: inline-flex;
   align-items: center;

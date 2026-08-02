@@ -1,0 +1,18 @@
+# Netlify deployment config for Guided.
+# Next.js 15 App Router — the @netlify/plugin-nextjs runtime is applied
+# automatically; API routes deploy as Netlify Functions.
+
+[build]
+command = "pnpm build"
+publish = ".next"
+
+[build.environment]
+NODE_VERSION = "22"
+# Match the ~1h retention stated in the privacy policy (lib/project-store.ts).
+GUIDED_PROJECT_TTL_MIN = "60"
+
+# Storage: when NETLIFY=true (set by the platform), lib/storage.ts selects the
+# Netlify Blobs driver automatically — no extra configuration needed.
+# Server-side PDF export (Playwright) is unavailable on Netlify Functions; the
+# route returns 501 and users can print the /<slug>/print route from the
+# browser instead.

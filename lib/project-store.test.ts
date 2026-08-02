@@ -4,7 +4,8 @@ import {
   isValidSlug,
   loadProjectBook,
   projectExists,
-  resolveAsset,
+  readAsset,
+  safeRelPath,
 } from "./project-store";
 
 describe("isValidSlug", () => {
@@ -36,13 +37,35 @@ describe("isValidSlug", () => {
   });
 });
 
+describe("safeRelPath", () => {
+  test("passes normal relative paths through", () => {
+    expect(safeRelPath("book.json")).toBe("book.json");
+    expect(safeRelPath("assets/chapter1/a.png")).toBe("assets/chapter1/a.png");
+    expect(safeRelPath("assets\\chapter1\\a.png")).toBe("assets/chapter1/a.png");
+    expect(safeRelPath("/leading/slash.png")).toBe("leading/slash.png");
+  });
+
+  test("rejects traversal and degenerate paths", () => {
+    expect(safeRelPath("../etc/passwd")).toBeNull();
+    expect(safeRelPath("a/../b.png")).toBeNull();
+    expect(safeRelPath("a//b.png")).toBeNull();
+    expect(safeRelPath("./a.png")).toBeNull();
+    expect(safeRelPath("")).toBeNull();
+  });
+});
+
 describe("slug guard on store entry points", () => {
   test("projectExists is false for an invalid slug", async () => {
     await expect(projectExists("../outside")).resolves.toBe(false);
   });
 
-  test("resolveAsset returns null for an invalid slug", async () => {
-    await expect(resolveAsset("../outside", "a.png")).resolves.toBeNull();
+  test("readAsset returns null for an invalid slug", async () => {
+    await expect(readAsset("../outside", "a.png")).resolves.toBeNull();
+  });
+
+  test("readAsset returns null for traversal rel paths", async () => {
+    await expect(readAsset("demo", "../meta.json")).resolves.toBeNull();
+    await expect(readAsset("demo", "a/../../b.png")).resolves.toBeNull();
   });
 
   test("deleteProject is a no-op for an invalid slug", async () => {

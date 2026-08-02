@@ -94,14 +94,16 @@ radius 6px, `padding 3px 8px`, inline. `.cell-crop-hint` becomes a
 `.status-pill--warn` immediately below the Fit control (same copy).
 `.overflow-warn` repoints to the shared class (no visual change).
 
-### D4. Danger text-button
+### D4. Danger button (outlined)
 
-New `.btn-text-danger`: content-sized (no fixed width/height), `padding 4px 8px`,
-radius 7px, transparent bg, `color --color-danger-text`, Inter 12px/500, nowrap;
-hover bg `--swatch-red-fill`; `:focus-visible` ring per D6. Applied to
-"Remove image" (`CellEditor.tsx:143`) and any other text-labeled destructive
-sidebar action found during implementation. Icon-only `×` buttons keep
-`.mini-btn.danger` (with the new token color).
+New `.btn-outline-danger` (user-selected over a quiet text-button, 2026-08-02):
+content-sized, `padding 5px 10px`, radius 7px, bg `--color-paper`,
+`1px solid --swatch-red-stroke` at ~40% alpha, `color --color-danger-text`,
+Inter 12px/500, nowrap; hover = bg `--swatch-red-fill` + full-strength border;
+`:focus-visible` ring per D6. Follows the DESIGN.md secondary-button anatomy with
+danger tones. Applied to "Remove image" (`CellEditor.tsx:143`) and any other
+text-labeled destructive sidebar action found during implementation. Icon-only
+`×` buttons keep `.mini-btn.danger` (with the new token color).
 
 ### D5. Consistency sweep (CSS-only)
 

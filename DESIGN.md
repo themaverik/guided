@@ -164,8 +164,9 @@ Each lists key style + states. See `Guided Design.dc.html` for the rendered refe
 - **Status pill (persistent state):** JetBrains Mono 500 11px sentence-case; warn tones
   (`warn-title` on `warn-bg`, 1px `warn-border`), radius 6px, padding `3px 8px`, inline next to
   the control it describes (overflow badge, crop hint).
-- **Danger text-button:** content-sized, padding `4px 8px`, radius 7px, transparent bg,
-  `danger-text` color, Inter 12px/500, nowrap; hover = Red swatch fill tint. For text-labeled
+- **Danger button (outlined):** secondary-button anatomy in danger tones — content-sized,
+  padding `5px 10px`, radius 7px, white bg, 1px Red-stroke border (~40% alpha, full on hover),
+  `danger-text` color, Inter 12px/500, nowrap; hover bg = Red swatch fill. For text-labeled
   destructive actions ("Remove image"); icon-only `×` stays a mini-toolbar button.
 - **Swatch:** 38px, radius 8px; bg = fill, 2px border = stroke, + bottom-right stroke badge.
   States: default · hover (darker fill + soft shadow) · **selected** (`0 0 0 2.5px #fff, 0 0 0 4.5px selection` ring) · focus (2.5px dashed `selection`, 2px offset).

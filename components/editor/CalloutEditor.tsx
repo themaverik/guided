@@ -69,6 +69,7 @@ export default function CalloutEditor({
             <button
               key={m}
               className={`seg-btn${calloutLayout === m ? " active" : ""}`}
+              aria-pressed={calloutLayout === m}
               onClick={() => updateRow(ci, si, ri, { calloutLayout: m })}
             >
               {m}
@@ -85,6 +86,7 @@ export default function CalloutEditor({
               <button
                 key={c}
                 className={`seg-btn${calloutCols === c ? " active" : ""}`}
+                aria-pressed={calloutCols === c}
                 onClick={() => updateRow(ci, si, ri, { calloutCols: c })}
               >
                 {c}

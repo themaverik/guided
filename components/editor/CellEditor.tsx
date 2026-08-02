@@ -86,6 +86,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
                   <button
                     key={v}
                     className={`seg-btn${fit === v ? " active" : ""}`}
+                    aria-pressed={fit === v}
                     onClick={() => setCellImageFit(ci, si, ri, cellIndex, v)}
                   >
                     {label}
@@ -195,6 +196,7 @@ export default function CellEditor({ ci, si, ri, cellIndex }: { ci: number; si: 
                     <button
                       key={a}
                       className={`seg-btn${(o.align ?? "left") === a ? " active" : ""}`}
+                      aria-pressed={(o.align ?? "left") === a}
                       onClick={() => setCellTextAlign(ci, si, ri, cellIndex, i, a)}
                       aria-label={`Align ${a}`}
                       title={`Align ${a}`}

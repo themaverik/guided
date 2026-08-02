@@ -10,6 +10,10 @@ import { readZip } from "@/lib/unzip";
 
 export const runtime = "nodejs";
 
+// Project archives are store-only zips (lib/zip.ts), so the wire size tracks
+// the raw size; readZip additionally caps total decompressed bytes.
+const MAX_ZIP_BYTES = 100 * 1024 * 1024;
+
 export async function POST(req: Request) {
   let form: FormData;
   try {
@@ -20,6 +24,9 @@ export async function POST(req: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "no file" }, { status: 400 });
+  }
+  if (file.size > MAX_ZIP_BYTES) {
+    return NextResponse.json({ error: "archive too large" }, { status: 413 });
   }
 
   let entries;

@@ -12,6 +12,7 @@ import AnnotationDeleteController from "./AnnotationDeleteController";
 import EphemeralNotice from "./EphemeralNotice";
 import LeftPane from "./LeftPane";
 import PreviewPane from "./PreviewPane";
+import Toast from "./Toast";
 import "./editor.css";
 
 const MIN_W = 320;
@@ -60,6 +61,7 @@ export default function EditorApp({
           <PreviewPane />
         </div>
         <AnnotationDeleteController />
+        <Toast />
       </div>
     </EditorStoreProvider>
   );

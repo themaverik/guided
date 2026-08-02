@@ -12,6 +12,7 @@ import { bookApiFor } from "@/lib/project-routes";
 import ConfirmDialog from "@/components/editor/ConfirmDialog";
 
 const LS_PREFIX = "guidebook:book:";
+const LS_TERMS_KEY = "guidebook:terms-accepted";
 
 interface Recoverable {
   key: string;
@@ -30,10 +31,22 @@ export default function LandingActions() {
   const [recoverable, setRecoverable] = useState<Recoverable[]>([]);
   const [pendingDiscard, setPendingDiscard] = useState<Recoverable | null>(null);
   const [pendingClearAll, setPendingClearAll] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const onTermsChange = (accepted: boolean) => {
+    setTermsAccepted(accepted);
+    try {
+      if (accepted) localStorage.setItem(LS_TERMS_KEY, "1");
+      else localStorage.removeItem(LS_TERMS_KEY);
+    } catch {
+      /* localStorage unavailable */
+    }
+  };
 
   // Surface any locally-mirrored books (crash/expiry recovery).
   useEffect(() => {
     try {
+      setTermsAccepted(localStorage.getItem(LS_TERMS_KEY) === "1");
       const found: Recoverable[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -180,6 +193,18 @@ export default function LandingActions() {
 
   return (
     <div className="landing-actions">
+      <label className="landing-terms">
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => onTermsChange(e.target.checked)}
+        />
+        <span>
+          By using the app, you accept the{" "}
+          <Link href="/terms">terms and conditions</Link>.
+        </span>
+      </label>
+
       {creating ? (
         <div className="landing-newform">
           <input
@@ -195,13 +220,17 @@ export default function LandingActions() {
           <button
             className="landing-btn primary"
             onClick={() => void create()}
-            disabled={busy}
+            disabled={busy || !termsAccepted}
           >
             {busy ? "Creating…" : "Create"}
           </button>
         </div>
       ) : (
-        <button className="landing-btn primary" onClick={() => setCreating(true)}>
+        <button
+          className="landing-btn primary"
+          onClick={() => setCreating(true)}
+          disabled={!termsAccepted}
+        >
           Start a new project
         </button>
       )}
@@ -215,7 +244,7 @@ export default function LandingActions() {
       <button
         className="landing-btn"
         onClick={() => fileRef.current?.click()}
-        disabled={busy}
+        disabled={busy || !termsAccepted}
       >
         {busy ? "Importing…" : "Import a project (.zip)"}
       </button>
@@ -247,7 +276,7 @@ export default function LandingActions() {
               <button
                 className="landing-btn"
                 onClick={() => restore(r)}
-                disabled={busy}
+                disabled={busy || !termsAccepted}
               >
                 Restore “{r.title}”
               </button>

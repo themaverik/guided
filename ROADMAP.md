@@ -662,6 +662,15 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   Note: `pnpm e2e` is unrunnable repo-wide (no `playwright.config.*` committed) —
   pre-existing, unrelated.
 
+- **Crop-fit stretch bugfix** — [done] (merge `223d521`). "Crop height"/"Crop width"
+  image fit modes stretched grid-cell images: the base `.grid-cell .img-slot img`
+  `max-width/height: 100%` clamp broke the crop rules' intrinsic-ratio box and
+  `object-fit: fill` squashed the image. Fixed with `max-width/height: none` in both
+  `.fit-width`/`.fit-height` img rules (`components/renderer/renderer.css` only —
+  shared by preview and print). Semantics: fill the stated axis at intrinsic ratio,
+  crop overflow (top/left-anchored), short axis stays blank. Suite 288/288.
+  Follow-up candidate: the now-inert `object-fit: fill` could be removed.
+
 ## Later (v3 remainder)
 
 - **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle

@@ -11,6 +11,11 @@ NODE_VERSION = "22"
 # Match the ~1h retention stated in the privacy policy (lib/project-store.ts).
 GUIDED_PROJECT_TTL_MIN = "60"
 
+# Pinned locally (devDependency) so the version respects .npmrc's
+# minimum-release-age guard; without this Netlify auto-installs latest.
+[[plugins]]
+package = "@netlify/plugin-nextjs"
+
 # Storage: when NETLIFY=true (set by the platform), lib/storage.ts selects the
 # Netlify Blobs driver automatically — no extra configuration needed.
 # Server-side PDF export (Playwright) is unavailable on Netlify Functions; the

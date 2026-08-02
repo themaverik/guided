@@ -12,6 +12,8 @@ export const runtime = "nodejs";
 
 type Ctx = { params: Promise<{ slug: string }> };
 
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+
 export async function POST(req: Request, { params }: Ctx) {
   const { slug } = await params;
   if (!(await projectExists(slug))) {
@@ -37,6 +39,9 @@ export async function POST(req: Request, { params }: Ctx) {
     );
   }
 
+  if (file.size > MAX_IMAGE_BYTES) {
+    return NextResponse.json({ error: "file too large" }, { status: 413 });
+  }
   const filename = safeSegment(file.name);
   if (!IMAGE_RE.test(filename)) {
     return NextResponse.json(

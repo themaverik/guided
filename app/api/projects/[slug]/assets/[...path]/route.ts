@@ -1,7 +1,7 @@
 /*
  * Serve a project asset from data/projects/<slug>/assets/<...path>. Assets live
  * outside the static public/ tree, so they are streamed through this route with
- * a path-traversal guard (resolveAsset).
+ * a path-traversal guard (readAsset).
  */
 import path from "node:path";
 import { NextResponse } from "next/server";

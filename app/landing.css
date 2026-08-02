@@ -55,6 +55,14 @@
   flex-direction: column;
   gap: 10px;
 }
+.landing-tagline {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-ink);
+  opacity: 0.75;
+  margin: -6px 0 14px;
+}
 .landing-terms {
   display: flex;
   align-items: flex-start;

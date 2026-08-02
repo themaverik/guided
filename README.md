@@ -1,6 +1,7 @@
 # Guided
 
 A simple, minimalist, image-driven, print-ready guidebook editor (**guide** + **ed**itor).
+*Focus on the content — Guided takes care of the formatting.*
 
 Author image-driven guidebooks in a two-pane WYSIWYG editor — chapters, steps, and
 screenshot layouts with callouts, annotations, watermarks, and pixel-accurate print/PDF

@@ -72,3 +72,6 @@ Icon
 
 # Superpowers brainstorm visual companion (scratch)
 .superpowers/
+
+# netlify
+.netlify/

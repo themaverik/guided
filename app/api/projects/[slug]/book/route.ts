@@ -9,6 +9,7 @@ import {
   projectExists,
   saveProjectBook,
 } from "@/lib/project-store";
+import { sanitizeBookInput } from "@/lib/validate-book";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,6 +47,6 @@ export async function PUT(req: Request, { params }: Ctx) {
       { status: 400 },
     );
   }
-  await saveProjectBook(slug, book);
+  await saveProjectBook(slug, sanitizeBookInput(book));
   return NextResponse.json({ ok: true });
 }

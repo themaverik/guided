@@ -68,28 +68,30 @@ export async function GET(_req: Request, { params }: Ctx) {
     );
   }
   activeExports++;
-
-  const browser = await chromium.launch();
   try {
-    const page = await browser.newPage();
-    await page.goto(printUrl, { waitUntil: "networkidle", timeout: GOTO_TIMEOUT_MS });
-    // Let webfonts + the auto-fit layout pass settle before printing.
-    await page.waitForTimeout(600);
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      preferCSSPageSize: true,
-    });
-    const name = downloadName((await loadProjectBook(slug)).title, slug);
-    return new NextResponse(new Uint8Array(pdf), {
-      headers: {
-        "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="${name}.pdf"`,
-      },
-    });
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage();
+      await page.goto(printUrl, { waitUntil: "networkidle", timeout: GOTO_TIMEOUT_MS });
+      // Let webfonts + the auto-fit layout pass settle before printing.
+      await page.waitForTimeout(600);
+      const pdf = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        preferCSSPageSize: true,
+      });
+      const name = downloadName((await loadProjectBook(slug)).title, slug);
+      return new NextResponse(new Uint8Array(pdf), {
+        headers: {
+          "content-type": "application/pdf",
+          "content-disposition": `attachment; filename="${name}.pdf"`,
+        },
+      });
+    } finally {
+      await browser.close();
+    }
   } finally {
     activeExports--;
-    await browser.close();
   }
 }
 

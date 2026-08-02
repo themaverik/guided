@@ -68,13 +68,13 @@ const safeColor = (v: string | undefined): string | undefined =>
 
 /** Return a copy of the book with unsafe colors dropped and pageConfig clamped. */
 export function sanitizeBookInput(book: Book): Book {
-  const chapters: Chapter[] = (
-    Array.isArray(book.chapters) ? book.chapters : []
-  ).map((ch) =>
-    ch.pageTextColor === undefined
-      ? ch
-      : { ...ch, pageTextColor: safeColor(ch.pageTextColor) },
-  );
+  const chapters: Chapter[] = (Array.isArray(book.chapters) ? book.chapters : [])
+    .filter((ch): ch is Chapter => ch !== null && typeof ch === "object")
+    .map((ch) =>
+      ch.pageTextColor === undefined
+        ? ch
+        : { ...ch, pageTextColor: safeColor(ch.pageTextColor) },
+    );
   const out: Book = { ...book, chapters };
   if (out.pageTextColor !== undefined) out.pageTextColor = safeColor(out.pageTextColor);
   if (out.coverTextColor !== undefined) out.coverTextColor = safeColor(out.coverTextColor);

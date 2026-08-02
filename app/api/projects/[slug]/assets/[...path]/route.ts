@@ -1,12 +1,11 @@
 /*
  * Serve a project asset from data/projects/<slug>/assets/<...path>. Assets live
  * outside the static public/ tree, so they are streamed through this route with
- * a path-traversal guard (resolveAsset).
+ * a path-traversal guard (readAsset).
  */
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { resolveAsset } from "@/lib/project-store";
+import { readAsset } from "@/lib/project-store";
 
 export const runtime = "nodejs";
 
@@ -24,12 +23,11 @@ type Ctx = { params: Promise<{ slug: string; path: string[] }> };
 export async function GET(_req: Request, { params }: Ctx) {
   const { slug, path: segments } = await params;
   const rel = (segments ?? []).join("/");
-  const abs = await resolveAsset(slug, rel);
-  if (!abs) {
+  const bytes = await readAsset(slug, rel);
+  if (bytes === null) {
     return new NextResponse("Not found", { status: 404 });
   }
-  const ext = path.extname(abs).toLowerCase();
-  const bytes = await readFile(abs);
+  const ext = path.extname(rel).toLowerCase();
   return new NextResponse(new Uint8Array(bytes), {
     headers: {
       "content-type": CONTENT_TYPE[ext] ?? "application/octet-stream",

@@ -2,10 +2,8 @@
  * Per-project image upload. POST multipart { chapterId, file } → saves to
  * data/projects/<slug>/assets/<chapterId>/<file> and returns the bare filename.
  */
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
-import { assetDir, projectExists, touch } from "@/lib/project-store";
+import { projectExists, saveAsset, touch } from "@/lib/project-store";
 import { IMAGE_RE, safeSegment } from "@/lib/server-paths";
 
 export const runtime = "nodejs";
@@ -51,12 +49,11 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   try {
-    const dir = assetDir(slug, chapterId);
-    await mkdir(dir, { recursive: true });
-    await writeFile(path.join(dir, filename), Buffer.from(await file.arrayBuffer()));
+    await saveAsset(slug, chapterId, filename, Buffer.from(await file.arrayBuffer()));
     await touch(slug);
     return NextResponse.json({ filename });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    console.error(`upload failed for project ${slug}:`, err);
+    return NextResponse.json({ error: "upload failed" }, { status: 500 });
   }
 }

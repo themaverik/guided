@@ -671,6 +671,22 @@ subagent-driven execution), each with its own ADR if it touches the schema or an
   crop overflow (top/left-anchored), short axis stays blank. Suite 288/288.
   Follow-up candidate: the now-inert `object-fit: fill` could be removed.
 
+- **API security hardening** — [done] (merge `d5e745d`). Fixes the top three
+  findings of the 2026-08-02 security audit: (1) Critical — URL slugs reached
+  `path.join(DATA_ROOT, slug)` unvalidated (traversal incl. recursive delete);
+  now guarded by `SLUG_RE` at every store entry point (`projectDir` throws,
+  `projectExists`/`resolveAsset`/`deleteProject` short-circuit; all routes 404).
+  (2) High — `readZip` had no decompression cap (zip bomb); now 200 MB total /
+  10k entries via zlib `maxOutputLength`. (3) Medium — body-size caps with 413:
+  book PUT / project POST 20 MB, image upload 20 MB, import zip 100 MB.
+  Staff-engineer review APPROVE; suite 299/299 (11 new security tests).
+  Open audit backlog: PDF-route timeouts/concurrency + Host-origin trust, raw
+  `Error.message` leaks in upload/import 500s, book `PUT` schema validation
+  (clamp `pageConfig`, pattern-check `pageTextColor`), dormant `new Function`
+  in `lib/book-io.ts` (dead code — delete or AST-parse), no auth/rate limiting
+  (accepted for ephemeral local use per ADR-005), chunked-encoding bypass of
+  Content-Length checks (accepted residual).
+
 ## Later (v3 remainder)
 
 - **Annotation standardization** (ISO 32000 vocabulary; Circle + Polygon / Diamond preset; 8-handle

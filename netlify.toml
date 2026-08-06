@@ -16,8 +16,9 @@ GUIDED_PROJECT_TTL_MIN = "60"
 [[plugins]]
 package = "@netlify/plugin-nextjs"
 
-# Storage: when NETLIFY=true (set by the platform), lib/storage.ts selects the
-# Netlify Blobs driver automatically — no extra configuration needed.
+# Storage: the site env var GUIDED_STORAGE=blobs (scope: All) selects the
+# Netlify Blobs driver. lib/storage.ts also falls back to blobs on a deployed
+# build; local runs — including `netlify dev` — stay on the fs driver.
 # Server-side PDF export (Playwright) is unavailable on Netlify Functions; the
 # route returns 501 and users can print the /<slug>/print route from the
 # browser instead.

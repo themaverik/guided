@@ -36,9 +36,11 @@ exists / listKeys / removePrefix) over flat keys `"<slug>/book.json"`,
 - **fs driver** (default): maps keys under `data/projects/` — byte-compatible
   with the ADR-005 layout.
 - **netlify-blobs driver**: site-scoped store `guided-projects` with strong
-  consistency (create → redirect → load must read its own write). Selected
-  when `NETLIFY=true` (set by the platform) or `GUIDED_STORAGE=blobs`;
-  `GUIDED_STORAGE=fs` forces the filesystem driver.
+  consistency (create → redirect → load must read its own write). Selected by
+  `GUIDED_STORAGE=blobs` (set on the site, scope All), or as a fallback on a
+  deployed Netlify build (`NETLIFY=true` without `NETLIFY_DEV`/`NETLIFY_LOCAL`,
+  so `netlify dev` stays on the filesystem). `GUIDED_STORAGE=fs` forces the
+  filesystem driver. Selection is the pure `resolveDriverKind(env)`.
 
 `lib/project-store.ts` keeps its public API but now performs all validation
 in pure string space (`isValidSlug`, `safeRelPath`) before keys reach a

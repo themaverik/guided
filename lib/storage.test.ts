@@ -2,7 +2,11 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { createFsDriver, type StorageDriver } from "./storage";
+import {
+  createFsDriver,
+  resolveDriverKind,
+  type StorageDriver,
+} from "./storage";
 
 let root: string;
 let drv: StorageDriver;
@@ -38,5 +42,31 @@ describe("fs storage driver", () => {
     await drv.removePrefix("p3/");
     expect(await drv.listKeys("p3/")).toEqual([]);
     expect(await drv.exists("p3/book.json")).toBe(false);
+  });
+});
+
+describe("driver selection", () => {
+  test("defaults to fs when nothing is set", () => {
+    expect(resolveDriverKind({})).toBe("fs");
+  });
+
+  test("GUIDED_STORAGE wins over Netlify detection", () => {
+    expect(resolveDriverKind({ GUIDED_STORAGE: "blobs" })).toBe("blobs");
+    expect(
+      resolveDriverKind({ GUIDED_STORAGE: "fs", NETLIFY: "true" }),
+    ).toBe("fs");
+  });
+
+  test("a deployed Netlify build falls back to blobs", () => {
+    expect(resolveDriverKind({ NETLIFY: "true" })).toBe("blobs");
+  });
+
+  test("local `netlify dev` stays on fs despite NETLIFY=true", () => {
+    expect(resolveDriverKind({ NETLIFY: "true", NETLIFY_DEV: "true" })).toBe(
+      "fs",
+    );
+    expect(resolveDriverKind({ NETLIFY: "true", NETLIFY_LOCAL: "true" })).toBe(
+      "fs",
+    );
   });
 });

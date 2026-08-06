@@ -75,3 +75,6 @@ Icon
 
 # netlify
 .netlify/
+
+# serena tool artifacts
+.serena/

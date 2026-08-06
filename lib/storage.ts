@@ -4,8 +4,9 @@
  *
  * Two drivers:
  *  - fs (default): data/projects/<key> on local disk — the ADR-005 behavior.
- *  - netlify-blobs: site-scoped Netlify Blobs store, selected automatically
- *    when running on Netlify (read-only function filesystem).
+ *  - netlify-blobs: site-scoped Netlify Blobs store, selected by
+ *    GUIDED_STORAGE=blobs or on a deployed Netlify build (see
+ *    resolveDriverKind — local runs always stay on fs unless asked otherwise).
  *
  * Callers (lib/project-store.ts) validate slugs and relative paths BEFORE
  * building keys; drivers treat keys as opaque.
@@ -124,13 +125,29 @@ function createBlobsDriver(): StorageDriver {
 
 export const FS_ROOT = path.join(process.cwd(), "data", "projects");
 
+/**
+ * Which driver an environment asks for, in order:
+ *  1. GUIDED_STORAGE=fs|blobs — explicit, wins everywhere. The deployed site
+ *     sets "blobs"; a local `.env.local` can set either.
+ *  2. A real Netlify deploy — its function filesystem is read-only, so blobs.
+ *     `netlify dev` also sets NETLIFY=true, but that is a local run: exclude it
+ *     via NETLIFY_DEV/NETLIFY_LOCAL so it does not masquerade as a deploy.
+ *  3. fs — every other local run (`pnpm dev`, tests, self-hosted).
+ */
+export function resolveDriverKind(
+  env: Record<string, string | undefined> = process.env,
+): "fs" | "blobs" {
+  if (env.GUIDED_STORAGE === "fs") return "fs";
+  if (env.GUIDED_STORAGE === "blobs") return "blobs";
+  const isLocalNetlifyDev =
+    env.NETLIFY_DEV === "true" || env.NETLIFY_LOCAL === "true";
+  return env.NETLIFY === "true" && !isLocalNetlifyDev ? "blobs" : "fs";
+}
+
 function selectDriver(): StorageDriver {
-  const forced = process.env.GUIDED_STORAGE;
-  if (forced === "fs") return createFsDriver(FS_ROOT);
-  if (forced === "blobs" || process.env.NETLIFY === "true") {
-    return createBlobsDriver();
-  }
-  return createFsDriver(FS_ROOT);
+  return resolveDriverKind() === "blobs"
+    ? createBlobsDriver()
+    : createFsDriver(FS_ROOT);
 }
 
 let driver: StorageDriver | null = null;

@@ -7,6 +7,23 @@ versions follow [SemVer](https://semver.org/).
 Moving forward: every user-visible change lands here; `ROADMAP.md` holds only
 upcoming features.
 
+## [1.0.0] — 2026-08-13
+
+First stable release — promotes the 0.1.0 feature set to 1.0.
+
+### Fixed
+
+- Local runs no longer assume a Netlify deployment for storage; the
+  filesystem driver is used unless `GUIDED_STORAGE=blobs` is set.
+
+### Changed
+
+- README rewritten around an animated demo GIF and the new
+  https://guide-editor.netlify.app URL.
+- `ROADMAP.md` and `PRD.md` brought up to post-0.1.0 reality (shipped
+  history now lives here).
+- CI: `actions/checkout` bumped to v7 in the security-scan workflow.
+
 ## [0.1.0] — 2026-08-02
 
 Initial public release.

@@ -125,7 +125,7 @@ Architecture decisions are recorded as [ADRs](docs/adr/) in MADR format.
 ## Data & privacy
 
 Only the content you create is stored, meaning your text and uploaded images, and
-it's removed about an hour after inactivity (or immediately, if you delete the
+it's removed about 24 hours after inactivity (or immediately, if you delete the
 project). See [/privacy](https://guide-editor.netlify.app/privacy) and
 [/terms](https://guide-editor.netlify.app/terms).
 

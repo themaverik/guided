@@ -8,8 +8,8 @@ publish = ".next"
 
 [build.environment]
 NODE_VERSION = "22"
-# Match the ~1h retention stated in the privacy policy (lib/project-store.ts).
-GUIDED_PROJECT_TTL_MIN = "60"
+# Match the ~24h retention stated in the privacy policy (lib/project-store.ts).
+GUIDED_PROJECT_TTL_MIN = "1440"
 
 # Pinned locally (devDependency) so the version respects .npmrc's
 # minimum-release-age guard; without this Netlify auto-installs latest.

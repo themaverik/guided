@@ -87,7 +87,7 @@ export default function Quickstart() {
       </p>
 
       <p className="muted">
-        Note: projects are temporary and are removed about an hour after you
+        Note: projects are temporary and are removed about 24 hours after you
         stop editing. Download your project to keep it. See our{" "}
         <Link href="/privacy">Privacy Policy</Link>.
       </p>

@@ -48,8 +48,8 @@ export default function Privacy() {
 
       <h2>How long we keep it</h2>
       <p>
-        Projects are temporary. A project is automatically deleted about one
-        hour after you stop editing it, and you can delete a project
+        Projects are temporary. A project is automatically deleted about 24
+        hours after you stop editing it, and you can delete a project
         immediately at any time (the Discard action on the home page, or
         deleting it from the editor). To keep a guidebook, export it as a PDF
         or a project .zip; once downloaded, the copy is yours and is no longer

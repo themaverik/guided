@@ -33,7 +33,7 @@ export default function Terms() {
 
       <h2>Availability and data</h2>
       <p>
-        Projects are temporary and are removed about an hour after inactivity
+        Projects are temporary and are removed about 24 hours after inactivity
         (see the <Link href="/privacy">Privacy Policy</Link>). The service may be
         unavailable, change, or be discontinued at any time, and we are not
         liable for lost content — please download anything you want to keep.

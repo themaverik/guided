@@ -34,10 +34,30 @@ Status legend: [not started] · [in progress]
   serverless-compatible Chromium (or an external render service) so Export
   PDF works on the hosted app.
 
+## Maintenance backlog (from the 2026-08-13 PR triage)
+
+- **Fix the red `security-scan` on main** — [not started]. `npm audit --prod`
+  fails on two high transitive advisories: `nanoid` <3.3.17 via postcss
+  (patched upstream — add a pnpm override) and `image-size` ≤2.0.2 via
+  `@netlify/blobs` → `@netlify/dev-utils` (no patched release yet — blocked
+  on Netlify; consider an audit allowlist or bumping `@netlify/blobs` when
+  fixed upstream).
+- **Deliberate Next 16 upgrade** — [not started]. Dependabot PRs #15/#14
+  (next + eslint-config-next 16.2.x) were closed rather than merged blind;
+  do the major on a tested branch (build, unit, PDF/print E2E) when there is
+  a reason to move off Next 15.
+- **TypeScript 6 bump** — [not started]. PR #7 closed (conflicting major);
+  revisit alongside the Next upgrade.
+- **Reapply the two GitHub Actions bumps** — [not started].
+  `actions/setup-node` v7 and `pnpm/action-setup` v6 (PRs #17/#4) could not
+  be merged: the local `gh` OAuth token lacks the `workflow` scope. Either
+  `gh auth refresh -s workflow` and re-bump, or edit
+  `.github/workflows/security-scan.yml` directly.
+
 ## Accepted limitations (revisit if the hosting model changes)
 
 - No auth / rate limiting / CORS restrictions — accepted for the ephemeral
-  ~1h-TTL hosting model (ADR-005).
+  ~24h-TTL hosting model (ADR-005).
 - Content-Length body caps can be bypassed with chunked encoding — accepted
   residual; caps are a soft guard, not a hard quota.
 - `listProjects`/`sweepExpired` scan the whole store per call — accepted at

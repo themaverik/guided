@@ -7,12 +7,13 @@ versions follow [SemVer](https://semver.org/).
 Moving forward: every user-visible change lands here; `ROADMAP.md` holds only
 upcoming features.
 
-## [1.0.0] — 2026-08-13
-
-First stable release — promotes the 0.1.0 feature set to 1.0.
+## [Unreleased]
 
 ### Fixed
 
+- Project retention is now stated consistently as ~24 hours everywhere
+  (terms, privacy, quickstart, README, `netlify.toml`), matching the
+  deployed `GUIDED_PROJECT_TTL_MIN=1440`.
 - Local runs no longer assume a Netlify deployment for storage; the
   filesystem driver is used unless `GUIDED_STORAGE=blobs` is set.
 

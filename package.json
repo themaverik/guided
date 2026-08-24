@@ -14,10 +14,10 @@
   "dependencies": {
     "@netlify/blobs": "^10.7.10",
     "next": "^15.5.21",
-    "postcss": "^8.5.18",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "zustand": "^5.0.5"
+    "postcss": "^8.5.26",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zustand": "^5.0.15"
   },
   "pnpm": {
     "overrides": {
@@ -35,8 +35,8 @@
     "@playwright/test": "^1.52.0",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^20.17.50",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "eslint": "^9.27.0",
     "eslint-config-next": "15.3.3",
     "playwright": "^1.52.0",

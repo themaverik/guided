@@ -30,20 +30,20 @@
     }
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@netlify/plugin-nextjs": "5.15.12",
-    "@playwright/test": "^1.52.0",
-    "@tailwindcss/postcss": "^4.1.7",
+    "@eslint/eslintrc": "^3.3.6",
+    "@netlify/plugin-nextjs": "5.15.13",
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20.17.50",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
     "eslint": "^9.27.0",
     "eslint-config-next": "15.3.3",
-    "playwright": "^1.52.0",
-    "tailwindcss": "^4.1.7",
+    "playwright": "^1.62.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.8.3",
     "vite": "^7.3.6",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=22",
